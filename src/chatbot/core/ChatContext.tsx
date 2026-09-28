@@ -25,6 +25,7 @@ export interface ChatContextValue {
   showSuggestions: boolean;
   suggestionBadgesEnabled: boolean;
   userContext: ChatUserContext;
+  apiBaseUrl?: string;
   sendMessage: (text: string) => Promise<void>;
   retryLast: () => Promise<void>;
   confirmTicket: (customerIdOrEmail?: string) => Promise<void>;
@@ -41,3 +42,8 @@ export function useChatContext(): ChatContextValue {
   }
   return value;
 }
+
+export function useOptionalChatContext(): ChatContextValue | null {
+  return useContext(ChatContext);
+}
+

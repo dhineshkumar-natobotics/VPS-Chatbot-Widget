@@ -1,8 +1,20 @@
 {
-  "name": "vps-chatbot-frontend",
-  "private": true,
+  "name": "vpschatbotwidget",
   "version": "1.0.0",
+  "private": false,
+  "description": "This is an Package for the chatbot widget ui for our customer portel . ",
+  "homepage": "https://github.com/dhineshkumar-natobotics/VPS-Chatbot-Widget#readme",
+  "bugs": {
+    "url": "https://github.com/dhineshkumar-natobotics/VPS-Chatbot-Widget/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhineshkumar-natobotics/VPS-Chatbot-Widget.git"
+  },
+  "license": "ISC",
+  "author": "Dhineshkuamr Thirupathi",
   "type": "module",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

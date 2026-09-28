@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { chatApi } from "../api/chatbot-api";
+import { createChatApi, type ChatApiClient } from "../api/chatbot-api";
 import type {
   ChatMessage,
   ChatUserContext,
@@ -14,6 +14,14 @@ export interface ChatProviderProps {
   suggestions?: Suggestion[];
   disableSuggestions?: boolean;
   initialMessage?: string;
+  /** Backend or proxy API base URL (e.g. "https://vpsai.onrender.com" or "/api"). Defaults to VITE_API_BASE or "" */
+  apiBaseUrl?: string;
+  /** Alias for apiBaseUrl */
+  apiUrl?: string;
+  /** Alias for apiBaseUrl */
+  proxyUrl?: string;
+  /** Optional custom chat API client */
+  api?: ChatApiClient;
 }
 
 function newId(prefix: string): string {
@@ -36,7 +44,17 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   suggestions = DEFAULT_SUGGESTIONS,
   disableSuggestions = false,
   initialMessage,
+  apiBaseUrl,
+  apiUrl,
+  proxyUrl,
+  api,
 }) => {
+  const resolvedBaseUrl = apiBaseUrl ?? apiUrl ?? proxyUrl;
+  const client = useMemo(
+    () => api ?? createChatApi(resolvedBaseUrl),
+    [api, resolvedBaseUrl]
+  );
+
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [status, setStatus] = useState<ChatUiStatus>("idle");
@@ -47,10 +65,11 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const ensureSession = useCallback(async (): Promise<string> => {
     if (sessionId) return sessionId;
     setStatus("connecting");
-    const created = await chatApi.createSession();
+    const created = await client.createSession();
     setSessionId(created.sessionId);
     return created.sessionId;
-  }, [sessionId]);
+  }, [sessionId, client]);
+
 
   const sendToBackend = useCallback(
     async (text: string) => {
@@ -77,7 +96,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
       try {
         const currentSession = await ensureSession();
-        const response = await chatApi.sendMessage(currentSession, text);
+        const response = await client.sendMessage(currentSession, text);
         setMessages((prev) =>
           prev.map((message) =>
             message.id === pendingId
@@ -107,7 +126,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         setStatus("error");
       }
     },
-    [ensureSession]
+    [ensureSession, client]
   );
 
   const sendMessage = useCallback(
@@ -131,14 +150,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
   const resetConversation = useCallback(async () => {
     if (sessionId) {
-      await chatApi.closeSession(sessionId);
+      await client.closeSession(sessionId);
     }
     setSessionId(null);
     setMessages([]);
     setStatus("idle");
     setError(null);
     lastUserTextRef.current = null;
-  }, [sessionId]);
+  }, [sessionId, client]);
 
   React.useEffect(() => {
     if (!initialMessage || initialSentRef.current) return;
@@ -159,6 +178,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       showSuggestions: !disableSuggestions && messages.length === 0,
       suggestionBadgesEnabled: !disableSuggestions,
       userContext,
+      apiBaseUrl: client.apiBaseUrl,
       sendMessage,
       retryLast,
       confirmTicket,
@@ -173,6 +193,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       suggestions,
       disableSuggestions,
       userContext,
+      client.apiBaseUrl,
       sendMessage,
       retryLast,
       confirmTicket,
@@ -180,6 +201,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       resetConversation,
     ]
   );
+
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
