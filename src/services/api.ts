@@ -1,13 +1,23 @@
 import { ChatApiResponse, Message, SessionResponse } from "../types/chat";
+import { buildApiUrl, resolveApiBaseUrl } from "../chatbot/api/chatbot-api";
 
-const API_BASE = "";
+let customBaseUrl = resolveApiBaseUrl();
 
 export class ChatService {
+  static setBaseUrl(url: string) {
+    customBaseUrl = resolveApiBaseUrl(url);
+  }
+
+  static getBaseUrl(): string {
+    return customBaseUrl;
+  }
+
   static async createSession(): Promise<string> {
-    const response = await fetch(`${API_BASE}/api/v1/sessions`, {
+    const response = await fetch(buildApiUrl(customBaseUrl, "/api/v1/sessions"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     });
+
     if (!response.ok) {
       throw new Error(`Failed to create session: ${response.statusText}`);
     }
@@ -16,11 +26,14 @@ export class ChatService {
   }
 
   static async sendMessage(sessionId: string, message: string): Promise<ChatApiResponse> {
-    const response = await fetch(`${API_BASE}/api/v1/sessions/${sessionId}/messages`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
-    });
+    const response = await fetch(
+      buildApiUrl(customBaseUrl, `/api/v1/sessions/${sessionId}/messages`),
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      }
+    );
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       const message = err?.error?.message || `Server error (${response.status})`;
@@ -30,7 +43,9 @@ export class ChatService {
   }
 
   static async getHistory(sessionId: string): Promise<Message[]> {
-    const response = await fetch(`${API_BASE}/api/v1/sessions/${sessionId}/messages`);
+    const response = await fetch(
+      buildApiUrl(customBaseUrl, `/api/v1/sessions/${sessionId}/messages`)
+    );
     if (!response.ok) {
       return [];
     }
@@ -50,19 +65,20 @@ export class ChatService {
   }
 
   static async closeSession(sessionId: string): Promise<void> {
-    await fetch(`${API_BASE}/api/v1/sessions/${sessionId}`, {
+    await fetch(buildApiUrl(customBaseUrl, `/api/v1/sessions/${sessionId}`), {
       method: "DELETE",
     }).catch(() => {});
   }
 
   static async checkHealth(): Promise<boolean> {
     try {
-      const res = await fetch(`${API_BASE}/health`);
+      const res = await fetch(buildApiUrl(customBaseUrl, "/health"));
       return res.ok;
     } catch {
       return false;
     }
   }
+
 
   static async getCustomers(): Promise<any[]> {
     return [];

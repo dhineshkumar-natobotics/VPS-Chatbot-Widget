@@ -14,14 +14,43 @@
   "license": "ISC",
   "author": "Dhineshkuamr Thirupathi",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "./dist-lib/vps-chatbot.cjs",
+  "module": "./dist-lib/vps-chatbot.js",
+  "types": "./dist-lib/types/chatbot/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist-lib/types/chatbot/index.d.ts",
+      "import": "./dist-lib/vps-chatbot.js",
+      "require": "./dist-lib/vps-chatbot.cjs",
+      "default": "./src/chatbot/index.ts"
+    },
+    "./chatbot": {
+      "types": "./dist-lib/types/chatbot/index.d.ts",
+      "import": "./dist-lib/vps-chatbot.js",
+      "require": "./dist-lib/vps-chatbot.cjs",
+      "default": "./src/chatbot/index.ts"
+    },
+    "./css": "./src/index.css"
+  },
+  "files": [
+    "dist-lib",
+    "src/chatbot",
+    "src/components",
+    "src/lib",
+    "src/types",
+    "src/index.css"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:lib": "vite build --config vite.config.lib.ts && tsc -p tsconfig.json --declaration --emitDeclarationOnly --noEmit false --outDir dist-lib/types",
+    "prepublishOnly": "npm run build:lib",
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
+
+
   "dependencies": {
     "@shadcn/react": "^0.3.1",
     "clsx": "^2.1.1",

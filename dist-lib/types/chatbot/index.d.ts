@@ -4,24 +4,7 @@ export { useChatbot } from "./hooks/useChatbot";
 export { useChatContext, useOptionalChatContext } from "./core/ChatContext";
 export { ChatbotWidget, type ChatbotWidgetProps } from "./widget/ChatbotWidget";
 export { EmbeddedChatbot, type EmbeddedChatbotProps } from "./embedded/EmbeddedChatbot";
-export {
-  chatApi,
-  createChatApi,
-  buildApiUrl,
-  resolveApiBaseUrl,
-  type ChatApiClient,
-} from "./api/chatbot-api";
+export { chatApi, createChatApi, buildApiUrl, resolveApiBaseUrl, type ChatApiClient, } from "./api/chatbot-api";
 export { ColorPalette } from "./config/colors";
-export type {
-  ChatUserContext,
-  ChatMessage,
-  Suggestion,
-  Ticket,
-  Source,
-  ToolCall,
-  TokenUsage,
-  ChatRole,
-  MessageStatus,
-} from "./api/chatbot-types";
+export type { ChatUserContext, ChatMessage, Suggestion, Ticket, Source, ToolCall, TokenUsage, ChatRole, MessageStatus, } from "./api/chatbot-types";
 export type { EnvStage } from "../components/EnvBadge";
-

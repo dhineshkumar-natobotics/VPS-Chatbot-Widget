@@ -5,6 +5,8 @@ import { ChatProvider } from "../chatbot/core/ChatProvider";
 import { ChatbotWidget } from "../chatbot/widget/ChatbotWidget";
 import { EmbeddedChatbot } from "../chatbot/embedded/EmbeddedChatbot";
 import { ChatPanel } from "../chatbot/core/ChatPanel";
+import { buildApiUrl, resolveApiBaseUrl } from "./api/chatbot-api";
+
 
 vi.mock("@shadcn/react/message-scroller", async () => {
   return await import("../test/message-scroller-stub");
@@ -271,4 +273,89 @@ describe("chatbot UI", () => {
     });
     expect(within(screen.getByTestId("second-surface")).getByText("shared question")).toBeTruthy();
   });
+
+  it("resolves apiBaseUrl correctly with various proxy and endpoint patterns", () => {
+    expect(resolveApiBaseUrl("https://vpsai.onrender.com/")).toBe("https://vpsai.onrender.com");
+
+    expect(resolveApiBaseUrl("  https://vpsai.onrender.com  ")).toBe("https://vpsai.onrender.com");
+    expect(resolveApiBaseUrl("")).toBe("");
+
+    expect(buildApiUrl("https://vpsai.onrender.com", "/api/v1/sessions")).toBe(
+      "https://vpsai.onrender.com/api/v1/sessions"
+    );
+    expect(buildApiUrl("https://vpsai.onrender.com/", "/api/v1/sessions")).toBe(
+      "https://vpsai.onrender.com/api/v1/sessions"
+    );
+    expect(buildApiUrl("https://vpsai.onrender.com/api", "/api/v1/sessions")).toBe(
+      "https://vpsai.onrender.com/api/v1/sessions"
+    );
+    expect(buildApiUrl("/api", "/api/v1/sessions")).toBe("/api/v1/sessions");
+    expect(buildApiUrl("https://vpsai.onrender.com/api", "/health")).toBe(
+      "https://vpsai.onrender.com/health"
+    );
+    expect(buildApiUrl("", "/api/v1/sessions")).toBe("/api/v1/sessions");
+  });
+
+  it("renders ChatbotWidget standalone with apiBaseUrl without manual ChatProvider wrapping", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.mocked(fetch);
+
+    render(
+      <ChatbotWidget
+        defaultOpen
+        apiBaseUrl="https://vpsai.onrender.com"
+        envStage="alpha"
+        envPulse
+      />
+    );
+
+    expect(screen.getByLabelText("VPS AI Assistant")).toBeInTheDocument();
+    const input = screen.getByLabelText("Chat message");
+    await user.type(input, "test message");
+    await user.keyboard("{Enter}");
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Transformer oil reports are available in the Reports page.")
+      ).toBeInTheDocument();
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://vpsai.onrender.com/api/v1/sessions",
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+
+  it("renders EmbeddedChatbot standalone with apiBaseUrl", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.mocked(fetch);
+
+    render(
+      <EmbeddedChatbot
+        defaultOpen
+        apiBaseUrl="https://vpsai.onrender.com"
+        envStage="alpha"
+      />
+    );
+
+    expect(document.getElementById("vps-embedded-chat-panel")).toHaveAttribute(
+      "aria-hidden",
+      "false"
+    );
+    const input = screen.getByLabelText("Chat message");
+    await user.type(input, "embedded message");
+    await user.keyboard("{Enter}");
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Transformer oil reports are available in the Reports page.")
+      ).toBeInTheDocument();
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://vpsai.onrender.com/api/v1/sessions",
+      expect.objectContaining({ method: "POST" })
+    );
+  });
 });
+

@@ -2,35 +2,129 @@
 
 Reusable React + TypeScript assistant for the VPS Customer Portal. Widget and slide-out modes share one conversation engine and call the existing Python API.
 
-## Widget
+## Standalone Usage (No Provider Required)
+
+You can drop `<ChatbotWidget />` or `<EmbeddedChatbot />` into any React application directly and pass the API / Proxy URL as a prop:
 
 ```tsx
-import { ChatProvider, ChatbotWidget } from "./chatbot";
+import { ChatbotWidget } from "vpschatbotwidget";
 
-<ChatProvider userContext={{ customerId: "CUST-1001" }}>
-  <ChatbotWidget />
-</ChatProvider>
+export function App() {
+  return (
+    <ChatbotWidget
+      apiBaseUrl="https://****.****.com"
+      envStage="alpha"
+      envPulse
+    />
+  );
+}
 ```
-
-`ChatbotWidget` accepts `open` / `onOpenChange` for host-controlled visibility, or `defaultOpen` for an uncontrolled trigger.
-
-## Embedded slide-out
 
 ```tsx
-import { ChatProvider, EmbeddedChatbot } from "./chatbot";
+import { EmbeddedChatbot } from "vpschatbotwidget";
 
-<ChatProvider userContext={{ email: "ops@company.com", page: "reports" }}>
-  <EmbeddedChatbot />
-</ChatProvider>
+export function App() {
+  return (
+    <EmbeddedChatbot
+      apiBaseUrl="https://****.****.com"
+      envStage="alpha"
+    />
+  );
+}
 ```
 
-On desktop the panel is about 440px and slides in from the right. On small screens it uses the full width with a light overlay.
+## Shared Conversation (Using Provider)
 
-## API base URL
+Wrap multiple chatbot views (e.g. Widget and Slide-out) in a single `<ChatProvider>` to share conversation history and state:
 
-The Vite dev server proxies `/api` and `/health` to `http://127.0.0.1:8000`. Production builds are served by FastAPI from `frontend/dist`, so the browser calls same-origin `/api/v1/...`.
+```tsx
+import { ChatProvider, ChatbotWidget, EmbeddedChatbot } from "vpschatbotwidget";
 
-There is no public model key in the frontend. Change the proxy target in `vite.config.ts` if the API is elsewhere during development.
+export function App() {
+  return (
+    <ChatProvider
+      apiBaseUrl="https://vpsai.onrender.com"
+      userContext={{ customerId: "CUST-1001", email: "user@example.com" }}
+    >
+      <ChatbotWidget open={widgetOpen} onOpenChange={setWidgetOpen} envStage="alpha" envPulse />
+      <EmbeddedChatbot open={embeddedOpen} onOpenChange={setEmbeddedOpen} envStage="alpha" />
+    </ChatProvider>
+  );
+}
+```
+
+## Configuring the API / Proxy URL
+
+You can supply the backend URL in 4 convenient ways:
+
+1. **Component Prop**:
+   ```tsx
+   <ChatbotWidget apiBaseUrl="https://youraiserviceapiurl.com" />
+   // or aliases:
+   <ChatbotWidget apiUrl="https://youraiserviceapiurl.com" />
+   <ChatbotWidget proxyUrl="https://youraiserviceapiurl.com" />
+   ```
+
+2. **ChatProvider Prop**:
+   ```tsx
+   <ChatProvider apiBaseUrl="https://youraiserviceapiurl.com">
+     <ChatbotWidget />
+   </ChatProvider>
+   ```
+
+3. **Vite / Next.js Proxy**:
+   If using a local dev proxy (e.g. in `vite.config.ts`):
+   ```ts
+   // vite.config.ts
+   server: {
+     proxy: {
+       "/api": {
+         target: "https://*******.com",
+         changeOrigin: true,
+       },
+       "/health": {
+        target: "https://********.com", 
+        changeOrigin: true,
+       },
+     },
+   }
+   ```
+   Pass `apiBaseUrl="/api"` or leave empty to default to relative same-origin paths. Path normalization automatically handles both `/api/v1/sessions` and `/health` without double `/api/api` nesting.
+
+4. **Environment Variables**:
+   Set in `.env`:
+   ```env
+   VITE_API_BASE=https://vpsai.onrender.com
+   ```
+   The component will automatically read `VITE_API_BASE`, `VITE_API_BASE_URL`, or `VITE_API_URL` when no prop is provided.
+
+## Sharing and Installing as a GitHub Component
+
+To install and use this component library directly from GitHub in another project:
+
+```bash
+# Install via GitHub repository
+npm install git+https://github.com/dhineshkumar-natobotics/VPS-Chatbot-Widget.git
+# Or if installing frontend subfolder from the main repo:
+npm install github:dhineshkumar-natobotics/VPS-AI-Chatbot#main:frontend
+```
+
+Import styles in your app entry (e.g. `main.tsx` or `_app.tsx`):
+```tsx
+import "vpschatbotwidget/css";
+```
+
+### Building the Library Bundle
+
+To build a standalone distributable bundle with ES Modules, CommonJS, and TypeScript types:
+```bash
+npm run build:lib
+```
+Artifacts are generated into `dist-lib/`:
+- `dist-lib/vps-chatbot.js` (ES Module)
+- `dist-lib/vps-chatbot.cjs` (CommonJS)
+- `dist-lib/types/` (TypeScript declarations)
+
 
 ## Authentication
 
