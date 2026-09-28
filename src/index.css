@@ -1,0 +1,550 @@
+@import url("https://fonts.googleapis.com/css2?family=Bai+Jamjuree:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&display=swap");
+@import "tailwindcss";
+
+:root {
+  --vps-white: #fff;
+  --vps-dark-blue: #1a1a31;
+  --vps-light-blue: #353552;
+  --vps-light-grey: #d1d1d6;
+  --vps-orange: #ff4717;
+
+  --dark-blue-50: #f1f5fc;
+  --dark-blue-100: #e5ebfa;
+  --dark-blue-200: #d1daf4;
+  --dark-blue-950: #1a1a31;
+
+  --light-blue-50: #f4f6fa;
+  --light-blue-100: #e6e9f3;
+  --light-blue-900: #404168;
+  --light-blue-950: #353552;
+
+  --grey-50: #f6f6f7;
+  --grey-100: #efeff0;
+  --grey-200: #e2e1e4;
+  --grey-300: #d1d1d6;
+  --grey-400: #b9b9c0;
+  --grey-500: #a7a6ae;
+  --grey-600: #93919a;
+  --grey-700: #7e7d85;
+
+  --orange-50: #fff3ed;
+  --orange-100: #ffe4d4;
+  --orange-500: #ff4717;
+  --orange-600: #f02706;
+  --orange-900: #7f150f;
+
+  --success-50: #f1fcf5;
+  --success-600: #1d9c53;
+  --success-700: #1b7a43;
+
+  --error-50: #fff1f1;
+  --error-200: #ffc5c5;
+  --error-300: #ff9d9d;
+  --error-800: #a50f0f;
+
+  --tint-solus-10: #ffede8;
+  --neutral-500: #727681;
+  --neutral-950: #0a0d12;
+
+  --bg-app: var(--light-blue-50);
+  --card-bg: var(--vps-white);
+  --border-light: var(--grey-200);
+  --surface-muted: var(--dark-blue-50);
+  --input-bg: var(--grey-100);
+
+  --primary: var(--vps-orange);
+  --primary-hover: var(--orange-600);
+  --primary-purple: var(--primary);
+
+  --action: var(--vps-dark-blue);
+  --action-hover: var(--light-blue-900);
+
+  --bubble-user-bg: var(--tint-solus-10);
+  --bubble-user-text: var(--vps-dark-blue);
+  --bubble-assistant-bg: var(--surface-muted);
+
+  --text-main: var(--vps-dark-blue);
+  --text-muted: var(--grey-600);
+  --text-subtle: var(--grey-400);
+  --text-on-action: var(--vps-white);
+
+  --success: var(--success-600);
+  --error-bg: var(--error-50);
+  --error-border: var(--error-200);
+  --error-text: var(--error-800);
+
+  --code-bg: var(--vps-dark-blue);
+  --overlay: #1a1a3133;
+  --scrollbar: var(--grey-300);
+
+  --font-main: "Bai Jamjuree", sans-serif;
+  --font-jamjuree: "Bai Jamjuree", sans-serif;
+}
+
+@theme inline {
+  --color-vps-white: var(--vps-white);
+  --color-vps-dark-blue: var(--vps-dark-blue);
+  --color-vps-light-blue: var(--vps-light-blue);
+  --color-vps-light-grey: var(--vps-light-grey);
+  --color-vps-orange: var(--vps-orange);
+  --color-background: var(--bg-app);
+  --color-foreground: var(--text-main);
+  --color-card: var(--card-bg);
+  --color-muted: var(--surface-muted);
+  --color-muted-foreground: var(--text-muted);
+  --color-border: var(--border-light);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--text-on-action);
+  --color-action: var(--action);
+  --color-action-foreground: var(--text-on-action);
+  --color-success: var(--success);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+
+  font-family: var(--font-main);
+
+  background-color: var(--bg-app);
+  color: var(--text-main);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+@keyframes chat-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.chat-pop {
+  animation: chat-pop 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ── Text Highlight Tokens ──────────────────────────────────────────────────── */
+
+/* Double-quoted strings  "..."  → warm amber */
+.hl-double-quote {
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: 3px;
+  padding: 0 3px;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Single-quoted strings  '...'  → sky blue */
+.hl-single-quote {
+  color: #0369a1;
+  background: #e0f2fe;
+  border-radius: 3px;
+  padding: 0 3px;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Dates → emerald green */
+.hl-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #065f46;
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.85em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Times → soft violet */
+.hl-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #5b21b6;
+  background: #ede9fe;
+  border: 1px solid #c4b5fd;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.85em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* URLs / Links → orange (brand primary) */
+.hl-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--vps-orange);
+  background: var(--orange-50);
+  border-bottom: 1.5px solid var(--vps-orange);
+  border-radius: 3px;
+  padding: 0 3px;
+  font-weight: 600;
+  text-decoration: none;
+  word-break: break-all;
+  transition: background 0.15s, color 0.15s;
+}
+.hl-link:hover {
+  background: var(--orange-100);
+  color: var(--orange-600);
+}
+
+/* ── Gibberish / Unreadable Input Warning Banner ────────────────────────────── */
+
+.chat-input-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 12px 8px 12px;
+  padding: 9px 12px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #9a3412;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  animation: chat-pop 0.2s ease-out;
+}
+
+.chat-input-warning-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #ea580c;
+}
+
+/* Textarea border hint when warning is active */
+.chat-textarea--warn {
+  border-color: #fb923c !important;
+  outline-color: #fb923c !important;
+}
+
+/* ── Messages Scroll Outer (wraps scroll-area + progress bar) ───────────────── */
+
+.messages-scroll-outer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Typing Progress Bar ────────────────────────────────────────────────────── */
+
+@keyframes tpb-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%);  }
+}
+
+@keyframes tpb-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes tpb-slide-down {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(100%); opacity: 0; }
+}
+
+@keyframes tpb-spin {
+  to { transform: rotate(360deg); }
+}
+
+.typing-progress-bar-root {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: var(--vps-white);
+  border-top: 1px solid var(--border-light);
+  padding: 5px 14px 6px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 -2px 12px 0 rgba(26, 26, 49, 0.06);
+}
+
+.tpb-enter { animation: tpb-slide-up   0.32s cubic-bezier(0.22,1,0.36,1) both; }
+.tpb-exit  { animation: tpb-slide-down 0.28s ease-in both; }
+
+/* Shimmer track */
+.tpb-shimmer-track {
+  width: 100%;
+  height: 3px;
+  background: var(--grey-100);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.tpb-shimmer-fill {
+  width: 55%;
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    var(--orange-100) 0%,
+    var(--vps-orange) 50%,
+    var(--orange-100) 100%
+  );
+  animation: tpb-shimmer 1.6s ease-in-out infinite;
+}
+
+/* Phase label row */
+.tpb-label-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.tpb-label-in  { opacity: 1; transform: translateY(0);    }
+.tpb-label-out { opacity: 0; transform: translateY(-4px); }
+
+.tpb-spinner-icon {
+  color: var(--vps-orange);
+  animation: tpb-spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+.tpb-phase-icon {
+  color: var(--grey-600);
+  flex-shrink: 0;
+}
+
+.tpb-phase-text {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* ── Platform-specific Link Badges ──────────────────────────────────────────── */
+
+/* LinkedIn */
+.hl-link--linkedin {
+  color: #fff !important;
+  background: #0a66c2 !important;
+  border-bottom-color: #004a96 !important;
+}
+.hl-link--linkedin:hover {
+  background: #004a96 !important;
+}
+
+/* YouTube */
+.hl-link--youtube {
+  color: #fff !important;
+  background: #ff0000 !important;
+  border-bottom-color: #cc0000 !important;
+}
+.hl-link--youtube:hover {
+  background: #cc0000 !important;
+}
+
+/* GitHub */
+.hl-link--github {
+  color: #fff !important;
+  background: #24292f !important;
+  border-bottom-color: #000 !important;
+}
+.hl-link--github:hover {
+  background: #000 !important;
+}
+
+/* Twitter / X */
+.hl-link--twitter {
+  color: #fff !important;
+  background: #1d9bf0 !important;
+  border-bottom-color: #0c7abf !important;
+}
+.hl-link--twitter:hover {
+  background: #0c7abf !important;
+}
+
+/* External hint globe icon inside link badge */
+.hl-link-external-hint {
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+/* ── Response Icon Mapper Badges ────────────────────────────────────────────── */
+
+.resp-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  float: right;
+  margin: 0 0 4px 6px;
+}
+
+.resp-icon-badge--error    { background: #fee2e2; color: #b91c1c; }
+.resp-icon-badge--warning  { background: #fef3c7; color: #b45309; }
+.resp-icon-badge--success  { background: #d1fae5; color: #065f46; }
+.resp-icon-badge--info     { background: #e0f2fe; color: #0369a1; }
+.resp-icon-badge--linkedin { background: #dbeafe; color: #0a66c2; }
+.resp-icon-badge--youtube  { background: #fee2e2; color: #ff0000; }
+.resp-icon-badge--link     { background: var(--orange-50); color: var(--vps-orange); }
+.resp-icon-badge--database { background: #e0e7ff; color: #4338ca; }
+.resp-icon-badge--chem     { background: #ccfbf1; color: #0f766e; }
+.resp-icon-badge--vessel   { background: #f1f5f9; color: #475569; }
+.resp-icon-badge--muted    { background: var(--grey-100); color: var(--grey-600); }
+
+/* ── Header title flex row (badge lives here) ───────────────────────────────── */
+
+.header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: nowrap;
+}
+
+/* ── EnvBadge ───────────────────────────────────────────────────────────────── */
+
+@keyframes env-badge-ping {
+  0%   { transform: scale(1);   opacity: 0.9; }
+  70%  { transform: scale(1.9); opacity: 0;   }
+  100% { transform: scale(1);   opacity: 0;   }
+}
+
+/* Base badge */
+.env-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px 2px 5px;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1;
+  user-select: none;
+  border: 1px solid transparent;
+  /* slide-in animation on mount */
+  animation: chat-pop 0.22s ease-out both;
+}
+
+/* Status dot */
+.env-badge-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.8;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Pulsing ring overlay */
+.env-badge-dot--pulse::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  animation: env-badge-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.env-badge-icon {
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.env-badge-label {
+  flex-shrink: 0;
+}
+
+/* ── Stage variants ─────────────────────────────────────────────────────────── */
+
+/* Alpha — purple */
+.env-badge--alpha {
+  color: #6d28d9;
+  background: #ede9fe;
+  border-color: #c4b5fd;
+}
+
+/* Beta — royal blue */
+.env-badge--beta {
+  color: #1d4ed8;
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+/* Gamma / RC — teal */
+.env-badge--gamma {
+  color: #0f766e;
+  background: #ccfbf1;
+  border-color: #5eead4;
+}
+
+/* QA — amber */
+.env-badge--qa {
+  color: #b45309;
+  background: #fef3c7;
+  border-color: #fcd34d;
+}
