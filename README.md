@@ -46,7 +46,7 @@ npm install git+https://github.com/dhineshkumar-natobotics/VPS-Chatbot-Widget.gi
 npm install github:dhineshkumar-natobotics/VPS-AI-Chatbot#main:frontend
 ```
 
-### From npm Registry (once published)
+### From npm Registry
 
 ```bash
 npm install vpschatbotwidget
