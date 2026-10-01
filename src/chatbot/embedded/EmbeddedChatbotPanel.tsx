@@ -1,6 +1,5 @@
 import React from "react";
 import { ChatPanel } from "../core/ChatPanel";
-import { cn } from "../../lib/cn";
 import { type EnvStage } from "../../components/EnvBadge";
 
 interface EmbeddedChatbotPanelProps {
@@ -23,22 +22,14 @@ export const EmbeddedChatbotPanel: React.FC<EmbeddedChatbotPanelProps> = ({
   return (
     <>
       <div
-        className={cn(
-          "fixed inset-0 z-[90] bg-[var(--overlay)] sm:hidden",
-          open ? "opacity-100" : "pointer-events-none opacity-0",
-          "transition-opacity duration-200 motion-reduce:transition-none"
-        )}
+        className={`embedded-overlay ${open ? "embedded-overlay--open" : "embedded-overlay--closed"}`}
         hidden={!open}
         onClick={onClose}
         aria-hidden="true"
       />
       <aside
         id="vps-embedded-chat-panel"
-        className={cn(
-          "fixed inset-y-0 right-0 z-[100] flex w-full max-w-[440px] flex-col border-l border-border bg-card shadow-xl",
-          "transition-transform duration-300 ease-out motion-reduce:transition-none",
-          open ? "translate-x-0" : "translate-x-full"
-        )}
+        className={`embedded-panel ${open ? "embedded-panel--open" : "embedded-panel--closed"}`}
         aria-hidden={!open}
       >
         {open && (

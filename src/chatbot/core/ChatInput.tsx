@@ -55,7 +55,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="bg-card px-4 pb-3 pt-2">
+    <div className="chat-input-wrapper">
       <ChatSuggestions
         variant="badge"
         suggestions={visibleSuggestions}
@@ -65,7 +65,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       <label htmlFor="vps-chat-input" className="sr-only">
         Chat message
       </label>
-      <div className="flex items-end gap-2 rounded-xl bg-[var(--input-bg)] px-2.5 py-1.5">
+      <div className="chat-input-row">
         <textarea
           id="vps-chat-input"
           ref={textareaRef}
@@ -83,20 +83,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               send();
             }
           }}
-          className="max-h-24 flex-1 resize-none bg-transparent py-1.5 text-[13.5px] text-foreground outline-none placeholder:text-[var(--text-subtle)] disabled:opacity-60"
+          className="chat-textarea"
         />
         <button
           type="button"
           onClick={send}
           disabled={disabled || !text.trim()}
           aria-label="Send message"
-          className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-action text-action-foreground hover:bg-[var(--action-hover)] disabled:cursor-not-allowed disabled:opacity-40"
+          className="chat-send-btn"
         >
           <ArrowUp size={16} />
         </button>
       </div>
-      <p className="mt-2 text-center text-[11px] font-medium text-[var(--text-subtle)]">
-        Powered by <span className="text-primary font-bold hover:underline cursor-pointer">VPS Veritas AI</span>
+      <p className="chat-input-footer">
+        Powered by <span className="chat-input-footer-brand">VPS Veritas AI</span>
       </p>
     </div>
   );

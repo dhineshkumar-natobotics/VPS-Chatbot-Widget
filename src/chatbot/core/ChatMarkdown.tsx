@@ -10,7 +10,7 @@ function renderInline(text: string): React.ReactNode[] {
       return (
         <code
           key={index}
-          className="rounded bg-[var(--input-bg)] px-1 py-0.5 font-mono text-[12px] text-foreground"
+          className="md-code"
         >
           {part.slice(1, -1)}
         </code>
@@ -23,7 +23,7 @@ function renderInline(text: string): React.ReactNode[] {
           href={part}
           target="_blank"
           rel="noopener noreferrer"
-          className="underline underline-offset-2"
+          className="md-link"
         >
           {part}
         </a>
@@ -45,7 +45,7 @@ export function ChatMarkdown({ text }: { text: string }) {
             .split(/\n/)
             .filter((line) => line.trim().startsWith("- ") || line.trim().startsWith("* "));
           return (
-            <ul key={blockIndex} className="my-1.5 ml-4 list-disc space-y-0.5">
+            <ul key={blockIndex} className="md-ul">
               {items.map((item, itemIndex) => (
                 <li key={itemIndex}>{renderInline(item.replace(/^[-*]\s+/, ""))}</li>
               ))}
@@ -56,7 +56,7 @@ export function ChatMarkdown({ text }: { text: string }) {
         if (/^\d+\.\s+/.test(block.trim())) {
           const items = block.split(/\n/).filter((line) => /^\d+\.\s+/.test(line.trim()));
           return (
-            <ol key={blockIndex} className="my-1.5 ml-4 list-decimal space-y-0.5">
+            <ol key={blockIndex} className="md-ol">
               {items.map((item, itemIndex) => (
                 <li key={itemIndex}>{renderInline(item.replace(/^\d+\.\s+/, ""))}</li>
               ))}
@@ -69,7 +69,7 @@ export function ChatMarkdown({ text }: { text: string }) {
           return (
             <pre
               key={blockIndex}
-              className="my-2 overflow-x-auto rounded-lg bg-[var(--code-bg)] p-3 font-mono text-[12px] text-primary-foreground"
+              className="md-pre"
             >
               <code>{content}</code>
             </pre>
@@ -77,7 +77,7 @@ export function ChatMarkdown({ text }: { text: string }) {
         }
 
         return (
-          <p key={blockIndex} className="mb-2 last:mb-0 whitespace-pre-wrap">
+          <p key={blockIndex} className="md-p">
             {renderInline(block)}
           </p>
         );

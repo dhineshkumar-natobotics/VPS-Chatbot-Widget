@@ -152,8 +152,8 @@ export const EmbeddedChatbotTrigger: React.FC<EmbeddedChatbotTriggerProps> = ({
       aria-expanded={false}
       aria-controls="vps-embedded-chat-panel"
       aria-label="Assistant"
-      className={`fixed right-0 z-[80] flex touch-none items-center gap-2 rounded-l-lg bg-action px-3 py-2.5 text-[12.5px] font-semibold text-action-foreground shadow-lg hover:bg-[var(--action-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-        dragging ? "cursor-grabbing" : "cursor-grab"
+      className={`embedded-trigger-btn ${
+        dragging ? "embedded-trigger-btn--grabbing" : "embedded-trigger-btn--grab"
       }`}
       style={{
         top: top ?? "50%",

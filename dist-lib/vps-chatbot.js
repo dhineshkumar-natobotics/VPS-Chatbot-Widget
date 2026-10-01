@@ -1,53 +1,53 @@
-import { jsx as l, jsxs as C, Fragment as le } from "react/jsx-runtime";
+import { jsx as o, jsxs as k, Fragment as oe } from "react/jsx-runtime";
 import * as c from "react";
-import Xe, { createContext as _t, useContext as Qe, useMemo as we, useState as Y, useRef as X, useCallback as Q, forwardRef as et, createElement as Ce, useEffect as ge } from "react";
-const xt = {};
-function te(e) {
+import Xe, { createContext as yt, useContext as Qe, useMemo as Ce, useState as j, useRef as K, useCallback as X, forwardRef as et, createElement as ke, useEffect as me } from "react";
+const wt = {};
+function ee(e) {
   return e != null && e.trim() !== "" ? e.trim().replace(/\/+$/, "") : String("").trim().replace(/\/+$/, "");
 }
 function We(e, t) {
-  const r = te(e);
+  const r = ee(e);
   if (!r)
     return t;
   if (r.endsWith("/api") && t.startsWith("/api/"))
     return `${r}${t.slice(4)}`;
   if (r.endsWith("/api") && t === "/health") {
-    const o = r.slice(0, -4);
-    return o ? `${o}/health` : "/health";
+    const s = r.slice(0, -4);
+    return s ? `${s}/health` : "/health";
   }
   const n = t.startsWith("/") ? t : `/${t}`;
   return `${r}${n}`;
 }
-function wt(e) {
+function Ct(e) {
   return e && typeof e == "object" && "data" in e && e.success !== !1 ? e.data : e;
 }
-function Ct(e, t, r) {
-  var s, a, i;
-  const n = e, o = (s = n == null ? void 0 : n.error) == null ? void 0 : s.message;
-  return o && !kt(o) ? {
+function kt(e, t, r) {
+  var l, a, i;
+  const n = e, s = (l = n == null ? void 0 : n.error) == null ? void 0 : l.message;
+  return s && !St(s) ? {
     code: (a = n == null ? void 0 : n.error) == null ? void 0 : a.code,
-    message: o,
+    message: s,
     requestId: (i = n == null ? void 0 : n.error) == null ? void 0 : i.request_id
   } : r >= 500 ? { message: "I couldn't process that request right now." } : r === 0 ? { message: "Something went wrong while connecting. Please try again." } : { message: t };
 }
-function kt(e) {
+function St(e) {
   return /traceback|sql|exception|stack|api[_ ]?key|password/i.test(e);
 }
-function St(e) {
+function Ft(e) {
   return {
     chunkId: e.chunk_id,
     source: e.source,
     score: e.score
   };
 }
-function Ft(e) {
+function Et(e) {
   return {
     toolName: e.tool_name,
     arguments: e.arguments ?? {},
     result: e.result ?? {}
   };
 }
-function Et(e) {
+function Tt(e) {
   return {
     model: e.model,
     promptTokens: e.prompt_tokens,
@@ -55,7 +55,7 @@ function Et(e) {
     totalTokens: e.total_tokens
   };
 }
-function Tt(e) {
+function Rt(e) {
   const t = e.role === "user" || e.role === "system" ? e.role : "assistant";
   return {
     id: String(e.id),
@@ -71,7 +71,7 @@ function Tt(e) {
     } : void 0
   };
 }
-async function Rt(e) {
+async function At(e) {
   const t = await e.text();
   if (!t) return {};
   try {
@@ -81,31 +81,31 @@ async function Rt(e) {
   }
 }
 function tt(e) {
-  const t = te(e);
-  async function r(n, o) {
-    let s;
+  const t = ee(e);
+  async function r(n, s) {
+    let l;
     const a = We(t, n);
     try {
-      s = await fetch(a, {
-        ...o,
+      l = await fetch(a, {
+        ...s,
         headers: {
           "Content-Type": "application/json",
-          ...(o == null ? void 0 : o.headers) ?? {}
+          ...(s == null ? void 0 : s.headers) ?? {}
         }
       });
     } catch {
       throw { message: "Something went wrong while connecting. Please try again." };
     }
-    if (s.status === 204)
+    if (l.status === 204)
       return;
-    const i = await Rt(s);
-    if (!s.ok)
-      throw Ct(
+    const i = await At(l);
+    if (!l.ok)
+      throw kt(
         i,
         "I couldn't process that request right now.",
-        s.status
+        l.status
       );
-    return wt(i);
+    return Ct(i);
   }
   return {
     apiBaseUrl: t,
@@ -116,28 +116,28 @@ function tt(e) {
       });
       return { sessionId: n.session_id, createdAt: n.created_at };
     },
-    async sendMessage(n, o) {
-      const s = await r(
+    async sendMessage(n, s) {
+      const l = await r(
         `/api/v1/sessions/${n}/messages`,
         {
           method: "POST",
-          body: JSON.stringify({ message: o })
+          body: JSON.stringify({ message: s })
         }
       );
       return {
-        requestId: s.request_id,
-        sessionId: s.session_id,
-        answer: s.answer,
-        sources: (s.sources || []).map(St),
-        toolCalls: (s.tool_calls || []).map(Ft),
-        usage: Et(s.usage)
+        requestId: l.request_id,
+        sessionId: l.session_id,
+        answer: l.answer,
+        sources: (l.sources || []).map(Ft),
+        toolCalls: (l.tool_calls || []).map(Et),
+        usage: Tt(l.usage)
       };
     },
     async getHistory(n) {
       try {
         return ((await r(
           `/api/v1/sessions/${n}/messages`
-        )).messages || []).map(Tt);
+        )).messages || []).map(Rt);
       } catch {
         return [];
       }
@@ -161,7 +161,7 @@ function tt(e) {
     }
   };
 }
-const pn = tt(), At = [
+const hn = tt(), Bt = [
   {
     label: "How do I access my reports?",
     query: "How do I access my reports in the VPS Customer Portal?"
@@ -178,20 +178,20 @@ const pn = tt(), At = [
     label: "How do I contact VPS Support?",
     query: "How can I contact VPS Customer Support?"
   }
-], Fe = _t(null);
-function Bt() {
-  const e = Qe(Fe);
+], Ee = yt(null);
+function Dt() {
+  const e = Qe(Ee);
   if (!e)
     throw new Error("useChatbot must be used inside ChatProvider.");
   return e;
 }
 function rt() {
-  return Qe(Fe);
+  return Qe(Ee);
 }
-function je(e) {
+function $e(e) {
   return `${e}-${crypto.randomUUID()}`;
 }
-function Dt(e) {
+function Mt(e) {
   if (e && typeof e == "object" && "message" in e) {
     const t = String(e.message);
     if (t && !/traceback|sql|exception|stack|api[_ ]?key|password/i.test(t))
@@ -202,87 +202,87 @@ function Dt(e) {
 const nt = ({
   children: e,
   userContext: t = {},
-  suggestions: r = At,
+  suggestions: r = Bt,
   disableSuggestions: n = !1,
-  initialMessage: o,
-  apiBaseUrl: s,
+  initialMessage: s,
+  apiBaseUrl: l,
   apiUrl: a,
   proxyUrl: i,
   api: d
 }) => {
-  const p = s ?? a ?? i, m = we(
-    () => d ?? tt(p),
-    [d, p]
-  ), [y, f] = Y(null), [u, g] = Y([]), [E, v] = Y("idle"), [B, W] = Y(null), L = X(null), $ = X(!1), N = Q(async () => {
-    if (y) return y;
-    v("connecting");
-    const _ = await m.createSession();
-    return f(_.sessionId), _.sessionId;
-  }, [y, m]), M = Q(
-    async (_) => {
-      L.current = _;
-      const k = {
-        id: je("user"),
+  const h = l ?? a ?? i, g = Ce(
+    () => d ?? tt(h),
+    [d, h]
+  ), [v, f] = j(null), [u, m] = j([]), [T, _] = j("idle"), [D, V] = j(null), L = K(null), $ = K(!1), P = X(async () => {
+    if (v) return v;
+    _("connecting");
+    const y = await g.createSession();
+    return f(y.sessionId), y.sessionId;
+  }, [v, g]), I = X(
+    async (y) => {
+      L.current = y;
+      const S = {
+        id: $e("user"),
         role: "user",
-        content: _,
+        content: y,
         createdAt: (/* @__PURE__ */ new Date()).toISOString(),
         status: "complete"
-      }, S = je("asst"), A = {
-        id: S,
+      }, F = $e("asst"), B = {
+        id: F,
         role: "assistant",
         content: "",
         createdAt: (/* @__PURE__ */ new Date()).toISOString(),
         status: "pending"
       };
-      g((R) => [...R, k, A]), v("awaiting"), W(null);
+      m((A) => [...A, S, B]), _("awaiting"), V(null);
       try {
-        const R = await N(), F = await m.sendMessage(R, _);
-        g(
-          (j) => j.map(
-            (H) => H.id === S ? {
-              ...H,
-              id: F.requestId || S,
-              content: F.answer,
+        const A = await P(), E = await g.sendMessage(A, y);
+        m(
+          (W) => W.map(
+            (z) => z.id === F ? {
+              ...z,
+              id: E.requestId || F,
+              content: E.answer,
               status: "complete",
-              sources: F.sources,
-              toolCalls: F.toolCalls,
-              usage: F.usage
-            } : H
+              sources: E.sources,
+              toolCalls: E.toolCalls,
+              usage: E.usage
+            } : z
           )
-        ), v("idle");
-      } catch (R) {
-        const F = Dt(R);
-        g(
-          (j) => j.map(
-            (H) => H.id === S ? { ...H, content: F, status: "error" } : H
+        ), _("idle");
+      } catch (A) {
+        const E = Mt(A);
+        m(
+          (W) => W.map(
+            (z) => z.id === F ? { ...z, content: E, status: "error" } : z
           )
-        ), W(F), v("error");
+        ), V(E), _("error");
       }
     },
-    [N, m]
-  ), T = Q(
-    async (_) => {
-      const k = _.trim();
-      !k || E === "awaiting" || E === "connecting" || await M(k);
+    [P, g]
+  ), R = X(
+    async (y) => {
+      const S = y.trim();
+      !S || T === "awaiting" || T === "connecting" || await I(S);
     },
-    [M, E]
-  ), z = Q(async () => {
-    const _ = L.current;
-    _ && (g((k) => k.filter((S) => S.status !== "error")), await M(_));
-  }, [M]), I = Q(async () => {
-  }, []), J = Q(() => {
-  }, []), U = Q(async () => {
-    y && await m.closeSession(y), f(null), g([]), v("idle"), W(null), L.current = null;
-  }, [y, m]);
+    [I, T]
+  ), O = X(async () => {
+    const y = L.current;
+    y && (m((S) => S.filter((F) => F.status !== "error")), await I(y));
+  }, [I]), N = X(async () => {
+  }, []), Z = X(() => {
+  }, []), U = X(async () => {
+    v && await g.closeSession(v), f(null), m([]), _("idle"), V(null), L.current = null;
+  }, [v, g]);
   Xe.useEffect(() => {
-    !o || $.current || ($.current = !0, T(o));
-  }, [o, T]);
-  const b = we(
+    !s || $.current || ($.current = !0, R(s));
+  }, [s, R]);
+  const b = Ce(
     () => ({
       messages: u,
-      status: E,
-      error: B,
-      sessionId: y,
+      status: T,
+      error: D,
+      sessionId: v,
       pendingTicket: null,
       ticketBusy: !1,
       lastTicket: null,
@@ -290,47 +290,47 @@ const nt = ({
       showSuggestions: !n && u.length === 0,
       suggestionBadgesEnabled: !n,
       userContext: t,
-      apiBaseUrl: m.apiBaseUrl,
-      sendMessage: T,
-      retryLast: z,
-      confirmTicket: I,
-      cancelTicket: J,
+      apiBaseUrl: g.apiBaseUrl,
+      sendMessage: R,
+      retryLast: O,
+      confirmTicket: N,
+      cancelTicket: Z,
       resetConversation: U
     }),
     [
       u,
-      E,
-      B,
-      y,
+      T,
+      D,
+      v,
       r,
       n,
       t,
-      m.apiBaseUrl,
-      T,
-      z,
-      I,
-      J,
+      g.apiBaseUrl,
+      R,
+      O,
+      N,
+      Z,
       U
     ]
   );
-  return /* @__PURE__ */ l(Fe.Provider, { value: b, children: e });
+  return /* @__PURE__ */ o(Ee.Provider, { value: b, children: e });
 };
-function ye() {
-  return Bt();
+function ve() {
+  return Dt();
 }
-const Mt = ({ message: e, onRetry: t }) => /* @__PURE__ */ C(
+const It = ({ message: e, onRetry: t }) => /* @__PURE__ */ k(
   "div",
   {
-    className: "mx-4 mb-2 rounded-lg border border-[var(--error-border)] bg-[var(--error-bg)] px-3 py-2 text-[12.5px] text-[var(--error-text)]",
+    className: "chat-error-banner",
     role: "alert",
     children: [
-      /* @__PURE__ */ l("p", { children: e }),
-      t && /* @__PURE__ */ l(
+      /* @__PURE__ */ o("p", { children: e }),
+      t && /* @__PURE__ */ o(
         "button",
         {
           type: "button",
           onClick: t,
-          className: "mt-1.5 text-[12px] font-semibold underline underline-offset-2",
+          className: "chat-error-retry-btn",
           children: "Try again"
         }
       )
@@ -343,14 +343,14 @@ const Mt = ({ message: e, onRetry: t }) => /* @__PURE__ */ C(
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const It = (e) => e.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase(), ot = (...e) => e.filter((t, r, n) => !!t && t.trim() !== "" && n.indexOf(t) === r).join(" ").trim();
+const Nt = (e) => e.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase(), st = (...e) => e.filter((t, r, n) => !!t && t.trim() !== "" && n.indexOf(t) === r).join(" ").trim();
 /**
  * @license lucide-react v0.468.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-var Nt = {
+var Pt = {
   xmlns: "http://www.w3.org/2000/svg",
   width: 24,
   height: 24,
@@ -367,31 +367,31 @@ var Nt = {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Pt = et(
+const xt = et(
   ({
     color: e = "currentColor",
     size: t = 24,
     strokeWidth: r = 2,
     absoluteStrokeWidth: n,
-    className: o = "",
-    children: s,
+    className: s = "",
+    children: l,
     iconNode: a,
     ...i
-  }, d) => Ce(
+  }, d) => ke(
     "svg",
     {
       ref: d,
-      ...Nt,
+      ...Pt,
       width: t,
       height: t,
       stroke: e,
       strokeWidth: n ? Number(r) * 24 / Number(t) : r,
-      className: ot("lucide", o),
+      className: st("lucide", s),
       ...i
     },
     [
-      ...a.map(([p, m]) => Ce(p, m)),
-      ...Array.isArray(s) ? s : [s]
+      ...a.map(([h, g]) => ke(h, g)),
+      ...Array.isArray(l) ? l : [l]
     ]
   )
 );
@@ -401,13 +401,13 @@ const Pt = et(
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const O = (e, t) => {
+const H = (e, t) => {
   const r = et(
-    ({ className: n, ...o }, s) => Ce(Pt, {
-      ref: s,
+    ({ className: n, ...s }, l) => ke(xt, {
+      ref: l,
       iconNode: t,
-      className: ot(`lucide-${It(e)}`, n),
-      ...o
+      className: st(`lucide-${Nt(e)}`, n),
+      ...s
     })
   );
   return r.displayName = `${e}`, r;
@@ -418,7 +418,7 @@ const O = (e, t) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Lt = O("ArrowDown", [
+const Lt = H("ArrowDown", [
   ["path", { d: "M12 5v14", key: "s699le" }],
   ["path", { d: "m19 12-7 7-7-7", key: "1idqje" }]
 ]);
@@ -428,7 +428,7 @@ const Lt = O("ArrowDown", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const zt = O("ArrowLeft", [
+const Ot = H("ArrowLeft", [
   ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
   ["path", { d: "M19 12H5", key: "x3x0zl" }]
 ]);
@@ -438,7 +438,7 @@ const zt = O("ArrowLeft", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Ot = O("ArrowUp", [
+const Ht = H("ArrowUp", [
   ["path", { d: "m5 12 7-7 7 7", key: "hav0vg" }],
   ["path", { d: "M12 19V5", key: "x0mq9r" }]
 ]);
@@ -448,7 +448,7 @@ const Ot = O("ArrowUp", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const st = O("BotMessageSquare", [
+const lt = H("BotMessageSquare", [
   ["path", { d: "M12 6V2H8", key: "1155em" }],
   ["path", { d: "m8 18-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z", key: "w2lp3e" }],
   ["path", { d: "M2 12h2", key: "1t8f8n" }],
@@ -462,14 +462,14 @@ const st = O("BotMessageSquare", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Ht = O("Check", [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]]);
+const zt = H("Check", [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]]);
 /**
  * @license lucide-react v0.468.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const qt = O("ChevronDown", [
+const qt = H("ChevronDown", [
   ["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]
 ]);
 /**
@@ -478,14 +478,14 @@ const qt = O("ChevronDown", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Gt = O("ChevronUp", [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]]);
+const Gt = H("ChevronUp", [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]]);
 /**
  * @license lucide-react v0.468.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Vt = O("ClipboardCheck", [
+const Vt = H("ClipboardCheck", [
   ["rect", { width: "8", height: "4", x: "8", y: "2", rx: "1", ry: "1", key: "tgr4d6" }],
   [
     "path",
@@ -502,7 +502,7 @@ const Vt = O("ClipboardCheck", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Wt = O("FileText", [
+const Wt = H("FileText", [
   ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
   ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
   ["path", { d: "M10 9H8", key: "b1mrlr" }],
@@ -515,7 +515,7 @@ const Wt = O("FileText", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const jt = O("FlaskConical", [
+const $t = H("FlaskConical", [
   [
     "path",
     {
@@ -532,7 +532,7 @@ const jt = O("FlaskConical", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const lt = O("MessageSquare", [
+const ot = H("MessageSquare", [
   ["path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z", key: "1lielz" }]
 ]);
 /**
@@ -541,7 +541,7 @@ const lt = O("MessageSquare", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const $t = O("Microscope", [
+const Ut = H("Microscope", [
   ["path", { d: "M6 18h8", key: "1borvv" }],
   ["path", { d: "M3 22h18", key: "8prr45" }],
   ["path", { d: "M14 22a7 7 0 1 0 0-14h-1", key: "1jwaiy" }],
@@ -555,14 +555,14 @@ const $t = O("Microscope", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Ut = O("Minus", [["path", { d: "M5 12h14", key: "1ays0h" }]]);
+const jt = H("Minus", [["path", { d: "M5 12h14", key: "1ays0h" }]]);
 /**
  * @license lucide-react v0.468.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Yt = O("RefreshCw", [
+const Yt = H("RefreshCw", [
   ["path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8", key: "v9h5vc" }],
   ["path", { d: "M21 3v5h-5", key: "1q7to0" }],
   ["path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16", key: "3uifl3" }],
@@ -574,7 +574,7 @@ const Yt = O("RefreshCw", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Zt = O("TestTubeDiagonal", [
+const Zt = H("TestTubeDiagonal", [
   [
     "path",
     { d: "M21 7 6.82 21.18a2.83 2.83 0 0 1-3.99-.01a2.83 2.83 0 0 1 0-4L17 3", key: "1ub6xw" }
@@ -588,13 +588,13 @@ const Zt = O("TestTubeDiagonal", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Jt = O("X", [
+const Jt = H("X", [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
 ]), Kt = {
   alpha: {
     label: "Alpha",
-    Icon: jt,
+    Icon: $t,
     variant: "env-badge--alpha",
     tooltip: "Alpha build — internal testing only"
   },
@@ -606,7 +606,7 @@ const Jt = O("X", [
   },
   gamma: {
     label: "Gamma",
-    Icon: $t,
+    Icon: Ut,
     variant: "env-badge--gamma",
     tooltip: "Gamma / Release Candidate"
   },
@@ -622,21 +622,21 @@ const Jt = O("X", [
   className: r = ""
 }) => {
   if (!e) return null;
-  const { label: n, Icon: o, variant: s, tooltip: a } = Kt[e];
-  return /* @__PURE__ */ C(
+  const { label: n, Icon: s, variant: l, tooltip: a } = Kt[e];
+  return /* @__PURE__ */ k(
     "span",
     {
-      className: `env-badge ${s} ${r} text-[var(--vps-orange)] font-medium text-[10px] leading-[12px] px-1.5 py-0.5 rounded-full border border-[var(--border)] bg-[var(--orange-50)] hover:bg-[var(--grey-200)] cursor-pointer hover:text-foreground flex items-center gap-1 `,
+      className: `env-badge-inline ${l} ${r}`.trim(),
       title: a,
       "aria-label": `${n} build`,
       role: "status",
       children: [
-        /* @__PURE__ */ l(o, { size: 10, className: "env-badge-icon", "aria-hidden": "true" }),
-        /* @__PURE__ */ l("span", { className: "text-[var(--text-primary)] font-medium text-[10px] leading-[12px]", children: n })
+        /* @__PURE__ */ o(s, { size: 10, className: "env-badge-icon", "aria-hidden": "true" }),
+        /* @__PURE__ */ o("span", { className: "env-badge-inline-label", children: n })
       ]
     }
   );
-}, Qt = (e) => /* @__PURE__ */ l(
+}, Qt = (e) => /* @__PURE__ */ o(
   "svg",
   {
     width: e.width || "24px",
@@ -646,170 +646,150 @@ const Jt = O("X", [
     xmlns: "http://www.w3.org/2000/svg",
     fill: e.Color || "currentColor",
     ...e,
-    children: /* @__PURE__ */ l("path", { d: "M11.999 0c-2.25 0-4.5.06-6.6.21a5.57 5.57 0 0 0-5.19 5.1c-.24 3.21-.27 6.39-.06 9.6a5.644 5.644 0 0 0 5.7 5.19h3.15v-3.9h-3.15c-.93.03-1.74-.63-1.83-1.56-.18-3-.15-6 .06-9 .06-.84.72-1.47 1.56-1.53 2.04-.15 4.2-.21 6.36-.21s4.32.09 6.36.18c.81.06 1.5.69 1.56 1.53.24 3 .24 6 .06 9-.12.93-.9 1.62-1.83 1.59h-3.15l-6 3.9V24l6-3.9h3.15c2.97.03 5.46-2.25 5.7-5.19.21-3.18.18-6.39-.03-9.57a5.57 5.57 0 0 0-5.19-5.1c-2.13-.18-4.38-.24-6.63-.24zm-5.04 8.76c-.36 0-.66.3-.66.66v2.34c0 .33.18.63.48.78 1.62.78 3.42 1.2 5.22 1.26 1.8-.06 3.6-.48 5.22-1.26.3-.15.48-.45.48-.78V9.42c0-.09-.03-.15-.09-.21a.648.648 0 0 0-.87-.36c-1.5.66-3.12 1.02-4.77 1.05-1.65-.03-3.27-.42-4.77-1.08a.566.566 0 0 0-.24-.06z" })
+    children: /* @__PURE__ */ o("path", { d: "M11.999 0c-2.25 0-4.5.06-6.6.21a5.57 5.57 0 0 0-5.19 5.1c-.24 3.21-.27 6.39-.06 9.6a5.644 5.644 0 0 0 5.7 5.19h3.15v-3.9h-3.15c-.93.03-1.74-.63-1.83-1.56-.18-3-.15-6 .06-9 .06-.84.72-1.47 1.56-1.53 2.04-.15 4.2-.21 6.36-.21s4.32.09 6.36.18c.81.06 1.5.69 1.56 1.53.24 3 .24 6 .06 9-.12.93-.9 1.62-1.83 1.59h-3.15l-6 3.9V24l6-3.9h3.15c2.97.03 5.46-2.25 5.7-5.19.21-3.18.18-6.39-.03-9.57a5.57 5.57 0 0 0-5.19-5.1c-2.13-.18-4.38-.24-6.63-.24zm-5.04 8.76c-.36 0-.66.3-.66.66v2.34c0 .33.18.63.48.78 1.62.78 3.42 1.2 5.22 1.26 1.8-.06 3.6-.48 5.22-1.26.3-.15.48-.45.48-.78V9.42c0-.09-.03-.15-.09-.21a.648.648 0 0 0-.87-.36c-1.5.66-3.12 1.02-4.77 1.05-1.65-.03-3.27-.42-4.77-1.08a.566.566 0 0 0-.24-.06z" })
   }
 ), er = ({
   title: e = "VPS AI Assistant",
   subtitle: t = "Customer portal support",
   onClose: r,
   onReset: n,
-  onBack: o,
-  showMinimize: s = !1,
+  onBack: s,
+  showMinimize: l = !1,
   envStage: a,
   envPulse: i = !0
-}) => /* @__PURE__ */ C("header", { className: "flex items-center justify-between border-b border-border bg-card px-5 py-4", children: [
-  /* @__PURE__ */ C("div", { className: "flex items-center gap-3", children: [
-    o && /* @__PURE__ */ l(
+}) => /* @__PURE__ */ k("header", { className: "chat-header", children: [
+  /* @__PURE__ */ k("div", { className: "chat-header-left", children: [
+    s && /* @__PURE__ */ o(
       "button",
       {
         type: "button",
-        onClick: o,
-        className: "flex h-8 w-8 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground hover:bg-[var(--grey-100)]",
+        onClick: s,
+        className: "icon-btn-back",
         "aria-label": "Back",
-        children: /* @__PURE__ */ l(zt, { size: 16 })
+        children: /* @__PURE__ */ o(Ot, { size: 16 })
       }
     ),
-    /* @__PURE__ */ l(
+    /* @__PURE__ */ o(
       "div",
       {
-        className: "flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground",
+        className: "avatar-circle",
         "aria-hidden": "true",
-        children: /* @__PURE__ */ l(Qt, { width: "16px", height: "16px", Color: "white" })
+        children: /* @__PURE__ */ o(Qt, { width: "16px", height: "16px", color: "white" })
       }
     ),
-    /* @__PURE__ */ C("div", { children: [
-      /* @__PURE__ */ C("div", { className: "flex items-center gap-1.5", children: [
-        /* @__PURE__ */ l("h2", { className: "text-[16px] font-bold tracking-tight text-foreground", children: e }),
-        /* @__PURE__ */ l(Xt, { stage: a, pulse: i })
+    /* @__PURE__ */ k("div", { children: [
+      /* @__PURE__ */ k("div", { className: "chat-header-title-row", children: [
+        /* @__PURE__ */ o("h2", { className: "chat-header-title", children: e }),
+        /* @__PURE__ */ o(Xt, { stage: a, pulse: i })
       ] }),
-      /* @__PURE__ */ l("p", { className: "text-[12px] text-muted-foreground font-medium text-[var(--text-subtle)]", children: t || "Customer portal support" })
+      /* @__PURE__ */ o("p", { className: "chat-header-subtitle", children: t || "Customer portal support" })
     ] })
   ] }),
-  /* @__PURE__ */ C("div", { className: "flex items-center gap-1", children: [
-    n && /* @__PURE__ */ l(
+  /* @__PURE__ */ k("div", { className: "chat-header-actions", children: [
+    n && /* @__PURE__ */ o(
       "button",
       {
         type: "button",
         onClick: n,
-        className: "flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-subtle)] hover:bg-muted hover:text-foreground",
+        className: "icon-btn-action",
         "aria-label": "Start a new conversation",
         title: "New conversation",
-        children: /* @__PURE__ */ l(Yt, { size: 15 })
+        children: /* @__PURE__ */ o(Yt, { size: 15 })
       }
     ),
-    r && /* @__PURE__ */ l(
+    r && /* @__PURE__ */ o(
       "button",
       {
         type: "button",
         onClick: r,
-        className: "flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-subtle)] hover:bg-muted hover:text-foreground",
-        "aria-label": s ? "Minimize chat" : "Close chat",
-        children: /* @__PURE__ */ l(Ut, { size: 16 })
+        className: "icon-btn-action",
+        "aria-label": l ? "Minimize chat" : "Close chat",
+        children: /* @__PURE__ */ o(jt, { size: 16 })
       }
     )
   ] })
 ] });
 function tr(e, t) {
-  const r = X(e);
-  ge(() => {
+  const r = K(e);
+  me(() => {
     var n;
     r.current && !e && ((n = t.current) == null || n.focus()), r.current = e;
   }, [e, t]);
 }
-function at(e) {
-  var t, r, n = "";
-  if (typeof e == "string" || typeof e == "number") n += e;
-  else if (typeof e == "object") if (Array.isArray(e)) {
-    var o = e.length;
-    for (t = 0; t < o; t++) e[t] && (r = at(e[t])) && (n && (n += " "), n += r);
-  } else for (r in e) e[r] && (n && (n += " "), n += r);
-  return n;
-}
-function rr() {
-  for (var e, t, r = 0, n = "", o = arguments.length; r < o; r++) (e = arguments[r]) && (t = at(e)) && (n && (n += " "), n += t);
-  return n;
-}
-function V(...e) {
-  return rr(e);
-}
-function nr(e, t) {
+function rr(e, t) {
   const r = t.trim().toLowerCase();
   return r ? e.filter(
     (n) => n.label.toLowerCase().includes(r) || n.query.toLowerCase().includes(r)
   ) : e;
 }
-const or = ({
+const nr = ({
   suggestions: e,
   onSelect: t,
   disabled: r,
   variant: n = "list"
-}) => e.length ? n === "badge" ? /* @__PURE__ */ l(
+}) => e.length ? n === "badge" ? /* @__PURE__ */ o(
   "ul",
   {
-    className: "mb-2 flex flex-wrap gap-1.5",
+    className: "suggestions-badge-list",
     "aria-label": "Suggested questions",
-    children: e.map((o) => /* @__PURE__ */ l("li", { className: "max-w-full", children: /* @__PURE__ */ l(
+    children: e.map((s) => /* @__PURE__ */ o("li", { className: "suggestion-badge-item", children: /* @__PURE__ */ o(
       "button",
       {
         type: "button",
         disabled: r,
-        onClick: () => t(o),
-        title: o.query,
-        className: V(
-          "max-w-full truncate rounded-full border border-border bg-card px-2.5 py-1 text-left text-[11.5px] font-semibold text-foreground",
-          "hover:border-primary hover:bg-[var(--tint-solus-10)] hover:text-primary",
-          "disabled:cursor-not-allowed disabled:opacity-50"
-        ),
-        children: o.label
+        onClick: () => t(s),
+        title: s.query,
+        className: "suggestion-badge-btn",
+        children: s.label
       }
-    ) }, o.query))
+    ) }, s.query))
   }
-) : /* @__PURE__ */ l("div", { className: "mt-3 flex flex-col gap-2", children: e.map((o) => /* @__PURE__ */ l(
+) : /* @__PURE__ */ o("div", { className: "suggestions-list", children: e.map((s) => /* @__PURE__ */ o(
   "button",
   {
     type: "button",
     disabled: r,
-    onClick: () => t(o),
-    className: "rounded-lg border border-border bg-card px-3.5 py-2.5 text-left text-[13px] font-semibold text-foreground shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition hover:-translate-y-px hover:border-vps-light-grey hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:hover:translate-y-0",
-    children: o.label
+    onClick: () => t(s),
+    className: "suggestion-list-btn",
+    children: s.label
   },
-  o.query
+  s.query
 )) }) : null, sr = ({
   onSend: e,
   disabled: t = !1,
   placeholder: r = "Ask something…"
 }) => {
-  const { suggestions: n, showSuggestions: o, suggestionBadgesEnabled: s } = ye(), [a, i] = Y(""), d = X(null), p = (u) => {
+  const { suggestions: n, showSuggestions: s, suggestionBadgesEnabled: l } = ve(), [a, i] = j(""), d = K(null), h = (u) => {
     u && (u.style.height = "auto", u.style.height = `${Math.min(u.scrollHeight, 96)}px`);
   };
-  tr(t, d), ge(() => {
-    p(d.current);
+  tr(t, d), me(() => {
+    h(d.current);
   }, [a]);
-  const m = we(() => {
-    if (!s || t) return [];
+  const g = Ce(() => {
+    if (!l || t) return [];
     const u = a.trim();
-    return u ? nr(n, u) : o ? n : [];
-  }, [t, o, s, n, a]), y = (u) => {
+    return u ? rr(n, u) : s ? n : [];
+  }, [t, s, l, n, a]), v = (u) => {
     i(u.query);
-    const g = d.current;
-    g == null || g.focus();
+    const m = d.current;
+    m == null || m.focus();
   }, f = () => {
     const u = a.trim();
     !u || t || (e(u), i(""), d.current && (d.current.style.height = "auto"));
   };
-  return /* @__PURE__ */ C("div", { className: "bg-card px-4 pb-3 pt-2", children: [
-    /* @__PURE__ */ l(
-      or,
+  return /* @__PURE__ */ k("div", { className: "chat-input-wrapper", children: [
+    /* @__PURE__ */ o(
+      nr,
       {
         variant: "badge",
-        suggestions: m,
-        onSelect: y,
+        suggestions: g,
+        onSelect: v,
         disabled: t
       }
     ),
-    /* @__PURE__ */ l("label", { htmlFor: "vps-chat-input", className: "sr-only", children: "Chat message" }),
-    /* @__PURE__ */ C("div", { className: "flex items-end gap-2 rounded-xl bg-[var(--input-bg)] px-2.5 py-1.5", children: [
-      /* @__PURE__ */ l(
+    /* @__PURE__ */ o("label", { htmlFor: "vps-chat-input", className: "sr-only", children: "Chat message" }),
+    /* @__PURE__ */ k("div", { className: "chat-input-row", children: [
+      /* @__PURE__ */ o(
         "textarea",
         {
           id: "vps-chat-input",
@@ -819,78 +799,78 @@ const or = ({
           disabled: t,
           placeholder: r,
           onChange: (u) => {
-            i(u.target.value), p(u.target);
+            i(u.target.value), h(u.target);
           },
           onKeyDown: (u) => {
             u.key === "Enter" && !u.shiftKey && (u.preventDefault(), f());
           },
-          className: "max-h-24 flex-1 resize-none bg-transparent py-1.5 text-[13.5px] text-foreground outline-none placeholder:text-[var(--text-subtle)] disabled:opacity-60"
+          className: "chat-textarea"
         }
       ),
-      /* @__PURE__ */ l(
+      /* @__PURE__ */ o(
         "button",
         {
           type: "button",
           onClick: f,
           disabled: t || !a.trim(),
           "aria-label": "Send message",
-          className: "mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-action text-action-foreground hover:bg-[var(--action-hover)] disabled:cursor-not-allowed disabled:opacity-40",
-          children: /* @__PURE__ */ l(Ot, { size: 16 })
+          className: "chat-send-btn",
+          children: /* @__PURE__ */ o(Ht, { size: 16 })
         }
       )
     ] }),
-    /* @__PURE__ */ C("p", { className: "mt-2 text-center text-[11px] font-medium text-[var(--text-subtle)]", children: [
+    /* @__PURE__ */ k("p", { className: "chat-input-footer", children: [
       "Powered by ",
-      /* @__PURE__ */ l("span", { className: "text-primary font-bold hover:underline cursor-pointer", children: "VPS Veritas AI" })
+      /* @__PURE__ */ o("span", { className: "chat-input-footer-brand", children: "VPS Veritas AI" })
     ] })
   ] });
 };
-function lr({ defaultTagName: e, props: t, render: r, state: n = {}, stateAttributesMapping: o }) {
-  let s = ke(ar(n, o), t);
-  if (!r) return c.createElement(e, s);
-  if (typeof r == "function") return r(s, n);
+function lr({ defaultTagName: e, props: t, render: r, state: n = {}, stateAttributesMapping: s }) {
+  let l = Se(or(n, s), t);
+  if (!r) return c.createElement(e, l);
+  if (typeof r == "function") return r(l, n);
   if (!c.isValidElement(r)) return null;
-  let a = r.props, i = { ...ke(s, a), ref: ae(s.ref, a.ref) };
+  let a = r.props, i = { ...Se(l, a), ref: ae(l.ref, a.ref) };
   return c.cloneElement(r, i);
 }
-function ke(...e) {
+function Se(...e) {
   let t = {};
   for (let r of e) {
     if (!r) continue;
     let n = r;
-    for (let o of Object.keys(n)) {
-      let s = n[o];
-      if (s === void 0) continue;
-      let a = t[o];
-      o === "className" ? t[o] = [a, s].filter(Boolean).join(" ") : o === "style" ? t[o] = { ...a, ...s } : o === "ref" ? t[o] = ae(a, s) : cr(o) && typeof a == "function" && typeof s == "function" ? t[o] = ir(s, a) : t[o] = s;
+    for (let s of Object.keys(n)) {
+      let l = n[s];
+      if (l === void 0) continue;
+      let a = t[s];
+      s === "className" ? t[s] = [a, l].filter(Boolean).join(" ") : s === "style" ? t[s] = { ...a, ...l } : s === "ref" ? t[s] = ae(a, l) : ir(s) && typeof a == "function" && typeof l == "function" ? t[s] = ar(l, a) : t[s] = l;
     }
   }
   return t;
 }
-function ar(e, t) {
+function or(e, t) {
   var n;
   let r = {};
-  for (let o of Object.keys(e)) {
-    let s = e[o], a = (n = t == null ? void 0 : t[o]) == null ? void 0 : n.call(t, s);
+  for (let s of Object.keys(e)) {
+    let l = e[s], a = (n = t == null ? void 0 : t[s]) == null ? void 0 : n.call(t, l);
     if (a) {
       Object.assign(r, a);
       continue;
     }
-    if (o === "slot") {
-      r["data-slot"] = s;
+    if (s === "slot") {
+      r["data-slot"] = l;
       continue;
     }
-    let i = `data-${String(o).replace(/[A-Z]/g, (d) => `-${d.toLowerCase()}`)}`;
-    typeof s == "boolean" ? r[i] = s ? "" : void 0 : s != null && (r[i] = String(s));
+    let i = `data-${String(s).replace(/[A-Z]/g, (d) => `-${d.toLowerCase()}`)}`;
+    typeof l == "boolean" ? r[i] = l ? "" : void 0 : l != null && (r[i] = String(l));
   }
   return r;
 }
-function ir(e, t) {
+function ar(e, t) {
   return function(r) {
     e(r), r.defaultPrevented || t(r);
   };
 }
-function cr(e) {
+function ir(e) {
   return /^on[A-Z]/.test(e);
 }
 function ae(...e) {
@@ -899,44 +879,44 @@ function ae(...e) {
     for (let n of t) typeof n == "function" ? n(r) : n && (n.current = r);
   };
 }
-var ur = 8, dr = 64, fr = 0, be = 0.5, pr = 180, hr = /* @__PURE__ */ new Set(["ArrowDown", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "]), it = { start: !1, end: !1 }, mr = [], ve = { currentAnchorId: null, visibleMessageIds: mr };
+var cr = 8, ur = 64, dr = 0, be = 0.5, fr = 180, hr = /* @__PURE__ */ new Set(["ArrowDown", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "]), at = { start: !1, end: !1 }, pr = [], _e = { currentAnchorId: null, visibleMessageIds: pr };
 function gr({ content: e, scrollEdgeThreshold: t, spacer: r, viewport: n }) {
-  if (!n || !e) return it;
-  let o = Ee({ content: e, spacer: r, viewport: n });
-  return { start: n.scrollTop > t, end: o - n.scrollTop - n.clientHeight > t };
+  if (!n || !e) return at;
+  let s = Te({ content: e, spacer: r, viewport: n });
+  return { start: n.scrollTop > t, end: s - n.scrollTop - n.clientHeight > t };
 }
-function br({ content: e, scrollMargin: t, scrollPreviousItemPeek: r, spacer: n, viewport: o, visibleMessageIds: s }) {
-  if (!e || !o) return ve;
-  let a = o.getBoundingClientRect(), i = a.top + t + r, d = typeof IntersectionObserver > "u", p = [], m = null;
-  for (let y of se(e, n)) {
-    let f = y.dataset.messageId;
+function mr({ content: e, scrollMargin: t, scrollPreviousItemPeek: r, spacer: n, viewport: s, visibleMessageIds: l }) {
+  if (!e || !s) return _e;
+  let a = s.getBoundingClientRect(), i = a.top + t + r, d = typeof IntersectionObserver > "u", h = [], g = null;
+  for (let v of le(e, n)) {
+    let f = v.dataset.messageId;
     if (!f) continue;
-    let u = y.dataset.scrollAnchor === "true", g = u || d ? y.getBoundingClientRect() : null;
-    (d && g ? g.bottom > i && g.top < a.bottom : s.has(f)) && p.push(f), u && g && g.top <= i + be && (m = f);
+    let u = v.dataset.scrollAnchor === "true", m = u || d ? v.getBoundingClientRect() : null;
+    (d && m ? m.bottom > i && m.top < a.bottom : l.has(f)) && h.push(f), u && m && m.top <= i + be && (g = f);
   }
-  return p.length === 0 && m === null ? ve : { currentAnchorId: m, visibleMessageIds: p };
+  return h.length === 0 && g === null ? _e : { currentAnchorId: g, visibleMessageIds: h };
 }
-function se(e, t) {
+function le(e, t) {
   return Array.from(e.children).filter((r) => r instanceof HTMLElement && r !== t);
 }
-function vr(e, t) {
+function br(e, t) {
   for (let r = t; r < e.length; r++) {
     let n = e[r];
     if ((n == null ? void 0 : n.dataset.scrollAnchor) === "true") return n;
   }
   return null;
 }
-function yr(e, t) {
+function _r(e, t) {
   for (let r of e) if (r.dataset.scrollAnchor === "true" && !t.has(r)) return r;
   return null;
 }
-function _r(e, t) {
+function vr(e, t) {
   var n;
   let r = 0;
-  for (let o = t; o < e.length; o++) if (((n = e[o]) == null ? void 0 : n.dataset.scrollAnchor) === "true" && (r += 1, r > 1)) return !0;
+  for (let s = t; s < e.length; s++) if (((n = e[s]) == null ? void 0 : n.dataset.scrollAnchor) === "true" && (r += 1, r > 1)) return !0;
   return !1;
 }
-function xr(e) {
+function yr(e) {
   for (let t = e.length - 1; t >= 0; t--) {
     let r = e[t];
     if ((r == null ? void 0 : r.dataset.scrollAnchor) === "true") return r;
@@ -945,82 +925,82 @@ function xr(e) {
 }
 function wr({ content: e, spacer: t, viewport: r }) {
   let n = r.getBoundingClientRect();
-  for (let o of se(e, t)) {
-    if (!o.dataset.messageId) continue;
-    let s = o.getBoundingClientRect();
-    if (s.bottom > n.top && s.top < n.bottom) return o;
+  for (let s of le(e, t)) {
+    if (!s.dataset.messageId) continue;
+    let l = s.getBoundingClientRect();
+    if (l.bottom > n.top && l.top < n.bottom) return s;
   }
   return null;
 }
-function Cr({ align: e, element: t, scrollMargin: r, spacer: n, viewport: o }) {
-  let s = ct(t, o), a = t.getBoundingClientRect().height, i = Fr(n);
+function Cr({ align: e, element: t, scrollMargin: r, spacer: n, viewport: s }) {
+  let l = it(t, s), a = t.getBoundingClientRect().height, i = Fr(n);
   if (e === "center") {
-    let d = Math.max(0, o.clientHeight - i.start - i.end);
-    return s - i.start - (d - a) / 2 - r;
+    let d = Math.max(0, s.clientHeight - i.start - i.end);
+    return l - i.start - (d - a) / 2 - r;
   }
-  if (e === "end") return s - o.clientHeight + a + i.end + r;
+  if (e === "end") return l - s.clientHeight + a + i.end + r;
   if (e === "nearest") {
-    let d = s + a, p = o.scrollTop + i.start, m = o.scrollTop + o.clientHeight - i.end;
-    return s >= p && d <= m ? o.scrollTop : s < p ? s - i.start - r : d - o.clientHeight + i.end + r;
+    let d = l + a, h = s.scrollTop + i.start, g = s.scrollTop + s.clientHeight - i.end;
+    return l >= h && d <= g ? s.scrollTop : l < h ? l - i.start - r : d - s.clientHeight + i.end + r;
   }
-  return s - i.start - r;
+  return l - i.start - r;
 }
-function ct(e, t) {
+function it(e, t) {
   let r = e.getBoundingClientRect(), n = t.getBoundingClientRect();
   return r.top - n.top + t.scrollTop;
 }
-function he(e, t) {
+function pe(e, t) {
   return e.getBoundingClientRect().top - t.getBoundingClientRect().top;
 }
 function kr({ content: e, scrollTop: t, spacer: r, viewport: n }) {
-  let o = Ee({ content: e, spacer: r, viewport: n });
-  return t + n.clientHeight - o;
+  let s = Te({ content: e, spacer: r, viewport: n });
+  return t + n.clientHeight - s;
 }
-function Ee({ content: e, spacer: t, viewport: r }) {
-  let n = se(e, t), o = ut(e), s = r.getBoundingClientRect(), a = r.scrollTop, i = o.start + o.end;
+function Te({ content: e, spacer: t, viewport: r }) {
+  let n = le(e, t), s = ct(e), l = r.getBoundingClientRect(), a = r.scrollTop, i = s.start + s.end;
   for (let d of n) {
-    let p = d.getBoundingClientRect();
-    i = Math.max(i, p.bottom - s.top + a + o.end);
+    let h = d.getBoundingClientRect();
+    i = Math.max(i, h.bottom - l.top + a + s.end);
   }
   return i;
 }
 function Sr(e) {
   return Math.max(0, e.scrollHeight - e.clientHeight);
 }
-function ut(e) {
+function ct(e) {
   let t = window.getComputedStyle(e);
-  return { end: Se(t.paddingBlockEnd || t.paddingBottom), start: Se(t.paddingBlockStart || t.paddingTop) };
+  return { end: Fe(t.paddingBlockEnd || t.paddingBottom), start: Fe(t.paddingBlockStart || t.paddingTop) };
 }
 function Fr(e) {
   let t = e == null ? void 0 : e.parentElement;
-  return t ? ut(t) : { end: 0, start: 0 };
+  return t ? ct(t) : { end: 0, start: 0 };
 }
 function Er(e) {
   if (!e) return 0;
   let t = window.getComputedStyle(e), r = t.rowGap === "normal" ? t.gap : t.rowGap;
-  return Se(r);
+  return Fe(r);
 }
-function Se(e) {
+function Fe(e) {
   if (!e) return 0;
   let t = Number.parseFloat(e);
   return Number.isFinite(t) ? t : 0;
 }
-function dt(e, t) {
+function ut(e, t) {
   let r = e, n = /* @__PURE__ */ new Set();
-  return { getSnapshot: () => r, hasListeners: () => n.size > 0, setSnapshot: (o) => {
-    t(r, o) || (r = o, n.forEach((s) => s()));
-  }, subscribe: (o, s, a) => {
+  return { getSnapshot: () => r, hasListeners: () => n.size > 0, setSnapshot: (s) => {
+    t(r, s) || (r = s, n.forEach((l) => l()));
+  }, subscribe: (s, l, a) => {
     let i = n.size === 0;
-    return n.add(o), i && (s == null || s()), () => {
-      n.delete(o), n.size === 0 && (a == null || a());
+    return n.add(s), i && (l == null || l()), () => {
+      n.delete(s), n.size === 0 && (a == null || a());
     };
   } };
 }
-function $e(e, t) {
-  return dt(e, t);
+function Ue(e, t) {
+  return ut(e, t);
 }
 function Tr() {
-  return dt(ve, Ar);
+  return ut(_e, Ar);
 }
 function Rr(e, t) {
   return e.start === t.start && e.end === t.end;
@@ -1028,218 +1008,218 @@ function Rr(e, t) {
 function Ar(e, t) {
   return e.currentAnchorId !== t.currentAnchorId || e.visibleMessageIds.length !== t.visibleMessageIds.length ? !1 : e.visibleMessageIds.every((r, n) => r === t.visibleMessageIds[n]);
 }
-function Br({ autoScroll: e, defaultScrollPosition: t, scrollEdgeThreshold: r, scrollMargin: n, scrollPreviousItemPeek: o }) {
-  let s = c.useRef(e), a = c.useRef(!1), i = c.useRef(null), d = c.useRef(!1), p = c.useRef(r), m = c.useRef(0), y = c.useRef(null), f = c.useRef(0), u = c.useRef(e ? "following-bottom" : "free-scrolling"), g = c.useRef(/* @__PURE__ */ new Map()), E = c.useRef(null), v = c.useRef(null), B = c.useRef(null), W = c.useRef(o), L = c.useRef(!0), $ = c.useRef(null), N = c.useRef(n), M = c.useRef(null), T = c.useRef(0), z = c.useRef(0), I = c.useRef(null), J = c.useRef(null), U = c.useRef(null), b = c.useRef(null), _ = c.useRef(null), k = c.useRef(null), S = c.useRef(null), A = c.useRef(null), R = c.useRef(null), F = c.useRef(/* @__PURE__ */ new Set()), j = c.useRef(/* @__PURE__ */ new WeakSet());
-  return U.current === null && (U.current = $e(t === "end" || t === "last-anchor", (H, ce) => H === ce)), b.current === null && (b.current = $e(it, Rr)), R.current === null && (R.current = Tr()), s.current = e, p.current = r, N.current = n, W.current = o, { autoScrollRef: s, autoscrollingRef: a, autoscrollingTimeoutRef: _, streamingTurnRef: B, contentRef: i, defaultScrollPositionAppliedRef: d, firstItemRef: y, itemCountRef: m, lastScrollTopRef: f, messageElementsRef: g, modeRef: u, pendingScrollFrameRef: M, pendingScrollToMessageRef: E, prependRestoreRef: v, preserveScrollOnPrependRef: L, pendingDefaultScrollStore: U.current, rootRef: $, scrollEdgeThresholdRef: p, scrollMarginRef: N, scrollPreviousItemPeekRef: W, spacerGapRef: T, spacerHeightRef: z, spacerRef: I, stateFrameRef: J, stateStore: b.current, viewportRef: k, visibilityFrameRef: S, visibilityObserverRef: A, visibilityStore: R.current, visibleMessageIdsRef: F, handledScrollAnchorsRef: j };
+function Br({ autoScroll: e, defaultScrollPosition: t, scrollEdgeThreshold: r, scrollMargin: n, scrollPreviousItemPeek: s }) {
+  let l = c.useRef(e), a = c.useRef(!1), i = c.useRef(null), d = c.useRef(!1), h = c.useRef(r), g = c.useRef(0), v = c.useRef(null), f = c.useRef(0), u = c.useRef(e ? "following-bottom" : "free-scrolling"), m = c.useRef(/* @__PURE__ */ new Map()), T = c.useRef(null), _ = c.useRef(null), D = c.useRef(null), V = c.useRef(s), L = c.useRef(!0), $ = c.useRef(null), P = c.useRef(n), I = c.useRef(null), R = c.useRef(0), O = c.useRef(0), N = c.useRef(null), Z = c.useRef(null), U = c.useRef(null), b = c.useRef(null), y = c.useRef(null), S = c.useRef(null), F = c.useRef(null), B = c.useRef(null), A = c.useRef(null), E = c.useRef(/* @__PURE__ */ new Set()), W = c.useRef(/* @__PURE__ */ new WeakSet());
+  return U.current === null && (U.current = Ue(t === "end" || t === "last-anchor", (z, ce) => z === ce)), b.current === null && (b.current = Ue(at, Rr)), A.current === null && (A.current = Tr()), l.current = e, h.current = r, P.current = n, V.current = s, { autoScrollRef: l, autoscrollingRef: a, autoscrollingTimeoutRef: y, streamingTurnRef: D, contentRef: i, defaultScrollPositionAppliedRef: d, firstItemRef: v, itemCountRef: g, lastScrollTopRef: f, messageElementsRef: m, modeRef: u, pendingScrollFrameRef: I, pendingScrollToMessageRef: T, prependRestoreRef: _, preserveScrollOnPrependRef: L, pendingDefaultScrollStore: U.current, rootRef: $, scrollEdgeThresholdRef: h, scrollMarginRef: P, scrollPreviousItemPeekRef: V, spacerGapRef: R, spacerHeightRef: O, spacerRef: N, stateFrameRef: Z, stateStore: b.current, viewportRef: S, visibilityFrameRef: F, visibilityObserverRef: B, visibilityStore: A.current, visibleMessageIdsRef: E, handledScrollAnchorsRef: W };
 }
-function ft(e) {
+function dt(e) {
   e.pendingDefaultScrollStore.setSnapshot(!1);
 }
-function me(e) {
-  e.defaultScrollPositionAppliedRef.current = !0, ft(e);
+function ge(e) {
+  e.defaultScrollPositionAppliedRef.current = !0, dt(e);
 }
 function Dr({ refs: e, commitScrollState: t, scheduleStateCommit: r, scheduleVisibilitySync: n }) {
-  let { streamingTurnRef: o, autoScrollRef: s, autoscrollingRef: a, autoscrollingTimeoutRef: i, contentRef: d, itemCountRef: p, messageElementsRef: m, modeRef: y, pendingScrollToMessageRef: f, prependRestoreRef: u, scrollMarginRef: g, scrollPreviousItemPeekRef: E, spacerGapRef: v, spacerHeightRef: B, spacerRef: W, viewportRef: L } = e, $ = c.useCallback((b) => {
+  let { streamingTurnRef: s, autoScrollRef: l, autoscrollingRef: a, autoscrollingTimeoutRef: i, contentRef: d, itemCountRef: h, messageElementsRef: g, modeRef: v, pendingScrollToMessageRef: f, prependRestoreRef: u, scrollMarginRef: m, scrollPreviousItemPeekRef: T, spacerGapRef: _, spacerHeightRef: D, spacerRef: V, viewportRef: L } = e, $ = c.useCallback((b) => {
     i.current !== null && (window.clearTimeout(i.current), i.current = null), a.current !== b && (a.current = b, t()), b && (i.current = window.setTimeout(() => {
       i.current = null, a.current = !1, t();
-    }, pr));
-  }, [t]), N = c.useCallback((b) => {
-    let _ = W.current;
-    if (!_) return;
-    let k = Math.max(0, Math.ceil(b));
-    B.current !== k && (B.current = k, _.hidden = k === 0, _.style.height = `${k}px`, _.style.marginTop = k > 0 ? `${-v.current}px` : "");
-  }, []), M = c.useCallback((b, { behavior: _ = "auto", autoscrolling: k = !1 } = {}) => {
-    let S = L.current;
-    if (!S) return;
-    let A = Math.max(0, b);
-    if (Math.abs(S.scrollTop - A) <= be) {
-      S.scrollTop = A, t();
+    }, fr));
+  }, [t]), P = c.useCallback((b) => {
+    let y = V.current;
+    if (!y) return;
+    let S = Math.max(0, Math.ceil(b));
+    D.current !== S && (D.current = S, y.hidden = S === 0, y.style.height = `${S}px`, y.style.marginTop = S > 0 ? `${-_.current}px` : "");
+  }, []), I = c.useCallback((b, { behavior: y = "auto", autoscrolling: S = !1 } = {}) => {
+    let F = L.current;
+    if (!F) return;
+    let B = Math.max(0, b);
+    if (Math.abs(F.scrollTop - B) <= be) {
+      F.scrollTop = B, t();
       return;
     }
-    k && $(!0), S.scrollTo({ top: A, behavior: _ }), r();
-  }, [t, r, $]), T = c.useCallback(({ behavior: b = "auto" } = {}) => L.current ? (N(0), o.current = null, y.current = "free-scrolling", M(0, { behavior: b }), n(), !0) : !1, [n, M, N]), z = c.useCallback(({ behavior: b = "auto" } = {}) => {
-    let _ = L.current;
-    return _ ? (N(0), o.current = null, y.current = s.current ? "following-bottom" : "free-scrolling", M(Sr(_), { autoscrolling: !0, behavior: b }), n(), !0) : !1;
-  }, [n, M, N]), I = c.useCallback((b, { align: _ = "start", behavior: k = "auto", scrollMargin: S = g.current } = {}, { keepPreviousPeek: A = !1 } = {}) => {
-    let R = d.current, F = L.current;
-    if (!R || !F || !R.contains(b)) return !1;
-    let j = Cr({ align: _, element: b, scrollMargin: A ? S + E.current : S, spacer: W.current, viewport: F }), H = kr({ content: R, scrollTop: j, spacer: W.current, viewport: F });
-    return N(H), u.current = { element: b, viewportTop: he(b, F) }, y.current = A ? "anchored-to-message" : "settling-jump", o.current = A ? b : null, M(j, { behavior: k }), n(), !0;
-  }, [n, M, N]), J = c.useCallback(() => {
-    let b = o.current;
-    return !b || !b.isConnected || y.current !== "anchored-to-message" ? !1 : I(b, { align: "start" }, { keepPreviousPeek: !0 });
-  }, [I]), U = c.useCallback((b, _) => {
-    let k = m.current.get(b);
-    return k ? (me(e), I(k, _) ? (f.current = null, !0) : (f.current = { messageId: b, options: _ }, !0)) : p.current === 0 ? (f.current = { messageId: b, options: _ }, me(e), !0) : !1;
-  }, [I]);
+    S && $(!0), F.scrollTo({ top: B, behavior: y }), r();
+  }, [t, r, $]), R = c.useCallback(({ behavior: b = "auto" } = {}) => L.current ? (P(0), s.current = null, v.current = "free-scrolling", I(0, { behavior: b }), n(), !0) : !1, [n, I, P]), O = c.useCallback(({ behavior: b = "auto" } = {}) => {
+    let y = L.current;
+    return y ? (P(0), s.current = null, v.current = l.current ? "following-bottom" : "free-scrolling", I(Sr(y), { autoscrolling: !0, behavior: b }), n(), !0) : !1;
+  }, [n, I, P]), N = c.useCallback((b, { align: y = "start", behavior: S = "auto", scrollMargin: F = m.current } = {}, { keepPreviousPeek: B = !1 } = {}) => {
+    let A = d.current, E = L.current;
+    if (!A || !E || !A.contains(b)) return !1;
+    let W = Cr({ align: y, element: b, scrollMargin: B ? F + T.current : F, spacer: V.current, viewport: E }), z = kr({ content: A, scrollTop: W, spacer: V.current, viewport: E });
+    return P(z), u.current = { element: b, viewportTop: pe(b, E) }, v.current = B ? "anchored-to-message" : "settling-jump", s.current = B ? b : null, I(W, { behavior: S }), n(), !0;
+  }, [n, I, P]), Z = c.useCallback(() => {
+    let b = s.current;
+    return !b || !b.isConnected || v.current !== "anchored-to-message" ? !1 : N(b, { align: "start" }, { keepPreviousPeek: !0 });
+  }, [N]), U = c.useCallback((b, y) => {
+    let S = g.current.get(b);
+    return S ? (ge(e), N(S, y) ? (f.current = null, !0) : (f.current = { messageId: b, options: y }, !0)) : h.current === 0 ? (f.current = { messageId: b, options: y }, ge(e), !0) : !1;
+  }, [N]);
   return { flushPendingScrollToMessage: c.useCallback(() => {
     let b = f.current;
     if (!b) return !1;
-    let _ = m.current.get(b.messageId);
-    return !_ || !I(_, b.options) ? !1 : (f.current = null, me(e), !0);
-  }, [I]), reanchorToAnchoredMessage: J, scrollToElement: I, scrollToEnd: z, scrollToMessage: U, scrollToStart: T };
+    let y = g.current.get(b.messageId);
+    return !y || !N(y, b.options) ? !1 : (f.current = null, ge(e), !0);
+  }, [N]), reanchorToAnchoredMessage: Z, scrollToElement: N, scrollToEnd: O, scrollToMessage: U, scrollToStart: R };
 }
-function Ue(e, t) {
+function je(e, t) {
   return c.useCallback((r) => {
     e.current = r, r && t();
   }, [e, t]);
 }
-function Mr({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeThreshold: r = ur, scrollPreviousItemPeek: n = dr, scrollMargin: o = fr }) {
-  let s = Br({ autoScroll: e, defaultScrollPosition: t, scrollEdgeThreshold: r, scrollMargin: o, scrollPreviousItemPeek: n }), { streamingTurnRef: a, autoScrollRef: i, autoscrollingRef: d, autoscrollingTimeoutRef: p, contentRef: m, defaultScrollPositionAppliedRef: y, firstItemRef: f, itemCountRef: u, lastScrollTopRef: g, messageElementsRef: E, modeRef: v, pendingScrollFrameRef: B, pendingScrollToMessageRef: W, prependRestoreRef: L, preserveScrollOnPrependRef: $, pendingDefaultScrollStore: N, rootRef: M, scrollEdgeThresholdRef: T, scrollMarginRef: z, scrollPreviousItemPeekRef: I, spacerGapRef: J, spacerHeightRef: U, spacerRef: b, stateFrameRef: _, stateStore: k, viewportRef: S, visibilityFrameRef: A, visibilityObserverRef: R, visibilityStore: F, visibleMessageIdsRef: j, handledScrollAnchorsRef: H } = s, ce = c.useRef(t);
-  ce.current !== t && (ce.current = t, y.current = !1);
-  let ue = c.useCallback((h) => {
-    let x = M.current, w = S.current, D = [h.start && "start", h.end && "end"].filter(Boolean).join(" "), K = d.current;
-    for (let G of [x, w]) G && (D ? G.setAttribute("data-scrollable", D) : G.removeAttribute("data-scrollable"), G.toggleAttribute("data-autoscrolling", K));
-  }, []), Te = c.useCallback((h) => {
-    var D;
-    let x = ((D = S.current) == null ? void 0 : D.scrollTop) ?? 0, w = x < g.current - be;
-    g.current = x, i.current && !h.end && v.current !== "settling-jump" && v.current !== "anchored-to-message" ? v.current = "following-bottom" : v.current === "following-bottom" && h.end && w && !d.current && (v.current = "free-scrolling");
-  }, []), Z = c.useCallback(() => {
-    let h = gr({ content: m.current, scrollEdgeThreshold: T.current, spacer: b.current, viewport: S.current });
-    Te(h);
-    let x = v.current === "following-bottom" ? { ...h, end: !1 } : h;
-    ue(x), k.setSnapshot(x);
-  }, [Te, k, ue]), ne = c.useCallback(() => {
-    _.current === null && (_.current = window.requestAnimationFrame(() => {
-      _.current = null, Z();
+function Mr({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeThreshold: r = cr, scrollPreviousItemPeek: n = ur, scrollMargin: s = dr }) {
+  let l = Br({ autoScroll: e, defaultScrollPosition: t, scrollEdgeThreshold: r, scrollMargin: s, scrollPreviousItemPeek: n }), { streamingTurnRef: a, autoScrollRef: i, autoscrollingRef: d, autoscrollingTimeoutRef: h, contentRef: g, defaultScrollPositionAppliedRef: v, firstItemRef: f, itemCountRef: u, lastScrollTopRef: m, messageElementsRef: T, modeRef: _, pendingScrollFrameRef: D, pendingScrollToMessageRef: V, prependRestoreRef: L, preserveScrollOnPrependRef: $, pendingDefaultScrollStore: P, rootRef: I, scrollEdgeThresholdRef: R, scrollMarginRef: O, scrollPreviousItemPeekRef: N, spacerGapRef: Z, spacerHeightRef: U, spacerRef: b, stateFrameRef: y, stateStore: S, viewportRef: F, visibilityFrameRef: B, visibilityObserverRef: A, visibilityStore: E, visibleMessageIdsRef: W, handledScrollAnchorsRef: z } = l, ce = c.useRef(t);
+  ce.current !== t && (ce.current = t, v.current = !1);
+  let ue = c.useCallback((p) => {
+    let w = I.current, C = F.current, M = [p.start && "start", p.end && "end"].filter(Boolean).join(" "), J = d.current;
+    for (let G of [w, C]) G && (M ? G.setAttribute("data-scrollable", M) : G.removeAttribute("data-scrollable"), G.toggleAttribute("data-autoscrolling", J));
+  }, []), Re = c.useCallback((p) => {
+    var M;
+    let w = ((M = F.current) == null ? void 0 : M.scrollTop) ?? 0, C = w < m.current - be;
+    m.current = w, i.current && !p.end && _.current !== "settling-jump" && _.current !== "anchored-to-message" ? _.current = "following-bottom" : _.current === "following-bottom" && p.end && C && !d.current && (_.current = "free-scrolling");
+  }, []), Y = c.useCallback(() => {
+    let p = gr({ content: g.current, scrollEdgeThreshold: R.current, spacer: b.current, viewport: F.current });
+    Re(p);
+    let w = _.current === "following-bottom" ? { ...p, end: !1 } : p;
+    ue(w), S.setSnapshot(w);
+  }, [Re, S, ue]), ne = c.useCallback(() => {
+    y.current === null && (y.current = window.requestAnimationFrame(() => {
+      y.current = null, Y();
     }));
-  }, [Z]), P = c.useCallback(() => {
-    F.hasListeners() && A.current === null && (A.current = window.requestAnimationFrame(() => {
-      A.current = null, F.hasListeners() && F.setSnapshot(br({ content: m.current, scrollMargin: z.current, scrollPreviousItemPeek: I.current, spacer: b.current, viewport: S.current, visibleMessageIds: j.current }));
+  }, [Y]), x = c.useCallback(() => {
+    E.hasListeners() && B.current === null && (B.current = window.requestAnimationFrame(() => {
+      B.current = null, E.hasListeners() && E.setSnapshot(mr({ content: g.current, scrollMargin: O.current, scrollPreviousItemPeek: N.current, spacer: b.current, viewport: F.current, visibleMessageIds: W.current }));
     }));
-  }, [F]), { flushPendingScrollToMessage: de, reanchorToAnchoredMessage: Re, scrollToElement: oe, scrollToEnd: q, scrollToMessage: Ae, scrollToStart: fe } = Dr({ refs: s, commitScrollState: Z, scheduleStateCommit: ne, scheduleVisibilitySync: P }), Be = c.useCallback(() => {
-    let h = L.current, x = S.current;
-    if (!h || !x || !h.element.isConnected) return !1;
-    let w = he(h.element, x) - h.viewportTop;
-    return Math.abs(w) <= be ? !1 : (x.scrollTop += w, h.viewportTop = he(h.element, x), ne(), P(), !0);
-  }, [ne, P]), ee = c.useCallback(() => {
-    let h = m.current, x = S.current;
-    if (!h || !x) {
+  }, [E]), { flushPendingScrollToMessage: de, reanchorToAnchoredMessage: Ae, scrollToElement: se, scrollToEnd: q, scrollToMessage: Be, scrollToStart: fe } = Dr({ refs: l, commitScrollState: Y, scheduleStateCommit: ne, scheduleVisibilitySync: x }), De = c.useCallback(() => {
+    let p = L.current, w = F.current;
+    if (!p || !w || !p.element.isConnected) return !1;
+    let C = pe(p.element, w) - p.viewportTop;
+    return Math.abs(C) <= be ? !1 : (w.scrollTop += C, p.viewportTop = pe(p.element, w), ne(), x(), !0);
+  }, [ne, x]), Q = c.useCallback(() => {
+    let p = g.current, w = F.current;
+    if (!p || !w) {
       L.current = null;
       return;
     }
-    let w = wr({ content: h, spacer: b.current, viewport: x });
-    L.current = w ? { element: w, viewportTop: he(w, x) } : null;
-  }, []), De = c.useCallback(() => {
-    B.current === null && (B.current = window.requestAnimationFrame(() => {
-      B.current = null, de() && ee();
+    let C = wr({ content: p, spacer: b.current, viewport: w });
+    L.current = C ? { element: C, viewportTop: pe(C, w) } : null;
+  }, []), Me = c.useCallback(() => {
+    D.current === null && (D.current = window.requestAnimationFrame(() => {
+      D.current = null, de() && Q();
     }));
-  }, [ee, de]), pe = c.useCallback(() => {
-    if (!t || y.current || u.current === 0) return !1;
-    let h = !1;
+  }, [Q, de]), he = c.useCallback(() => {
+    if (!t || v.current || u.current === 0) return !1;
+    let p = !1;
     if (t === "last-anchor") {
-      let x = m.current, w = S.current, D = x && w ? xr(se(x, b.current)) : null;
-      if (!x || !w || !D) h = q({ behavior: "auto" });
+      let w = g.current, C = F.current, M = w && C ? yr(le(w, b.current)) : null;
+      if (!w || !C || !M) p = q({ behavior: "auto" });
       else {
-        let K = ct(D, w);
-        h = Ee({ content: x, spacer: b.current, viewport: w }) - K <= w.clientHeight ? q({ behavior: "auto" }) : oe(D, { align: "start" }, { keepPreviousPeek: !0 });
+        let J = it(M, C);
+        p = Te({ content: w, spacer: b.current, viewport: C }) - J <= C.clientHeight ? q({ behavior: "auto" }) : se(M, { align: "start" }, { keepPreviousPeek: !0 });
       }
-    } else h = t === "end" ? q({ behavior: "auto" }) : fe({ behavior: "auto" });
-    return h ? (me(s), !0) : !1;
-  }, [t, oe, q, fe]), Me = c.useCallback(() => {
-    let h = m.current;
-    if (!h) return;
-    let x = se(h, b.current), w = u.current, D = f.current;
-    u.current = x.length, f.current = x[0] ?? null, (() => {
+    } else p = t === "end" ? q({ behavior: "auto" }) : fe({ behavior: "auto" });
+    return p ? (ge(l), !0) : !1;
+  }, [t, se, q, fe]), Ie = c.useCallback(() => {
+    let p = g.current;
+    if (!p) return;
+    let w = le(p, b.current), C = u.current, M = f.current;
+    u.current = w.length, f.current = w[0] ?? null, (() => {
       if (de()) return;
-      if (w === 0) {
-        if (pe() || x.length > 0 && i.current && q({ behavior: "auto" })) return;
-        Z(), P();
+      if (C === 0) {
+        if (he() || w.length > 0 && i.current && q({ behavior: "auto" })) return;
+        Y(), x();
         return;
       }
-      let K = D ? x.indexOf(D) : -1;
-      if ($.current && K > 0) {
-        Be();
+      let J = M ? w.indexOf(M) : -1;
+      if ($.current && J > 0) {
+        De();
         return;
       }
-      if (x.length > w) {
-        let G = vr(x, w);
+      if (w.length > C) {
+        let G = br(w, C);
         if (G) {
-          if (i.current && v.current === "following-bottom" && _r(x, w)) {
+          if (i.current && _.current === "following-bottom" && vr(w, C)) {
             q({ behavior: "auto" });
             return;
           }
-          oe(G, { align: "start" }, { keepPreviousPeek: !0 }), H.current.add(G);
+          se(G, { align: "start" }, { keepPreviousPeek: !0 }), z.current.add(G);
           return;
         }
       }
-      if (x.length === w) {
-        let G = yr(x, H.current);
+      if (w.length === C) {
+        let G = _r(w, z.current);
         if (G) {
-          oe(G, { align: "start" }, { keepPreviousPeek: !0 }), H.current.add(G);
+          se(G, { align: "start" }, { keepPreviousPeek: !0 }), z.current.add(G);
           return;
         }
       }
-      v.current === "following-bottom" && i.current ? q({ behavior: "auto" }) : (Z(), P());
-    })(), ee();
-  }, [pe, ee, Z, de, Be, P, oe, q]), Ie = c.useCallback(() => {
-    if (v.current === "following-bottom" && i.current) {
+      _.current === "following-bottom" && i.current ? q({ behavior: "auto" }) : (Y(), x());
+    })(), Q();
+  }, [he, Q, Y, de, De, x, se, q]), Ne = c.useCallback(() => {
+    if (_.current === "following-bottom" && i.current) {
       q({ behavior: "auto" });
       return;
     }
-    let h = U.current;
-    if (Re()) {
-      i.current && h > 0 && U.current === 0 && q({ behavior: "auto" });
+    let p = U.current;
+    if (Ae()) {
+      i.current && p > 0 && U.current === 0 && q({ behavior: "auto" });
       return;
     }
-    ne(), P();
-  }, [Re, ne, P, q]), Ne = c.useCallback(() => {
-    let h = S.current;
-    if (!(!h || !F.hasListeners())) {
+    ne(), x();
+  }, [Ae, ne, x, q]), Pe = c.useCallback(() => {
+    let p = F.current;
+    if (!(!p || !E.hasListeners())) {
       if (typeof IntersectionObserver > "u") {
-        P();
+        x();
         return;
       }
-      R.current || (R.current = new IntersectionObserver((x) => {
-        for (let w of x) {
-          let D = w.target.dataset.messageId;
-          D && (w.isIntersecting ? j.current.add(D) : j.current.delete(D));
+      A.current || (A.current = new IntersectionObserver((w) => {
+        for (let C of w) {
+          let M = C.target.dataset.messageId;
+          M && (C.isIntersecting ? W.current.add(M) : W.current.delete(M));
         }
-        P();
-      }, { root: h, rootMargin: `${-(z.current + I.current)}px 0px 0px 0px`, threshold: [0, 0.01, 0.5, 1] })), E.current.forEach((x) => {
-        var w;
-        (w = R.current) == null || w.observe(x);
-      }), P();
+        x();
+      }, { root: p, rootMargin: `${-(O.current + N.current)}px 0px 0px 0px`, threshold: [0, 0.01, 0.5, 1] })), T.current.forEach((w) => {
+        var C;
+        (C = A.current) == null || C.observe(w);
+      }), x();
     }
-  }, [P, F]), Pe = c.useCallback(() => {
-    var h;
-    A.current !== null && (window.cancelAnimationFrame(A.current), A.current = null), (h = R.current) == null || h.disconnect(), R.current = null, j.current.clear(), F.setSnapshot(ve);
-  }, [F]), vt = c.useCallback((h, x, w) => {
-    var D, K, G;
-    if (x) {
-      E.current.set(h, x), (D = R.current) == null || D.observe(x), P(), ((K = W.current) == null ? void 0 : K.messageId) === h && De();
+  }, [x, E]), xe = c.useCallback(() => {
+    var p;
+    B.current !== null && (window.cancelAnimationFrame(B.current), B.current = null), (p = A.current) == null || p.disconnect(), A.current = null, W.current.clear(), E.setSnapshot(_e);
+  }, [E]), _t = c.useCallback((p, w, C) => {
+    var M, J, G;
+    if (w) {
+      T.current.set(p, w), (M = A.current) == null || M.observe(w), x(), ((J = V.current) == null ? void 0 : J.messageId) === p && Me();
       return;
     }
-    w && E.current.get(h) === w && (E.current.delete(h), j.current.delete(h), (G = R.current) == null || G.unobserve(w), P());
-  }, [De, P]), Le = c.useCallback(() => {
-    (v.current === "following-bottom" || v.current === "anchored-to-message" || v.current === "settling-jump") && (a.current = null, v.current = "free-scrolling");
-  }, []), ze = c.useCallback(() => ue(k.getSnapshot()), [k, ue]), Oe = Ue(M, ze), He = Ue(S, ze), qe = c.useCallback((h) => {
-    m.current = h;
-  }, []), Ge = c.useCallback((h) => {
-    b.current = h, J.current = Er((h == null ? void 0 : h.parentElement) ?? null);
+    C && T.current.get(p) === C && (T.current.delete(p), W.current.delete(p), (G = A.current) == null || G.unobserve(C), x());
+  }, [Me, x]), Le = c.useCallback(() => {
+    (_.current === "following-bottom" || _.current === "anchored-to-message" || _.current === "settling-jump") && (a.current = null, _.current = "free-scrolling");
+  }, []), Oe = c.useCallback(() => ue(S.getSnapshot()), [S, ue]), He = je(I, Oe), ze = je(F, Oe), qe = c.useCallback((p) => {
+    g.current = p;
+  }, []), Ge = c.useCallback((p) => {
+    b.current = p, Z.current = Er((p == null ? void 0 : p.parentElement) ?? null);
   }, []), Ve = c.useCallback(() => {
-    Z(), P(), ee();
-  }, [ee, Z, P]), yt = c.useMemo(() => ({ handleContentChange: Me, handleResize: Ie, observeVisibility: Ne, pendingDefaultScrollStore: N, preserveScrollOnPrependRef: $, scrollToEnd: q, scrollToMessage: Ae, scrollToStart: fe, setContentElement: qe, setRootElement: Oe, setSpacerElement: Ge, setViewportElement: He, stateStore: k, syncAfterScroll: Ve, unobserveVisibility: Pe, userScrollIntent: Le, viewportRef: S, visibilityStore: F }), [Me, Ie, Ne, N, q, Ae, fe, qe, Oe, Ge, He, k, Ve, Pe, Le, F]);
+    Y(), x(), Q();
+  }, [Q, Y, x]), vt = c.useMemo(() => ({ handleContentChange: Ie, handleResize: Ne, observeVisibility: Pe, pendingDefaultScrollStore: P, preserveScrollOnPrependRef: $, scrollToEnd: q, scrollToMessage: Be, scrollToStart: fe, setContentElement: qe, setRootElement: He, setSpacerElement: Ge, setViewportElement: ze, stateStore: S, syncAfterScroll: Ve, unobserveVisibility: xe, userScrollIntent: Le, viewportRef: F, visibilityStore: E }), [Ie, Ne, Pe, P, q, Be, fe, qe, He, Ge, ze, S, Ve, xe, Le, E]);
   return c.useLayoutEffect(() => {
-    pe() || u.current === 0 && ft(s);
-  }, [pe]), c.useEffect(() => () => {
-    var h;
-    _.current !== null && (window.cancelAnimationFrame(_.current), _.current = null), A.current !== null && (window.cancelAnimationFrame(A.current), A.current = null), p.current !== null && (window.clearTimeout(p.current), p.current = null), B.current !== null && (window.cancelAnimationFrame(B.current), B.current = null), (h = R.current) == null || h.disconnect(), R.current = null;
+    he() || u.current === 0 && dt(l);
+  }, [he]), c.useEffect(() => () => {
+    var p;
+    y.current !== null && (window.cancelAnimationFrame(y.current), y.current = null), B.current !== null && (window.cancelAnimationFrame(B.current), B.current = null), h.current !== null && (window.clearTimeout(h.current), h.current = null), D.current !== null && (window.cancelAnimationFrame(D.current), D.current = null), (p = A.current) == null || p.disconnect(), A.current = null;
   }, []), c.useLayoutEffect(() => {
-    if (e && v.current === "following-bottom" && u.current > 0) {
+    if (e && _.current === "following-bottom" && u.current > 0) {
       q({ behavior: "auto" });
       return;
     }
-    Z();
-  }, [e, Z, q]), { context: yt, registerMessage: vt };
+    Y();
+  }, [e, Y, q]), { context: vt, registerMessage: _t };
 }
 function Ir(e) {
   let t = c.useRef(e);
   return t.current = e, t;
 }
-var pt = c.createContext(null), ht = c.createContext(null);
+var ft = c.createContext(null), ht = c.createContext(null);
 function ie() {
-  let e = c.useContext(pt);
+  let e = c.useContext(ft);
   if (!e) throw new Error("useMessageScroller must be used within a MessageScroller.");
   return e;
 }
@@ -1248,105 +1228,118 @@ function Nr() {
   if (!e) throw new Error("MessageScrollerItem must be used within a MessageScroller.");
   return e;
 }
-function Pr({ autoScroll: e = !1, children: t, defaultScrollPosition: r = "end", scrollEdgeThreshold: n, scrollPreviousItemPeek: o, scrollMargin: s }) {
-  let { context: a, registerMessage: i } = Mr({ autoScroll: e, defaultScrollPosition: r, scrollEdgeThreshold: n, scrollPreviousItemPeek: o, scrollMargin: s });
-  return l(pt.Provider, { value: a, children: l(ht.Provider, { value: i, children: t }) });
+function Pr({ autoScroll: e = !1, children: t, defaultScrollPosition: r = "end", scrollEdgeThreshold: n, scrollPreviousItemPeek: s, scrollMargin: l }) {
+  let { context: a, registerMessage: i } = Mr({ autoScroll: e, defaultScrollPosition: r, scrollEdgeThreshold: n, scrollPreviousItemPeek: s, scrollMargin: l });
+  return o(ft.Provider, { value: a, children: o(ht.Provider, { value: i, children: t }) });
 }
-function mt() {
+function pt() {
   let { pendingDefaultScrollStore: e } = ie();
   return c.useSyncExternalStore(e.subscribe, e.getSnapshot, e.getSnapshot);
 }
-function Lr({ children: e, ...t }) {
-  let { setRootElement: r } = ie(), n = mt();
-  return l("div", { ref: r, ...t, ...n ? { "data-pending-scroll": "" } : null, children: e });
+function xr({ children: e, ...t }) {
+  let { setRootElement: r } = ie(), n = pt();
+  return o("div", { ref: r, ...t, ...n ? { "data-pending-scroll": "" } : null, children: e });
 }
-function zr({ "aria-label": e, children: t, onKeyDown: r, onScroll: n, onTouchMove: o, onWheel: s, preserveScrollOnPrepend: a = !0, ref: i, role: d, tabIndex: p, ...m }) {
-  let { handleResize: y, preserveScrollOnPrependRef: f, setViewportElement: u, syncAfterScroll: g, userScrollIntent: E, viewportRef: v } = ie(), B = mt();
+function Lr({ "aria-label": e, children: t, onKeyDown: r, onScroll: n, onTouchMove: s, onWheel: l, preserveScrollOnPrepend: a = !0, ref: i, role: d, tabIndex: h, ...g }) {
+  let { handleResize: v, preserveScrollOnPrependRef: f, setViewportElement: u, syncAfterScroll: m, userScrollIntent: T, viewportRef: _ } = ie(), D = pt();
   f.current = a;
-  let W = c.useCallback((T) => {
-    var z;
-    u(T), (z = ae(i)) == null || z(T);
+  let V = c.useCallback((R) => {
+    var O;
+    u(R), (O = ae(i)) == null || O(R);
   }, [i, u]);
-  function L(T) {
-    g(), n == null || n(T);
+  function L(R) {
+    m(), n == null || n(R);
   }
-  function $(T) {
-    E(), s == null || s(T);
+  function $(R) {
+    T(), l == null || l(R);
   }
-  function N(T) {
-    E(), o == null || o(T);
+  function P(R) {
+    T(), s == null || s(R);
   }
-  function M(T) {
-    hr.has(T.key) && E(), r == null || r(T);
+  function I(R) {
+    hr.has(R.key) && T(), r == null || r(R);
   }
   return c.useEffect(() => {
-    let T = v.current;
-    if (!T || typeof ResizeObserver > "u") return;
-    let z = 0, I = new ResizeObserver(() => {
-      window.cancelAnimationFrame(z), z = window.requestAnimationFrame(y);
+    let R = _.current;
+    if (!R || typeof ResizeObserver > "u") return;
+    let O = 0, N = new ResizeObserver(() => {
+      window.cancelAnimationFrame(O), O = window.requestAnimationFrame(v);
     });
-    return I.observe(T), () => {
-      window.cancelAnimationFrame(z), I.disconnect();
+    return N.observe(R), () => {
+      window.cancelAnimationFrame(O), N.disconnect();
     };
-  }, [y, v]), l("div", { ref: W, role: d ?? "region", "aria-label": e ?? "Messages", tabIndex: p ?? 0, onKeyDown: M, onScroll: L, onTouchMove: N, onWheel: $, ...m, ...B ? { "data-pending-scroll": "" } : null, children: t });
+  }, [v, _]), o("div", { ref: V, role: d ?? "region", "aria-label": e ?? "Messages", tabIndex: h ?? 0, onKeyDown: I, onScroll: L, onTouchMove: P, onWheel: $, ...g, ...D ? { "data-pending-scroll": "" } : null, children: t });
 }
-function Or({ "aria-relevant": e, children: t, ref: r, role: n, spacerClassName: o, ...s }) {
-  let { handleContentChange: a, handleResize: i, setContentElement: d, setSpacerElement: p } = ie(), m = c.useRef(null), y = c.useCallback((f) => {
+function Or({ "aria-relevant": e, children: t, ref: r, role: n, spacerClassName: s, ...l }) {
+  let { handleContentChange: a, handleResize: i, setContentElement: d, setSpacerElement: h } = ie(), g = c.useRef(null), v = c.useCallback((f) => {
     var u;
-    m.current = f, d(f), (u = ae(r)) == null || u(f);
+    g.current = f, d(f), (u = ae(r)) == null || u(f);
   }, [r, d]);
   return c.useLayoutEffect(() => {
-    let f = m.current;
+    let f = g.current;
     if (!f || (a(), typeof MutationObserver > "u")) return;
     let u = new MutationObserver(() => {
       a();
     });
     return u.observe(f, { childList: !0 }), () => u.disconnect();
   }, [a]), c.useEffect(() => {
-    let f = m.current;
+    let f = g.current;
     if (!f || typeof ResizeObserver > "u") return;
-    let u = 0, g = new ResizeObserver(() => {
+    let u = 0, m = new ResizeObserver(() => {
       window.cancelAnimationFrame(u), u = window.requestAnimationFrame(i);
     });
-    return g.observe(f), () => {
-      window.cancelAnimationFrame(u), g.disconnect();
+    return m.observe(f), () => {
+      window.cancelAnimationFrame(u), m.disconnect();
     };
-  }, [i]), C("div", { ref: y, role: n ?? "log", "aria-relevant": e ?? "additions", ...s, children: [t, l("div", { ref: p, "aria-hidden": "true", "data-message-scroller-spacer": "", hidden: !0, className: o })] });
+  }, [i]), k("div", { ref: v, role: n ?? "log", "aria-relevant": e ?? "additions", ...l, children: [t, o("div", { ref: h, "aria-hidden": "true", "data-message-scroller-spacer": "", hidden: !0, className: s })] });
 }
 function Hr({ messageId: e, ref: t, scrollAnchor: r = !1, ...n }) {
-  let o = Nr(), s = c.useRef(null), a = c.useCallback((i) => {
-    var p;
-    let d = s.current;
-    s.current = i, e && o(e, i, d), (p = ae(t)) == null || p(i);
-  }, [e, t, o]);
-  return l("div", { ref: a, "data-message-id": e, "data-scroll-anchor": r ? "true" : "false", ...n });
+  let s = Nr(), l = c.useRef(null), a = c.useCallback((i) => {
+    var h;
+    let d = l.current;
+    l.current = i, e && s(e, i, d), (h = ae(t)) == null || h(i);
+  }, [e, t, s]);
+  return o("div", { ref: a, "data-message-id": e, "data-scroll-anchor": r ? "true" : "false", ...n });
 }
-function qr({ behavior: e = "smooth", children: t, direction: r = "end", onClick: n, render: o, tabIndex: s, type: a = "button", ...i }) {
-  let { scrollToEnd: d, scrollToStart: p, stateStore: m } = ie(), y = Ir(n), f = c.useCallback((v) => m.subscribe(v), [m]), u = c.useCallback(() => {
-    let v = m.getSnapshot();
-    return r === "start" ? v.start : v.end;
-  }, [r, m]), g = c.useSyncExternalStore(f, u, u), E = c.useCallback((v) => {
-    var B;
-    g && ((B = y.current) == null || B.call(y, v), v.defaultPrevented || (v.currentTarget.blur(), r === "start" ? p({ behavior: e }) : d({ behavior: e })));
-  }, [e, r, g, y, d, p]);
-  return lr({ defaultTagName: "button", props: ke({ type: a, inert: !g, tabIndex: g ? s : -1, children: t ?? C("span", { children: ["Scroll to ", r] }), onClick: E }, i), render: o, state: { active: g, direction: r }, stateAttributesMapping: { active: (v) => ({ "data-active": v ? "true" : "false" }) } });
+function zr({ behavior: e = "smooth", children: t, direction: r = "end", onClick: n, render: s, tabIndex: l, type: a = "button", ...i }) {
+  let { scrollToEnd: d, scrollToStart: h, stateStore: g } = ie(), v = Ir(n), f = c.useCallback((_) => g.subscribe(_), [g]), u = c.useCallback(() => {
+    let _ = g.getSnapshot();
+    return r === "start" ? _.start : _.end;
+  }, [r, g]), m = c.useSyncExternalStore(f, u, u), T = c.useCallback((_) => {
+    var D;
+    m && ((D = v.current) == null || D.call(v, _), _.defaultPrevented || (_.currentTarget.blur(), r === "start" ? h({ behavior: e }) : d({ behavior: e })));
+  }, [e, r, m, v, d, h]);
+  return lr({ defaultTagName: "button", props: Se({ type: a, inert: !m, tabIndex: m ? l : -1, children: t ?? k("span", { children: ["Scroll to ", r] }), onClick: T }, i), render: s, state: { active: m, direction: r }, stateAttributesMapping: { active: (_) => ({ "data-active": _ ? "true" : "false" }) } });
 }
-var re = { Provider: Pr, Root: Lr, Viewport: zr, Content: Or, Item: Hr, Button: qr };
+var te = { Provider: Pr, Root: xr, Viewport: Lr, Content: Or, Item: Hr, Button: zr };
+function gt(e) {
+  var t, r, n = "";
+  if (typeof e == "string" || typeof e == "number") n += e;
+  else if (typeof e == "object") if (Array.isArray(e)) {
+    var s = e.length;
+    for (t = 0; t < s; t++) e[t] && (r = gt(e[t])) && (n && (n += " "), n += r);
+  } else for (r in e) e[r] && (n && (n += " "), n += r);
+  return n;
+}
+function qr() {
+  for (var e, t, r = 0, n = "", s = arguments.length; r < s; r++) (e = arguments[r]) && (t = gt(e)) && (n && (n += " "), n += t);
+  return n;
+}
+function re(...e) {
+  return qr(e);
+}
 function Gr(e) {
-  return /* @__PURE__ */ l(re.Provider, { ...e });
+  return /* @__PURE__ */ o(te.Provider, { ...e });
 }
 function Vr({
   className: e,
   ...t
 }) {
-  return /* @__PURE__ */ l(
-    re.Root,
+  return /* @__PURE__ */ o(
+    te.Root,
     {
       "data-slot": "message-scroller",
-      className: V(
-        "group/message-scroller relative flex size-full min-h-0 flex-col overflow-hidden",
-        e
-      ),
+      className: re("msg-scroller-root", e),
       ...t
     }
   );
@@ -1355,28 +1348,24 @@ function Wr({
   className: e,
   ...t
 }) {
-  return /* @__PURE__ */ l(
-    re.Viewport,
+  return /* @__PURE__ */ o(
+    te.Viewport,
     {
       "data-slot": "message-scroller-viewport",
-      className: V(
-        "size-full min-h-0 min-w-0 overflow-y-auto overscroll-contain",
-        "data-[pending-scroll]:invisible",
-        e
-      ),
+      className: re("msg-scroller-viewport", e),
       ...t
     }
   );
 }
-function jr({
+function $r({
   className: e,
   ...t
 }) {
-  return /* @__PURE__ */ l(
-    re.Content,
+  return /* @__PURE__ */ o(
+    te.Content,
     {
       "data-slot": "message-scroller-content",
-      className: V("flex h-max min-h-full flex-col gap-4 px-4 py-4", e),
+      className: re("msg-scroller-content", e),
       ...t
     }
   );
@@ -1386,42 +1375,31 @@ function Ye({
   scrollAnchor: t = !1,
   ...r
 }) {
-  return /* @__PURE__ */ l(
-    re.Item,
+  return /* @__PURE__ */ o(
+    te.Item,
     {
       "data-slot": "message-scroller-item",
       scrollAnchor: t,
-      className: V(
-        "min-w-0 shrink-0 [contain-intrinsic-size:auto_10rem] [content-visibility:auto]",
-        e
-      ),
+      className: re("msg-scroller-item", e),
       ...r
     }
   );
 }
-function $r({
+function Ur({
   direction: e = "end",
   className: t,
   children: r,
   ...n
 }) {
-  return /* @__PURE__ */ l(
-    re.Button,
+  return /* @__PURE__ */ o(
+    te.Button,
     {
       "data-slot": "message-scroller-button",
       direction: e,
-      className: V(
-        "absolute left-1/2 z-10 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md transition-[opacity,transform] duration-200",
-        "hover:bg-[var(--input-bg)]",
-        "data-[active=false]:pointer-events-none data-[active=false]:scale-95 data-[active=false]:opacity-0",
-        "data-[active=true]:scale-100 data-[active=true]:opacity-100",
-        "data-[direction=end]:bottom-3 data-[direction=start]:top-3",
-        "motion-reduce:transition-none",
-        t
-      ),
+      className: re("msg-scroller-btn", t),
       ...n,
-      children: r ?? /* @__PURE__ */ C(le, { children: [
-        /* @__PURE__ */ l(
+      children: r ?? /* @__PURE__ */ k(oe, { children: [
+        /* @__PURE__ */ o(
           Lt,
           {
             size: 16,
@@ -1429,78 +1407,78 @@ function $r({
             className: e === "start" ? "rotate-180" : void 0
           }
         ),
-        /* @__PURE__ */ l("span", { className: "sr-only", children: e === "end" ? "Jump to latest" : "Jump to start" })
+        /* @__PURE__ */ o("span", { className: "sr-only", children: e === "end" ? "Jump to latest" : "Jump to start" })
       ] })
     }
   );
 }
-const Ur = () => /* @__PURE__ */ C("div", { className: "flex items-start gap-2.5", children: [
-  /* @__PURE__ */ l(
+const jr = () => /* @__PURE__ */ k("div", { className: "chat-empty-row", children: [
+  /* @__PURE__ */ o(
     "div",
     {
-      className: "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground",
+      className: "avatar-circle avatar-circle--mt",
       "aria-hidden": "true",
-      children: /* @__PURE__ */ l(st, { size: 15 })
+      children: /* @__PURE__ */ o(lt, { size: 15 })
     }
   ),
-  /* @__PURE__ */ l("div", { className: "max-w-[82%] rounded-2xl rounded-tl-sm border border-border bg-[var(--bubble-assistant-bg)] px-3.5 py-2.5 text-[13.5px] leading-[1.55] text-foreground", children: /* @__PURE__ */ l("p", { children: "Hello — I am the VPS Veritas assistant. Ask about reports, sample status, registration, or support, or choose a question below the text box." }) })
+  /* @__PURE__ */ o("div", { className: "chat-empty-bubble", children: /* @__PURE__ */ o("p", { children: "Hello — I am the VPS Veritas assistant. Ask about reports, sample status, registration, or support, or choose a question below the text box." }) })
 ] });
-function _e(e) {
-  return e.split(/(\*\*[^*]+\*\*|`[^`]+`|https?:\/\/[^\s]+)/g).map((r, n) => r.startsWith("**") && r.endsWith("**") ? /* @__PURE__ */ l("strong", { children: r.slice(2, -2) }, n) : r.startsWith("`") && r.endsWith("`") ? /* @__PURE__ */ l(
+function ye(e) {
+  return e.split(/(\*\*[^*]+\*\*|`[^`]+`|https?:\/\/[^\s]+)/g).map((r, n) => r.startsWith("**") && r.endsWith("**") ? /* @__PURE__ */ o("strong", { children: r.slice(2, -2) }, n) : r.startsWith("`") && r.endsWith("`") ? /* @__PURE__ */ o(
     "code",
     {
-      className: "rounded bg-[var(--input-bg)] px-1 py-0.5 font-mono text-[12px] text-foreground",
+      className: "md-code",
       children: r.slice(1, -1)
     },
     n
-  ) : /^https?:\/\//.test(r) ? /* @__PURE__ */ l(
+  ) : /^https?:\/\//.test(r) ? /* @__PURE__ */ o(
     "a",
     {
       href: r,
       target: "_blank",
       rel: "noopener noreferrer",
-      className: "underline underline-offset-2",
+      className: "md-link",
       children: r
     },
     n
-  ) : /* @__PURE__ */ l(Xe.Fragment, { children: r }, n));
+  ) : /* @__PURE__ */ o(Xe.Fragment, { children: r }, n));
 }
 function Yr({ text: e }) {
   if (!e) return null;
   const t = e.split(/\n\n+/);
-  return /* @__PURE__ */ l(le, { children: t.map((r, n) => {
+  return /* @__PURE__ */ o(oe, { children: t.map((r, n) => {
     if (r.trim().startsWith("- ") || r.trim().startsWith("* ")) {
-      const o = r.split(/\n/).filter((s) => s.trim().startsWith("- ") || s.trim().startsWith("* "));
-      return /* @__PURE__ */ l("ul", { className: "my-1.5 ml-4 list-disc space-y-0.5", children: o.map((s, a) => /* @__PURE__ */ l("li", { children: _e(s.replace(/^[-*]\s+/, "")) }, a)) }, n);
+      const s = r.split(/\n/).filter((l) => l.trim().startsWith("- ") || l.trim().startsWith("* "));
+      return /* @__PURE__ */ o("ul", { className: "md-ul", children: s.map((l, a) => /* @__PURE__ */ o("li", { children: ye(l.replace(/^[-*]\s+/, "")) }, a)) }, n);
     }
     if (/^\d+\.\s+/.test(r.trim())) {
-      const o = r.split(/\n/).filter((s) => /^\d+\.\s+/.test(s.trim()));
-      return /* @__PURE__ */ l("ol", { className: "my-1.5 ml-4 list-decimal space-y-0.5", children: o.map((s, a) => /* @__PURE__ */ l("li", { children: _e(s.replace(/^\d+\.\s+/, "")) }, a)) }, n);
+      const s = r.split(/\n/).filter((l) => /^\d+\.\s+/.test(l.trim()));
+      return /* @__PURE__ */ o("ol", { className: "md-ol", children: s.map((l, a) => /* @__PURE__ */ o("li", { children: ye(l.replace(/^\d+\.\s+/, "")) }, a)) }, n);
     }
     if (r.startsWith("```")) {
-      const o = r.replace(/^```[a-zA-Z]*\n?/, "").replace(/```$/, "");
-      return /* @__PURE__ */ l(
+      const s = r.replace(/^```[a-zA-Z]*\n?/, "").replace(/```$/, "");
+      return /* @__PURE__ */ o(
         "pre",
         {
-          className: "my-2 overflow-x-auto rounded-lg bg-[var(--code-bg)] p-3 font-mono text-[12px] text-primary-foreground",
-          children: /* @__PURE__ */ l("code", { children: o })
+          className: "md-pre",
+          children: /* @__PURE__ */ o("code", { children: s })
         },
         n
       );
     }
-    return /* @__PURE__ */ l("p", { className: "mb-2 last:mb-0 whitespace-pre-wrap", children: _e(r) }, n);
+    return /* @__PURE__ */ o("p", { className: "md-p", children: ye(r) }, n);
   }) });
 }
-const Zr = ({ className: e }) => /* @__PURE__ */ C(
+const Zr = ({ className: e }) => /* @__PURE__ */ k(
   "div",
   {
-    className: V("flex items-center gap-1 py-0.5", e),
+    className: re("typing-indicator", e),
     role: "status",
     "aria-label": "Assistant is preparing a reply",
     children: [
-      /* @__PURE__ */ l("span", { className: "h-1.5 w-1.5 rounded-full bg-[var(--text-subtle)] motion-safe:animate-pulse" }),
-      /* @__PURE__ */ l("span", { className: "h-1.5 w-1.5 rounded-full bg-[var(--text-subtle)] motion-safe:animate-pulse [animation-delay:150ms]" }),
-      /* @__PURE__ */ l("span", { className: "h-1.5 w-1.5 rounded-full bg-[var(--text-subtle)] motion-safe:animate-pulse [animation-delay:300ms]" })
+      /* @__PURE__ */ o("span", { className: "typing-dot" }),
+      /* @__PURE__ */ o("span", { className: "typing-dot" }),
+      /* @__PURE__ */ o("span", { className: "typing-dot" })
     ]
   }
 );
@@ -1508,31 +1486,31 @@ function Jr(e) {
   return e === "create_ticket" ? "Support ticket processed" : e === "get_customer" ? "Account verified" : e === "get_ticket" ? "Ticket status loaded" : "Information retrieved";
 }
 function Kr({ sources: e }) {
-  const [t, r] = Y(!1);
-  return e.length ? /* @__PURE__ */ C("div", { className: "mt-2 border-t border-border pt-1.5", children: [
-    /* @__PURE__ */ C(
+  const [t, r] = j(!1);
+  return e.length ? /* @__PURE__ */ k("div", { className: "sources-panel", children: [
+    /* @__PURE__ */ k(
       "button",
       {
         type: "button",
-        className: "inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-muted-foreground hover:text-foreground",
+        className: "sources-toggle-btn",
         onClick: () => r((n) => !n),
         "aria-expanded": t,
         children: [
-          /* @__PURE__ */ l(Wt, { size: 12, "aria-hidden": "true" }),
+          /* @__PURE__ */ o(Wt, { size: 12, "aria-hidden": "true" }),
           e.length,
           " grounded source",
           e.length > 1 ? "s" : "",
-          t ? /* @__PURE__ */ l(Gt, { size: 12 }) : /* @__PURE__ */ l(qt, { size: 12 })
+          t ? /* @__PURE__ */ o(Gt, { size: 12 }) : /* @__PURE__ */ o(qt, { size: 12 })
         ]
       }
     ),
-    t && /* @__PURE__ */ l("ul", { className: "mt-1.5 space-y-1", children: e.map((n) => /* @__PURE__ */ C(
+    t && /* @__PURE__ */ o("ul", { className: "sources-list", children: e.map((n) => /* @__PURE__ */ k(
       "li",
       {
-        className: "flex items-center justify-between rounded-md border border-border bg-muted px-2 py-1 text-[11px] text-muted-foreground",
+        className: "source-item",
         children: [
-          /* @__PURE__ */ l("span", { className: "truncate", title: n.source, children: n.source.split(/[/\\]/).pop() || n.source }),
-          /* @__PURE__ */ C("span", { className: "ml-2 font-semibold text-success", children: [
+          /* @__PURE__ */ o("span", { className: "source-name", title: n.source, children: n.source.split(/[/\\]/).pop() || n.source }),
+          /* @__PURE__ */ k("span", { className: "source-score", children: [
             Math.round(n.score * 100),
             "%"
           ] })
@@ -1543,10 +1521,10 @@ function Kr({ sources: e }) {
   ] }) : null;
 }
 function Xr({ toolCalls: e }) {
-  return e.length ? /* @__PURE__ */ l("div", { className: "mt-2 flex flex-wrap gap-1.5", children: e.map((t, r) => /* @__PURE__ */ l(
+  return e.length ? /* @__PURE__ */ o("div", { className: "tool-badges", children: e.map((t, r) => /* @__PURE__ */ o(
     "span",
     {
-      className: "inline-flex items-center rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] text-muted-foreground",
+      className: "tool-badge",
       children: Jr(t.toolName)
     },
     `${t.toolName}-${r}`
@@ -1554,109 +1532,98 @@ function Xr({ toolCalls: e }) {
 }
 const Qr = ({ message: e }) => {
   const t = e.role === "user", r = e.status === "error";
-  return /* @__PURE__ */ C(
-    "div",
-    {
-      className: V("flex items-start gap-2.5", t && "flex-row-reverse"),
-      children: [
-        !t && /* @__PURE__ */ l(
-          "div",
-          {
-            className: "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground",
-            "aria-hidden": "true",
-            children: /* @__PURE__ */ l(st, { size: 15 })
-          }
-        ),
-        /* @__PURE__ */ C("div", { className: V("flex max-w-[82%] flex-col", t && "items-end"), children: [
-          /* @__PURE__ */ C(
-            "div",
-            {
-              className: V(
-                "rounded-2xl px-3.5 py-2.5 text-[13.5px] leading-[1.55]",
-                t && "rounded-tr-sm bg-[var(--bubble-user-bg)] text-[var(--bubble-user-text)] font-medium",
-                !t && !r && "rounded-tl-sm border border-border bg-[var(--bubble-bot-message-bg)] text-foreground",
-                r && "rounded-tl-sm border border-[var(--error-border)] bg-[var(--error-bg)] text-[var(--error-text)]"
-              ),
-              children: [
-                e.status === "pending" ? /* @__PURE__ */ l(Zr, {}) : t ? /* @__PURE__ */ l("p", { className: "whitespace-pre-wrap", children: e.content }) : /* @__PURE__ */ l(Yr, { text: e.content }),
-                e.toolCalls ? /* @__PURE__ */ l(Xr, { toolCalls: e.toolCalls }) : null,
-                e.sources ? /* @__PURE__ */ l(Kr, { sources: e.sources }) : null
-              ]
-            }
-          ),
-          t && e.status !== "error" && /* @__PURE__ */ l(Ht, { size: 13, className: "mt-1 text-success", "aria-hidden": "true" })
-        ] })
-      ]
-    }
-  );
+  return /* @__PURE__ */ k("div", { className: `msg-row${t ? " msg-row--user" : ""}`, children: [
+    !t && /* @__PURE__ */ o(
+      "div",
+      {
+        className: "avatar-circle avatar-circle--mt",
+        "aria-hidden": "true",
+        children: /* @__PURE__ */ o(lt, { size: 15 })
+      }
+    ),
+    /* @__PURE__ */ k("div", { className: `msg-col${t ? " msg-col--user" : ""}`, children: [
+      /* @__PURE__ */ k(
+        "div",
+        {
+          className: t ? "msg-bubble msg-bubble--user" : r ? "msg-bubble msg-bubble--error" : "msg-bubble msg-bubble--bot",
+          children: [
+            e.status === "pending" ? /* @__PURE__ */ o(Zr, {}) : t ? /* @__PURE__ */ o("p", { className: "msg-user-pre", children: e.content }) : /* @__PURE__ */ o(Yr, { text: e.content }),
+            e.toolCalls ? /* @__PURE__ */ o(Xr, { toolCalls: e.toolCalls }) : null,
+            e.sources ? /* @__PURE__ */ o(Kr, { sources: e.sources }) : null
+          ]
+        }
+      ),
+      t && e.status !== "error" && /* @__PURE__ */ o(zt, { size: 13, className: "msg-tick", "aria-hidden": "true" })
+    ] })
+  ] });
 }, en = () => {
-  const { messages: e, status: t, showSuggestions: r } = ye();
-  return /* @__PURE__ */ l(
+  const { messages: e, status: t, showSuggestions: r } = ve();
+  return /* @__PURE__ */ o(
     Gr,
     {
       autoScroll: !0,
       defaultScrollPosition: "last-anchor",
       scrollPreviousItemPeek: 64,
-      children: /* @__PURE__ */ C(Vr, { children: [
-        /* @__PURE__ */ l(Wr, { "aria-label": "Chat messages", children: /* @__PURE__ */ C(jr, { "aria-busy": t === "awaiting" || t === "connecting", children: [
-          r && /* @__PURE__ */ l(Ye, { messageId: "welcome", children: /* @__PURE__ */ l(Ur, {}) }),
-          e.map((o) => /* @__PURE__ */ l(
+      children: /* @__PURE__ */ k(Vr, { children: [
+        /* @__PURE__ */ o(Wr, { "aria-label": "Chat messages", children: /* @__PURE__ */ k($r, { "aria-busy": t === "awaiting" || t === "connecting", children: [
+          r && /* @__PURE__ */ o(Ye, { messageId: "welcome", children: /* @__PURE__ */ o(jr, {}) }),
+          e.map((s) => /* @__PURE__ */ o(
             Ye,
             {
-              messageId: o.id,
-              scrollAnchor: o.role === "user",
-              children: /* @__PURE__ */ l(Qr, { message: o })
+              messageId: s.id,
+              scrollAnchor: s.role === "user",
+              children: /* @__PURE__ */ o(Qr, { message: s })
             },
-            o.id
+            s.id
           ))
         ] }) }),
-        /* @__PURE__ */ l($r, {})
+        /* @__PURE__ */ o(Ur, {})
       ] })
     }
   );
 }, tn = () => {
-  const { pendingTicket: e, ticketBusy: t, userContext: r, confirmTicket: n, cancelTicket: o } = ye(), s = !r.customerId && !r.email, [a, i] = Y("");
-  return e ? /* @__PURE__ */ C(
+  const { pendingTicket: e, ticketBusy: t, userContext: r, confirmTicket: n, cancelTicket: s } = ve(), l = !r.customerId && !r.email, [a, i] = j("");
+  return e ? /* @__PURE__ */ k(
     "div",
     {
-      className: "mx-4 mb-3 rounded-xl border border-border bg-card p-4 shadow-sm",
+      className: "ticket-card",
       role: "region",
       "aria-label": "Create support ticket",
       children: [
-        /* @__PURE__ */ l("h3", { className: "text-[13.5px] font-bold text-foreground", children: "Create support ticket?" }),
-        /* @__PURE__ */ l("p", { className: "mt-1.5 text-[12.5px] leading-5 text-muted-foreground", children: "I can open a support request for you. Nothing is created until you confirm." }),
-        /* @__PURE__ */ l("p", { className: "mt-2 rounded-md bg-muted px-2.5 py-2 text-[12.5px] text-foreground", children: e.description }),
-        s && /* @__PURE__ */ C("label", { className: "mt-3 block text-[12px] font-semibold text-foreground", children: [
+        /* @__PURE__ */ o("h3", { className: "ticket-card-title", children: "Create support ticket?" }),
+        /* @__PURE__ */ o("p", { className: "ticket-card-desc", children: "I can open a support request for you. Nothing is created until you confirm." }),
+        /* @__PURE__ */ o("p", { className: "ticket-card-body", children: e.description }),
+        l && /* @__PURE__ */ k("label", { className: "ticket-id-label", children: [
           "Customer ID or email",
-          /* @__PURE__ */ l(
+          /* @__PURE__ */ o(
             "input",
             {
               value: a,
               onChange: (d) => i(d.target.value),
-              className: "mt-1 w-full rounded-md border border-border px-2.5 py-2 text-[13px] font-normal outline-none focus-visible:ring-2 focus-visible:ring-primary",
+              className: "ticket-id-input",
               placeholder: "CUST-1001 or you@company.com",
               autoComplete: "email"
             }
           )
         ] }),
-        /* @__PURE__ */ C("div", { className: "mt-3 flex justify-end gap-2", children: [
-          /* @__PURE__ */ l(
+        /* @__PURE__ */ k("div", { className: "ticket-actions", children: [
+          /* @__PURE__ */ o(
             "button",
             {
               type: "button",
-              onClick: o,
+              onClick: s,
               disabled: t,
-              className: "rounded-lg border border-border bg-card px-3.5 py-1.5 text-[12.5px] font-semibold text-muted-foreground hover:bg-muted",
+              className: "ticket-cancel-btn",
               children: "Cancel"
             }
           ),
-          /* @__PURE__ */ l(
+          /* @__PURE__ */ o(
             "button",
             {
               type: "button",
               onClick: () => void n(a),
-              disabled: t || s && !a.trim(),
-              className: "rounded-lg bg-action px-3.5 py-1.5 text-[12.5px] font-semibold text-action-foreground hover:bg-[var(--action-hover)] disabled:opacity-40",
+              disabled: t || l && !a.trim(),
+              className: "ticket-confirm-btn",
               children: t ? "Creating…" : "Create ticket"
             }
           )
@@ -1664,44 +1631,41 @@ const Qr = ({ message: e }) => {
       ]
     }
   ) : null;
-}, gt = ({
+}, mt = ({
   className: e,
   onClose: t,
   showMinimize: r,
   title: n,
-  subtitle: o,
-  envStage: s,
+  subtitle: s,
+  envStage: l,
   envPulse: a = !0
 }) => {
-  const { sendMessage: i, status: d, error: p, resetConversation: m, retryLast: y, pendingTicket: f } = ye(), u = d === "awaiting" || d === "connecting" || !!f;
-  return /* @__PURE__ */ C(
+  const { sendMessage: i, status: d, error: h, resetConversation: g, retryLast: v, pendingTicket: f } = ve(), u = d === "awaiting" || d === "connecting" || !!f;
+  return /* @__PURE__ */ k(
     "section",
     {
-      className: V(
-        "flex h-full min-h-0 flex-col overflow-hidden bg-card",
-        e
-      ),
+      className: `chat-panel${e ? ` ${e}` : ""}`,
       "aria-label": "VPS AI Assistant",
       children: [
-        /* @__PURE__ */ l(
+        /* @__PURE__ */ o(
           er,
           {
             title: n,
-            subtitle: o,
+            subtitle: s,
             onClose: t,
-            onReset: () => void m(),
+            onReset: () => void g(),
             showMinimize: r,
-            envStage: s,
+            envStage: l,
             envPulse: a
           }
         ),
-        /* @__PURE__ */ l("div", { className: "relative min-h-0 flex-1", children: /* @__PURE__ */ l(en, {}) }),
-        p && d === "error" && /* @__PURE__ */ l(Mt, { message: p, onRetry: () => void y() }),
-        /* @__PURE__ */ l(tn, {}),
-        /* @__PURE__ */ l(
+        /* @__PURE__ */ o("div", { className: "chat-panel-body", children: /* @__PURE__ */ o(en, {}) }),
+        h && d === "error" && /* @__PURE__ */ o(It, { message: h, onRetry: () => void v() }),
+        /* @__PURE__ */ o(tn, {}),
+        /* @__PURE__ */ o(
           sr,
           {
-            onSend: (g) => void i(g),
+            onSend: (m) => void i(m),
             disabled: u
           }
         )
@@ -1713,17 +1677,13 @@ const Qr = ({ message: e }) => {
   onClose: t,
   envStage: r,
   envPulse: n = !0
-}) => e ? /* @__PURE__ */ l(
+}) => e ? /* @__PURE__ */ o(
   "div",
   {
     id: "vps-chatbot-widget-panel",
-    className: V(
-      "fixed bottom-[98px] right-7 z-[999] flex h-[min(660px,calc(100vh-120px))] w-[min(420px,calc(100vw-32px))] flex-col overflow-hidden rounded-[20px] border border-border bg-card",
-      "shadow-[0_20px_40px_-15px_rgba(0,0,0,0.12)]",
-      "origin-bottom-right animate-[chat-pop_180ms_ease-out] motion-reduce:animate-none"
-    ),
-    children: /* @__PURE__ */ l(
-      gt,
+    className: "widget-panel",
+    children: /* @__PURE__ */ o(
+      mt,
       {
         onClose: t,
         showMinimize: !0,
@@ -1736,7 +1696,7 @@ const Qr = ({ message: e }) => {
 ) : null, nn = ({
   open: e,
   onToggle: t
-}) => /* @__PURE__ */ l(
+}) => /* @__PURE__ */ o(
   "button",
   {
     type: "button",
@@ -1744,112 +1704,98 @@ const Qr = ({ message: e }) => {
     "aria-expanded": e,
     "aria-controls": "vps-chatbot-widget-panel",
     "aria-label": e ? "Close assistant" : "Open assistant",
-    className: V(
-      "fixed bottom-7 right-7 z-[1000] flex h-[58px] w-[58px] items-center justify-center rounded-xl text-primary-foreground",
-      "bg-primary hover:bg-[var(--primary-hover)]",
-      "shadow-md",
-      "transition duration-200 motion-reduce:transition-none motion-reduce:hover:scale-100",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary"
-    ),
-    children: e ? /* @__PURE__ */ l(Jt, { size: 22 }) : /* @__PURE__ */ l(lt, { size: 24 })
+    className: "widget-trigger-btn",
+    children: e ? /* @__PURE__ */ o(Jt, { size: 22 }) : /* @__PURE__ */ o(ot, { size: 24 })
   }
 ), Ze = ({
   defaultOpen: e = !1,
   open: t,
   onOpenChange: r,
   envStage: n,
-  envPulse: o = !0
+  envPulse: s = !0
 }) => {
-  const [s, a] = Y(e), i = t ?? s, d = (p) => {
-    r == null || r(p), t === void 0 && a(p);
+  const [l, a] = j(e), i = t ?? l, d = (h) => {
+    r == null || r(h), t === void 0 && a(h);
   };
-  return /* @__PURE__ */ C(le, { children: [
-    /* @__PURE__ */ l(
+  return /* @__PURE__ */ k(oe, { children: [
+    /* @__PURE__ */ o(
       rn,
       {
         open: i,
         onClose: () => d(!1),
         envStage: n,
-        envPulse: o
+        envPulse: s
       }
     ),
-    /* @__PURE__ */ l(nn, { open: i, onToggle: () => d(!i) })
+    /* @__PURE__ */ o(nn, { open: i, onToggle: () => d(!i) })
   ] });
-}, hn = ({
+}, pn = ({
   apiBaseUrl: e,
   apiUrl: t,
   proxyUrl: r,
   userContext: n,
-  suggestions: o,
-  disableSuggestions: s,
+  suggestions: s,
+  disableSuggestions: l,
   initialMessage: a,
   ...i
 }) => {
-  const d = rt(), p = e ?? t ?? r;
-  return !!d && (!p || te(p) === te(d == null ? void 0 : d.apiBaseUrl)) && !n && !o && s === void 0 && !a ? /* @__PURE__ */ l(Ze, { ...i }) : /* @__PURE__ */ l(
+  const d = rt(), h = e ?? t ?? r;
+  return !!d && (!h || ee(h) === ee(d == null ? void 0 : d.apiBaseUrl)) && !n && !s && l === void 0 && !a ? /* @__PURE__ */ o(Ze, { ...i }) : /* @__PURE__ */ o(
     nt,
     {
-      apiBaseUrl: p,
+      apiBaseUrl: h,
       userContext: n,
-      suggestions: o,
-      disableSuggestions: s,
+      suggestions: s,
+      disableSuggestions: l,
       initialMessage: a,
-      children: /* @__PURE__ */ l(Ze, { ...i })
+      children: /* @__PURE__ */ o(Ze, { ...i })
     }
   );
-}, on = ({
+}, sn = ({
   open: e,
   onClose: t,
   subtitle: r,
   title: n,
-  envStage: o,
-  envPulse: s = !0
-}) => /* @__PURE__ */ C(le, { children: [
-  /* @__PURE__ */ l(
+  envStage: s,
+  envPulse: l = !0
+}) => /* @__PURE__ */ k(oe, { children: [
+  /* @__PURE__ */ o(
     "div",
     {
-      className: V(
-        "fixed inset-0 z-[90] bg-[var(--overlay)] sm:hidden",
-        e ? "opacity-100" : "pointer-events-none opacity-0",
-        "transition-opacity duration-200 motion-reduce:transition-none"
-      ),
+      className: `embedded-overlay ${e ? "embedded-overlay--open" : "embedded-overlay--closed"}`,
       hidden: !e,
       onClick: t,
       "aria-hidden": "true"
     }
   ),
-  /* @__PURE__ */ l(
+  /* @__PURE__ */ o(
     "aside",
     {
       id: "vps-embedded-chat-panel",
-      className: V(
-        "fixed inset-y-0 right-0 z-[100] flex w-full max-w-[440px] flex-col border-l border-border bg-card shadow-xl",
-        "transition-transform duration-300 ease-out motion-reduce:transition-none",
-        e ? "translate-x-0" : "translate-x-full"
-      ),
+      className: `embedded-panel ${e ? "embedded-panel--open" : "embedded-panel--closed"}`,
       "aria-hidden": !e,
-      children: e && /* @__PURE__ */ l(
-        gt,
+      children: e && /* @__PURE__ */ o(
+        mt,
         {
           onClose: t,
           title: n || "VPS AI Assistant",
           subtitle: r,
-          envStage: o,
-          envPulse: s
+          envStage: s,
+          envPulse: l
         }
       )
     }
   )
-] }), sn = 5, xe = 8, bt = "vps-embedded-assistant-top";
-function ln(e, t, r) {
+] }), ln = 5, we = 8, bt = "vps-embedded-assistant-top";
+function on(e, t, r) {
   return Math.min(r, Math.max(t, e));
 }
 function Je(e, t) {
   const r = Math.max(
-    xe,
-    window.innerHeight - t - xe
+    we,
+    window.innerHeight - t - we
   );
-  return ln(e, xe, r);
+  return on(e, we, r);
 }
 function an() {
   try {
@@ -1870,69 +1816,69 @@ function cn(e) {
 const un = ({
   onOpen: e
 }) => {
-  const t = X(null), r = X({
+  const t = K(null), r = K({
     pointerId: null,
     startY: 0,
     startTop: 0,
     moved: !1
-  }), [n, o] = Y(
+  }), [n, s] = j(
     () => typeof window > "u" ? null : an()
-  ), s = X(n), a = X(!1), [i, d] = Y(!1);
-  ge(() => {
-    s.current = n;
-  }, [n]), ge(() => {
+  ), l = K(n), a = K(!1), [i, d] = j(!1);
+  me(() => {
+    l.current = n;
+  }, [n]), me(() => {
     const f = t.current;
     if (!f) return;
     const u = () => {
-      o((g) => {
-        const E = g ?? Math.round(window.innerHeight / 2 - f.offsetHeight / 2), v = Je(E, f.offsetHeight);
-        return s.current = v, v;
+      s((m) => {
+        const T = m ?? Math.round(window.innerHeight / 2 - f.offsetHeight / 2), _ = Je(T, f.offsetHeight);
+        return l.current = _, _;
       });
     };
     return u(), window.addEventListener("resize", u), () => window.removeEventListener("resize", u);
   }, []);
-  const p = (f) => {
+  const h = (f) => {
     if (f.button !== 0) return;
-    const u = f.currentTarget, g = u.getBoundingClientRect();
+    const u = f.currentTarget, m = u.getBoundingClientRect();
     r.current = {
       pointerId: f.pointerId,
       startY: f.clientY,
-      startTop: g.top,
+      startTop: m.top,
       moved: !1
     };
     try {
       u.setPointerCapture(f.pointerId);
     } catch {
     }
-  }, m = (f) => {
+  }, g = (f) => {
     if (r.current.pointerId !== f.pointerId) return;
     const u = f.clientY - r.current.startY;
-    if (!r.current.moved && Math.abs(u) < sn) return;
+    if (!r.current.moved && Math.abs(u) < ln) return;
     r.current.moved = !0, d(!0);
-    const g = Je(
+    const m = Je(
       r.current.startTop + u,
       f.currentTarget.offsetHeight
     );
-    s.current = g, o(g);
-  }, y = (f) => {
-    var g, E;
+    l.current = m, s(m);
+  }, v = (f) => {
+    var m, T;
     if (r.current.pointerId !== f.pointerId) return;
     try {
-      (E = (g = f.currentTarget).hasPointerCapture) != null && E.call(g, f.pointerId) && f.currentTarget.releasePointerCapture(f.pointerId);
+      (T = (m = f.currentTarget).hasPointerCapture) != null && T.call(m, f.pointerId) && f.currentTarget.releasePointerCapture(f.pointerId);
     } catch {
     }
     const u = r.current.moved;
-    r.current.pointerId = null, r.current.moved = !1, d(!1), u && (a.current = !0, s.current != null && cn(s.current));
+    r.current.pointerId = null, r.current.moved = !1, d(!1), u && (a.current = !0, l.current != null && cn(l.current));
   };
-  return /* @__PURE__ */ C(
+  return /* @__PURE__ */ k(
     "button",
     {
       ref: t,
       type: "button",
-      onPointerDown: p,
-      onPointerMove: m,
-      onPointerUp: y,
-      onPointerCancel: y,
+      onPointerDown: h,
+      onPointerMove: g,
+      onPointerUp: v,
+      onPointerCancel: v,
       onClick: () => {
         if (a.current) {
           a.current = !1;
@@ -1943,13 +1889,13 @@ const un = ({
       "aria-expanded": !1,
       "aria-controls": "vps-embedded-chat-panel",
       "aria-label": "Assistant",
-      className: `fixed right-0 z-[80] flex touch-none items-center gap-2 rounded-l-lg bg-action px-3 py-2.5 text-[12.5px] font-semibold text-action-foreground shadow-lg hover:bg-[var(--action-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${i ? "cursor-grabbing" : "cursor-grab"}`,
+      className: `embedded-trigger-btn ${i ? "embedded-trigger-btn--grabbing" : "embedded-trigger-btn--grab"}`,
       style: {
         top: n ?? "50%",
         transform: n == null ? "translateY(-50%)" : void 0
       },
       children: [
-        /* @__PURE__ */ l(lt, { size: 16 }),
+        /* @__PURE__ */ o(ot, { size: 16 }),
         "Assistant"
       ]
     }
@@ -1959,47 +1905,47 @@ const un = ({
   open: t,
   onOpenChange: r,
   showTrigger: n = !0,
-  envStage: o,
-  envPulse: s = !0
+  envStage: s,
+  envPulse: l = !0
 }) => {
-  const [a, i] = Y(e), d = t ?? a, p = (m) => {
-    r == null || r(m), t === void 0 && i(m);
+  const [a, i] = j(e), d = t ?? a, h = (g) => {
+    r == null || r(g), t === void 0 && i(g);
   };
-  return /* @__PURE__ */ C(le, { children: [
-    n && !d && /* @__PURE__ */ l(un, { onOpen: () => p(!0) }),
-    /* @__PURE__ */ l(
-      on,
+  return /* @__PURE__ */ k(oe, { children: [
+    n && !d && /* @__PURE__ */ o(un, { onOpen: () => h(!0) }),
+    /* @__PURE__ */ o(
+      sn,
       {
         open: d,
-        onClose: () => p(!1),
-        envStage: o,
-        envPulse: s
+        onClose: () => h(!1),
+        envStage: s,
+        envPulse: l
       }
     )
   ] });
-}, mn = ({
+}, gn = ({
   apiBaseUrl: e,
   apiUrl: t,
   proxyUrl: r,
   userContext: n,
-  suggestions: o,
-  disableSuggestions: s,
+  suggestions: s,
+  disableSuggestions: l,
   initialMessage: a,
   ...i
 }) => {
-  const d = rt(), p = e ?? t ?? r;
-  return !!d && (!p || te(p) === te(d == null ? void 0 : d.apiBaseUrl)) && !n && !o && s === void 0 && !a ? /* @__PURE__ */ l(Ke, { ...i }) : /* @__PURE__ */ l(
+  const d = rt(), h = e ?? t ?? r;
+  return !!d && (!h || ee(h) === ee(d == null ? void 0 : d.apiBaseUrl)) && !n && !s && l === void 0 && !a ? /* @__PURE__ */ o(Ke, { ...i }) : /* @__PURE__ */ o(
     nt,
     {
-      apiBaseUrl: p,
+      apiBaseUrl: h,
       userContext: n,
-      suggestions: o,
-      disableSuggestions: s,
+      suggestions: s,
+      disableSuggestions: l,
       initialMessage: a,
-      children: /* @__PURE__ */ l(Ke, { ...i })
+      children: /* @__PURE__ */ o(Ke, { ...i })
     }
   );
-}, gn = {
+}, mn = {
   Colors: {
     VPS_White: "#fff",
     VPS_Dark_Blue: "#1A1A31",
@@ -2164,16 +2110,16 @@ const un = ({
   }
 };
 export {
-  gt as ChatPanel,
+  mt as ChatPanel,
   nt as ChatProvider,
-  hn as ChatbotWidget,
-  gn as ColorPalette,
-  mn as EmbeddedChatbot,
+  pn as ChatbotWidget,
+  mn as ColorPalette,
+  gn as EmbeddedChatbot,
   We as buildApiUrl,
-  pn as chatApi,
+  hn as chatApi,
   tt as createChatApi,
-  te as resolveApiBaseUrl,
-  Bt as useChatContext,
-  ye as useChatbot,
+  ee as resolveApiBaseUrl,
+  Dt as useChatContext,
+  ve as useChatbot,
   rt as useOptionalChatContext
 };

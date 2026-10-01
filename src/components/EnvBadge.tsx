@@ -87,7 +87,7 @@ export const EnvBadge: React.FC<EnvBadgeProps> = ({
 
   return (
     <span
-      className={`env-badge ${variant} ${className} text-[var(--vps-orange)] font-medium text-[10px] leading-[12px] px-1.5 py-0.5 rounded-full border border-[var(--border)] bg-[var(--orange-50)] hover:bg-[var(--grey-200)] cursor-pointer hover:text-foreground flex items-center gap-1 `}
+      className={`env-badge-inline ${variant} ${className}`.trim()}
       title={tooltip}
       aria-label={`${label} build`}
       role="status"
@@ -97,7 +97,7 @@ export const EnvBadge: React.FC<EnvBadgeProps> = ({
       <Icon size={10} className="env-badge-icon" aria-hidden="true" />
 
       {/* Label */}
-      <span className="text-[var(--text-primary)] font-medium text-[10px] leading-[12px]">{label}</span>
+      <span className="env-badge-inline-label">{label}</span>
     </span>
   );
 };

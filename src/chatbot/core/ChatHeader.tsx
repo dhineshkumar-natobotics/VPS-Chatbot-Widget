@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { ArrowLeft, Bot, Minus, RefreshCw } from "lucide-react";
-import ChatbotIcon from "../../../Chatbot.svg";
+import { ArrowLeft, Minus, RefreshCw } from "lucide-react";
 import { EnvBadge, type EnvStage } from "../../components/EnvBadge";
 
 interface ChatHeaderProps {
@@ -15,6 +14,7 @@ interface ChatHeaderProps {
   /** Whether the status dot pulses. Default: true */
   envPulse?: boolean;
 }
+
 const SVGComponent = (props: React.SVGProps<SVGSVGElement> & { width?: string; height?: string , Color?: string}) => (
   <svg
     width={props.width || "24px"}
@@ -41,41 +41,41 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   envPulse = true,
 }) => {
   return (
-    <header className="flex items-center justify-between border-b border-border bg-card px-5 py-4">
-      <div className="flex items-center gap-3">
+    <header className="chat-header">
+      <div className="chat-header-left">
         {onBack && (
           <button
             type="button"
             onClick={onBack}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground hover:bg-[var(--grey-100)]"
+            className="icon-btn-back"
             aria-label="Back"
           >
             <ArrowLeft size={16} />
           </button>
         )}
         <div
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground"
+          className="avatar-circle"
           aria-hidden="true"
         >
-          <SVGComponent width="16px" height="16px" Color="white" />
+          <SVGComponent width="16px" height="16px" color="white" />
         </div>
         <div>
-          <div className="flex items-center gap-1.5">
-            <h2 className="text-[16px] font-bold tracking-tight text-foreground">
+          <div className="chat-header-title-row">
+            <h2 className="chat-header-title">
               {title}
             </h2>
             {/* ── Env badge inline with title ── */}
             <EnvBadge stage={envStage} pulse={envPulse} />
           </div>
-          <p className="text-[12px] text-muted-foreground font-medium text-[var(--text-subtle)]">{subtitle || "Customer portal support"}</p>
+          <p className="chat-header-subtitle">{subtitle || "Customer portal support"}</p>
         </div>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="chat-header-actions">
         {onReset && (
           <button
             type="button"
             onClick={onReset}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-subtle)] hover:bg-muted hover:text-foreground"
+            className="icon-btn-action"
             aria-label="Start a new conversation"
             title="New conversation"
           >
@@ -86,7 +86,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-subtle)] hover:bg-muted hover:text-foreground"
+            className="icon-btn-action"
             aria-label={showMinimize ? "Minimize chat" : "Close chat"}
           >
             <Minus size={16} />

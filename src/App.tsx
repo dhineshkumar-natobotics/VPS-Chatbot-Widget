@@ -24,26 +24,22 @@ export const App: React.FC = () => {
 
   return (
     <ChatProvider userContext={userContext}>
-      <div className="flex min-h-screen flex-col bg-background">
-        <header className="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-7 py-3.5 shadow-sm">
-          <div className="flex items-center gap-3">
-
+      <div className="app-shell">
+        <header className="app-header">
+          <div className="app-header-brand">
             <div>
-              <h1 className="text-base font-bold text-foreground">
+              <h1 className="app-header-title">
                 Veritas AI Assistant
               </h1>
-              <p className="text-xs text-muted-foreground">
+              <p className="app-header-subtitle">
                 Your AI-powered assistant for Veritas
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="app-header-controls">
             <button
               type="button"
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12.5px] font-semibold ${mode === "widget"
-                ? "border-action bg-action text-action-foreground"
-                : "border-border bg-muted text-muted-foreground"
-                }`}
+              className={`mode-btn ${mode === "widget" ? "mode-btn--active" : "mode-btn--inactive"}`}
               onClick={() => {
                 setMode("widget");
                 setEmbeddedOpen(false);
@@ -54,10 +50,7 @@ export const App: React.FC = () => {
             </button>
             <button
               type="button"
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12.5px] font-semibold ${mode === "embedded"
-                ? "border-action bg-action text-action-foreground"
-                : "border-border bg-muted text-muted-foreground"
-                }`}
+              className={`mode-btn ${mode === "embedded" ? "mode-btn--active" : "mode-btn--inactive"}`}
               onClick={() => {
                 setMode("embedded");
                 setWidgetOpen(false);
@@ -70,14 +63,13 @@ export const App: React.FC = () => {
           </div>
         </header>
 
-
         {mode === "widget" && (
           <ChatbotWidget
             open={widgetOpen}
             onOpenChange={setWidgetOpen}
             envStage="alpha"
             envPulse
-            apiBaseUrl="https://vpsai.onrender.com"
+            apiBaseUrl="https://vpschatbot.onrender.com"
           />
         )}
         {mode === "embedded" && (
@@ -85,7 +77,7 @@ export const App: React.FC = () => {
             open={embeddedOpen}
             onOpenChange={setEmbeddedOpen}
             envStage="alpha"
-            apiBaseUrl="https://vpsai.onrender.com"
+            apiBaseUrl="https://vpschatbot.onrender.com"
           />
         )}
 

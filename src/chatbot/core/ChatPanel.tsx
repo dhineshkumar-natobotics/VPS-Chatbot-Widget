@@ -5,7 +5,6 @@ import { ChatHeader } from "./ChatHeader";
 import { ChatInput } from "./ChatInput";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatTicketConfirmation } from "./ChatTicketConfirmation";
-import { cn } from "../../lib/cn";
 import { type EnvStage } from "../../components/EnvBadge";
 
 interface ChatPanelProps {
@@ -35,10 +34,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
 
   return (
     <section
-      className={cn(
-        "flex h-full min-h-0 flex-col overflow-hidden bg-card",
-        className
-      )}
+      className={`chat-panel${className ? ` ${className}` : ""}`}
       aria-label="VPS AI Assistant"
     >
       <ChatHeader
@@ -50,7 +46,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         envStage={envStage}
         envPulse={envPulse}
       />
-      <div className="relative min-h-0 flex-1">
+      <div className="chat-panel-body">
         <ChatMessageList />
       </div>
       {error && status === "error" && (

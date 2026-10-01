@@ -21,10 +21,7 @@ function MessageScroller({
   return (
     <MessageScrollerPrimitive.Root
       data-slot="message-scroller"
-      className={cn(
-        "group/message-scroller relative flex size-full min-h-0 flex-col overflow-hidden",
-        className
-      )}
+      className={cn("msg-scroller-root", className)}
       {...props}
     />
   );
@@ -37,11 +34,7 @@ function MessageScrollerViewport({
   return (
     <MessageScrollerPrimitive.Viewport
       data-slot="message-scroller-viewport"
-      className={cn(
-        "size-full min-h-0 min-w-0 overflow-y-auto overscroll-contain",
-        "data-[pending-scroll]:invisible",
-        className
-      )}
+      className={cn("msg-scroller-viewport", className)}
       {...props}
     />
   );
@@ -54,7 +47,7 @@ function MessageScrollerContent({
   return (
     <MessageScrollerPrimitive.Content
       data-slot="message-scroller-content"
-      className={cn("flex h-max min-h-full flex-col gap-4 px-4 py-4", className)}
+      className={cn("msg-scroller-content", className)}
       {...props}
     />
   );
@@ -69,10 +62,7 @@ function MessageScrollerItem({
     <MessageScrollerPrimitive.Item
       data-slot="message-scroller-item"
       scrollAnchor={scrollAnchor}
-      className={cn(
-        "min-w-0 shrink-0 [contain-intrinsic-size:auto_10rem] [content-visibility:auto]",
-        className
-      )}
+      className={cn("msg-scroller-item", className)}
       {...props}
     />
   );
@@ -88,15 +78,7 @@ function MessageScrollerButton({
     <MessageScrollerPrimitive.Button
       data-slot="message-scroller-button"
       direction={direction}
-      className={cn(
-        "absolute left-1/2 z-10 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md transition-[opacity,transform] duration-200",
-        "hover:bg-[var(--input-bg)]",
-        "data-[active=false]:pointer-events-none data-[active=false]:scale-95 data-[active=false]:opacity-0",
-        "data-[active=true]:scale-100 data-[active=true]:opacity-100",
-        "data-[direction=end]:bottom-3 data-[direction=start]:top-3",
-        "motion-reduce:transition-none",
-        className
-      )}
+      className={cn("msg-scroller-btn", className)}
       {...props}
     >
       {children ?? (
