@@ -36,7 +36,7 @@ export interface ChatProviderProps {
   showGroundedSources?: boolean;
 }
 
-const DEFAULT_WELCOME_TEXT = `Hello! I am your **VPS Veritas AI Support Assistant**.
+const DEFAULT_WELCOME_TEXT = `Hello! I am your **VPS Veritas assistant**.
 
 I can help you with:
 - **Fuel Quality Testing (FQT)** & **Oil Condition Monitoring (OCM)**
@@ -161,35 +161,35 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         const currentSession = await ensureSession();
         const response = client.sendMessageStream
           ? await client.sendMessageStream(
-              currentSession,
-              text,
-              {
-                roleId: effectiveUserContext.roleId,
-                client: effectiveUserContext.client,
-              },
-              (liveStage) => {
-
-                updateProgress(liveStage);
-              }
-            )
-          : await client.sendMessage(currentSession, text, {
+            currentSession,
+            text,
+            {
               roleId: effectiveUserContext.roleId,
               client: effectiveUserContext.client,
-            });
+            },
+            (liveStage) => {
+
+              updateProgress(liveStage);
+            }
+          )
+          : await client.sendMessage(currentSession, text, {
+            roleId: effectiveUserContext.roleId,
+            client: effectiveUserContext.client,
+          });
 
         setMessages((prev) =>
           prev.map((message) =>
             message.id === pendingId
               ? {
-                  ...message,
-                  id: response.requestId || pendingId,
-                  content: response.answer,
-                  status: "complete",
-                  progressText: undefined,
-                  sources: response.sources,
-                  toolCalls: response.toolCalls,
-                  usage: response.usage,
-                }
+                ...message,
+                id: response.requestId || pendingId,
+                content: response.answer,
+                status: "complete",
+                progressText: undefined,
+                sources: response.sources,
+                toolCalls: response.toolCalls,
+                usage: response.usage,
+              }
               : message
           )
         );
@@ -226,8 +226,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     await sendToBackend(last);
   }, [sendToBackend]);
 
-  const confirmTicket = useCallback(async () => {}, []);
-  const cancelTicket = useCallback(() => {}, []);
+  const confirmTicket = useCallback(async () => { }, []);
+  const cancelTicket = useCallback(() => { }, []);
 
   const resetConversation = useCallback(async () => {
     if (sessionId) {
