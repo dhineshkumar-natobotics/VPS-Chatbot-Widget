@@ -26,6 +26,8 @@ export interface ChatContextValue {
   suggestionBadgesEnabled: boolean;
   userContext: ChatUserContext;
   apiBaseUrl?: string;
+  hideInspectSources?: boolean;
+  showGroundedSources?: boolean;
   sendMessage: (text: string) => Promise<void>;
   retryLast: () => Promise<void>;
   confirmTicket: (customerIdOrEmail?: string) => Promise<void>;

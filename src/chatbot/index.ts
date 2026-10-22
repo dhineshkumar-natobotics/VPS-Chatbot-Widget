@@ -14,6 +14,7 @@ export {
 export { ColorPalette } from "./config/colors";
 export type {
   ChatUserContext,
+  ChatAccessContext,
   ChatMessage,
   Suggestion,
   Ticket,

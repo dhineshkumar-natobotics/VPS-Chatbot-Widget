@@ -11,10 +11,18 @@ import { ChatContext, type ChatUiStatus } from "./ChatContext";
 export interface ChatProviderProps {
   children: React.ReactNode;
   userContext?: ChatUserContext;
+  /** Direct role name prop (e.g. "VPS Admin", "Client User", "Captain") */
+  role?: string;
+  /** Direct role ID prop for server-side RAG access control */
+  roleId?: number;
+  /** Direct client experience prop ("web" | "mobile" | "admin") */
+  client?: "mobile" | "web" | "admin";
+  /** Optional custom welcome message to display as initial assistant response */
+  welcomeMessage?: string;
   suggestions?: Suggestion[];
   disableSuggestions?: boolean;
   initialMessage?: string;
-  /** Backend or proxy API base URL (e.g. "https://vpsai.onrender.com" or "/api"). Defaults to VITE_API_BASE or "" */
+  /** Backend or proxy API base URL. Defaults to VITE_API_BASE or origin */
   apiBaseUrl?: string;
   /** Alias for apiBaseUrl */
   apiUrl?: string;
@@ -22,7 +30,22 @@ export interface ChatProviderProps {
   proxyUrl?: string;
   /** Optional custom chat API client */
   api?: ChatApiClient;
+  /** If true, hides the "Inspect Sources" toggle and details drawer */
+  hideInspectSources?: boolean;
+  /** Whether to render grounded sources (default: true) */
+  showGroundedSources?: boolean;
 }
+
+const DEFAULT_WELCOME_TEXT = `Hello! I am your **VPS Veritas AI Support Assistant**.
+
+I can help you with:
+- **Fuel Quality Testing (FQT)** & **Oil Condition Monitoring (OCM)**
+- **Fuel Defect Reporting (FDR)** — report and track bunker defect incidents
+- **Bunker Master** — manage bunkering operations, BDN logs, and surveys
+- **FSC & FSQ E-Forms** — paperless fuel system checks and bunker sample pre-registration
+- **Samplogic** sample logistics, report downloads, and support tickets
+
+Feel free to ask a question or select one of the suggested topics below!`;
 
 function newId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID()}`;
@@ -41,6 +64,10 @@ function friendlyError(err: unknown): string {
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
   userContext = {},
+  role,
+  roleId,
+  client: clientChannel,
+  welcomeMessage,
   suggestions = DEFAULT_SUGGESTIONS,
   disableSuggestions = false,
   initialMessage,
@@ -48,6 +75,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   apiUrl,
   proxyUrl,
   api,
+  hideInspectSources = false,
+  showGroundedSources = true,
 }) => {
   const resolvedBaseUrl = apiBaseUrl ?? apiUrl ?? proxyUrl;
   const client = useMemo(
@@ -55,8 +84,30 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     [api, resolvedBaseUrl]
   );
 
+  const effectiveUserContext = useMemo<ChatUserContext>(() => {
+    return {
+      ...userContext,
+      ...(role !== undefined ? { role } : {}),
+      ...(roleId !== undefined ? { roleId } : {}),
+      ...(clientChannel !== undefined ? { client: clientChannel } : {}),
+    };
+  }, [userContext, role, roleId, clientChannel]);
+
+  const defaultWelcomeMsg = useMemo<ChatMessage | null>(() => {
+    if (welcomeMessage === "") return null;
+    return {
+      id: "welcome-default",
+      role: "assistant",
+      content: welcomeMessage || DEFAULT_WELCOME_TEXT,
+      createdAt: new Date().toISOString(),
+      status: "complete",
+    };
+  }, [welcomeMessage]);
+
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    return defaultWelcomeMsg ? [defaultWelcomeMsg] : [];
+  });
   const [status, setStatus] = useState<ChatUiStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const lastUserTextRef = useRef<string | null>(null);
@@ -69,7 +120,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     setSessionId(created.sessionId);
     return created.sessionId;
   }, [sessionId, client]);
-
 
   const sendToBackend = useCallback(
     async (text: string) => {
@@ -88,15 +138,45 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         content: "",
         createdAt: new Date().toISOString(),
         status: "pending",
+        progressText: "Analyzing question & expanding domain terms ",
       };
 
       setMessages((prev) => [...prev, userMessage, pendingAssistant]);
       setStatus("awaiting");
       setError(null);
 
+      const updateProgress = (stageText: string) => {
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === pendingId
+              ? { ...message, progressText: stageText }
+              : message
+          )
+        );
+      };
+
+
+
       try {
         const currentSession = await ensureSession();
-        const response = await client.sendMessage(currentSession, text);
+        const response = client.sendMessageStream
+          ? await client.sendMessageStream(
+              currentSession,
+              text,
+              {
+                roleId: effectiveUserContext.roleId,
+                client: effectiveUserContext.client,
+              },
+              (liveStage) => {
+
+                updateProgress(liveStage);
+              }
+            )
+          : await client.sendMessage(currentSession, text, {
+              roleId: effectiveUserContext.roleId,
+              client: effectiveUserContext.client,
+            });
+
         setMessages((prev) =>
           prev.map((message) =>
             message.id === pendingId
@@ -105,6 +185,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
                   id: response.requestId || pendingId,
                   content: response.answer,
                   status: "complete",
+                  progressText: undefined,
                   sources: response.sources,
                   toolCalls: response.toolCalls,
                   usage: response.usage,
@@ -118,7 +199,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         setMessages((prev) =>
           prev.map((item) =>
             item.id === pendingId
-              ? { ...item, content: message, status: "error" }
+              ? { ...item, content: message, status: "error", progressText: undefined }
               : item
           )
         );
@@ -126,7 +207,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         setStatus("error");
       }
     },
-    [ensureSession, client]
+    [ensureSession, client, effectiveUserContext.client, effectiveUserContext.roleId]
   );
 
   const sendMessage = useCallback(
@@ -153,11 +234,11 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       await client.closeSession(sessionId);
     }
     setSessionId(null);
-    setMessages([]);
+    setMessages(defaultWelcomeMsg ? [defaultWelcomeMsg] : []);
     setStatus("idle");
     setError(null);
     lastUserTextRef.current = null;
-  }, [sessionId, client]);
+  }, [sessionId, client, defaultWelcomeMsg]);
 
   React.useEffect(() => {
     if (!initialMessage || initialSentRef.current) return;
@@ -175,10 +256,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       ticketBusy: false,
       lastTicket: null,
       suggestions,
-      showSuggestions: !disableSuggestions && messages.length === 0,
+      showSuggestions:
+        !disableSuggestions &&
+        (messages.length === 0 ||
+          (messages.length === 1 && messages[0].id === "welcome-default")),
       suggestionBadgesEnabled: !disableSuggestions,
-      userContext,
+      userContext: effectiveUserContext,
       apiBaseUrl: client.apiBaseUrl,
+      hideInspectSources,
+      showGroundedSources,
       sendMessage,
       retryLast,
       confirmTicket,
@@ -192,8 +278,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       sessionId,
       suggestions,
       disableSuggestions,
-      userContext,
+      effectiveUserContext,
       client.apiBaseUrl,
+      hideInspectSources,
+      showGroundedSources,
       sendMessage,
       retryLast,
       confirmTicket,
@@ -201,7 +289,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       resetConversation,
     ]
   );
-
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };

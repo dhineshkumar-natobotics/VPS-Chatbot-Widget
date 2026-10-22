@@ -24,7 +24,7 @@ export const ChatMessageList: React.FC = () => {
       <MessageScroller>
         <MessageScrollerViewport aria-label="Chat messages">
           <MessageScrollerContent aria-busy={isBusy}>
-            {showSuggestions && (
+            {messages.length === 0 && (
               <MessageScrollerItem messageId="welcome">
                 <ChatEmptyState />
               </MessageScrollerItem>

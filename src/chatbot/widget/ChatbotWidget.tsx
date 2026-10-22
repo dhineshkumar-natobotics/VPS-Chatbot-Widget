@@ -15,7 +15,15 @@ export interface ChatbotWidgetProps {
   /** Environment badge stage. Omit for production. */
   envStage?: EnvStage;
   envPulse?: boolean;
-  /** Backend or proxy API base URL (e.g. "https://vpsai.onrender.com" or "/api") */
+  /** Direct role name (e.g. "VPS Admin", "Client User", "Captain") */
+  role?: string;
+  /** Direct role ID for server-side RAG access control */
+  roleId?: number;
+  /** Direct client experience ("web" | "mobile" | "admin") */
+  client?: "mobile" | "web" | "admin";
+  /** Optional custom initial welcome message */
+  welcomeMessage?: string;
+  /** Backend or proxy API base URL */
   apiBaseUrl?: string;
   /** Alias for apiBaseUrl */
   apiUrl?: string;
@@ -29,11 +37,15 @@ export interface ChatbotWidgetProps {
   disableSuggestions?: boolean;
   /** Initial welcome message to trigger on mount */
   initialMessage?: string;
+  /** If true, hides the "Inspect Sources" toggle button and drawer in grounded sources */
+  hideInspectSources?: boolean;
+  /** Whether to show grounded sources (default: true) */
+  showGroundedSources?: boolean;
 }
 
 const ChatbotWidgetView: React.FC<Omit<
   ChatbotWidgetProps,
-  "apiBaseUrl" | "apiUrl" | "proxyUrl" | "userContext" | "suggestions" | "disableSuggestions" | "initialMessage"
+  "apiBaseUrl" | "apiUrl" | "proxyUrl" | "userContext" | "suggestions" | "disableSuggestions" | "initialMessage" | "hideInspectSources" | "showGroundedSources"
 >> = ({
   defaultOpen = false,
   open,
@@ -69,22 +81,33 @@ export const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
   apiUrl,
   proxyUrl,
   userContext,
+  role,
+  roleId,
+  client,
+  welcomeMessage,
   suggestions,
   disableSuggestions,
   initialMessage,
+  hideInspectSources,
+  showGroundedSources,
   ...viewProps
 }) => {
   const existingContext = useOptionalChatContext();
   const explicitUrl = apiBaseUrl ?? apiUrl ?? proxyUrl;
 
-  // If already inside ChatProvider and no conflicting apiBaseUrl or userContext override is passed, reuse context
   const canReuseContext =
     Boolean(existingContext) &&
     (!explicitUrl || resolveApiBaseUrl(explicitUrl) === resolveApiBaseUrl(existingContext?.apiBaseUrl)) &&
     !userContext &&
+    role === undefined &&
+    roleId === undefined &&
+    client === undefined &&
+    welcomeMessage === undefined &&
     !suggestions &&
     disableSuggestions === undefined &&
-    !initialMessage;
+    !initialMessage &&
+    hideInspectSources === undefined &&
+    showGroundedSources === undefined;
 
   if (canReuseContext) {
     return <ChatbotWidgetView {...viewProps} />;
@@ -94,9 +117,15 @@ export const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
     <ChatProvider
       apiBaseUrl={explicitUrl}
       userContext={userContext}
+      role={role}
+      roleId={roleId}
+      client={client}
+      welcomeMessage={welcomeMessage}
       suggestions={suggestions}
       disableSuggestions={disableSuggestions}
       initialMessage={initialMessage}
+      hideInspectSources={hideInspectSources}
+      showGroundedSources={showGroundedSources}
     >
       <ChatbotWidgetView {...viewProps} />
     </ChatProvider>

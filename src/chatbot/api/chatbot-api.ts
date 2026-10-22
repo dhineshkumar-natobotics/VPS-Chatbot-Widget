@@ -1,5 +1,6 @@
 import type {
   ApiErrorDto,
+  ChatAccessContext,
   ChatApiError,
   ChatMessage,
   ChatMessageDto,
@@ -92,6 +93,8 @@ export function normalizeSource(dto: SourceDto): Source {
     chunkId: dto.chunk_id,
     source: dto.source,
     score: dto.score,
+    title: dto.title,
+    snippet: dto.snippet,
   };
 }
 
@@ -144,7 +147,20 @@ async function readJson(response: Response): Promise<unknown> {
 export interface ChatApiClient {
   apiBaseUrl: string;
   createSession(): Promise<SessionCreated>;
-  sendMessage(sessionId: string, message: string): Promise<{
+  sendMessage(sessionId: string, message: string, access?: ChatAccessContext): Promise<{
+    requestId: string;
+    sessionId: string;
+    answer: string;
+    sources: Source[];
+    toolCalls: ToolCall[];
+    usage: TokenUsage;
+  }>;
+  sendMessageStream?(
+    sessionId: string,
+    message: string,
+    access?: ChatAccessContext,
+    onProgress?: (stage: string) => void
+  ): Promise<{
     requestId: string;
     sessionId: string;
     answer: string;
@@ -201,12 +217,16 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
       return { sessionId: dto.session_id, createdAt: dto.created_at };
     },
 
-    async sendMessage(sessionId: string, message: string) {
+    async sendMessage(sessionId: string, message: string, access?: ChatAccessContext) {
       const dto = await request<ChatResponseDto>(
         `/api/v1/sessions/${sessionId}/messages`,
         {
           method: "POST",
-          body: JSON.stringify({ message }),
+          body: JSON.stringify({
+            message,
+            ...(access?.roleId !== undefined ? { role_id: access.roleId } : {}),
+            ...(access?.client ? { client: access.client } : {}),
+          }),
         }
       );
       return {
@@ -217,6 +237,88 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
         toolCalls: (dto.tool_calls || []).map(normalizeToolCall),
         usage: normalizeUsage(dto.usage),
       };
+    },
+
+    async sendMessageStream(
+      sessionId: string,
+      message: string,
+      access?: ChatAccessContext,
+      onProgress?: (stage: string) => void
+    ) {
+      const url = buildApiUrl(baseUrl, `/api/v1/sessions/${sessionId}/messages/stream`);
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message,
+            ...(access?.roleId !== undefined ? { role_id: access.roleId } : {}),
+            ...(access?.client ? { client: access.client } : {}),
+          }),
+        });
+
+        if (!response.ok || !response.body) {
+          return await this.sendMessage(sessionId, message, access);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let finalResult: {
+          requestId: string;
+          sessionId: string;
+          answer: string;
+          sources: Source[];
+          toolCalls: ToolCall[];
+          usage: TokenUsage;
+        } | null = null;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith("data:")) {
+              try {
+                const data = JSON.parse(trimmed.slice(5).trim());
+                if (data.type === "progress" && data.stage) {
+                  onProgress?.(data.stage);
+                } else if (data.type === "complete") {
+                  finalResult = {
+                    requestId: data.request_id,
+                    sessionId: data.session_id,
+                    answer: data.answer,
+                    sources: (data.sources || []).map(normalizeSource),
+                    toolCalls: (data.tool_calls || []).map(normalizeToolCall),
+                    usage: normalizeUsage(data.usage),
+                  };
+                } else if (data.type === "error") {
+                  throw new Error(data.message || "An error occurred");
+                }
+              } catch (e) {
+                if (e instanceof Error && e.message !== "An error occurred") {
+                  // Ignore JSON parse error on incomplete chunk
+                } else {
+                  throw e;
+                }
+              }
+            }
+          }
+        }
+
+        if (finalResult) {
+          return finalResult;
+        }
+        return await this.sendMessage(sessionId, message, access);
+      } catch {
+        return await this.sendMessage(sessionId, message, access);
+      }
     },
 
     async getHistory(sessionId: string): Promise<ChatMessage[]> {
