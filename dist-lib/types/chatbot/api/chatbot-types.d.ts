@@ -4,6 +4,8 @@ export interface Source {
     chunkId: string;
     source: string;
     score: number;
+    title?: string;
+    snippet?: string;
 }
 export interface ToolCall {
     toolName: string;
@@ -22,6 +24,7 @@ export interface ChatMessage {
     content: string;
     createdAt: string;
     status?: MessageStatus;
+    progressText?: string;
     sources?: Source[];
     toolCalls?: ToolCall[];
     usage?: TokenUsage;
@@ -30,8 +33,17 @@ export interface ChatUserContext {
     customerId?: string;
     email?: string;
     name?: string;
+    /** Display name of the role, if the host application has one. */
     role?: string;
+    /** Authenticated Customer Portal role ID used for server-side RAG routing. */
+    roleId?: number;
+    /** Client experience that owns this authenticated session. */
+    client?: "mobile" | "web" | "admin";
     page?: string;
+}
+export interface ChatAccessContext {
+    roleId?: number;
+    client?: "mobile" | "web" | "admin";
 }
 export interface Ticket {
     ticketId: string;
@@ -67,6 +79,8 @@ export interface SourceDto {
     chunk_id: string;
     source: string;
     score: number;
+    title?: string;
+    snippet?: string;
 }
 export interface ToolCallDto {
     tool_name: string;
@@ -103,6 +117,13 @@ export interface ChatResponseDto {
     sources: SourceDto[];
     tool_calls?: ToolCallDto[];
     usage: TokenUsageDto;
+    role?: RoleDto | null;
+}
+export interface RoleDto {
+    id: number;
+    usertype: string;
+    channel: "mobile" | "web" | "admin";
+    knowledge_scopes: string[];
 }
 export interface TicketDto {
     ticket_id: string;

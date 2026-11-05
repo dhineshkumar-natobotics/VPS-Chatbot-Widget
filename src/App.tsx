@@ -210,8 +210,8 @@ const AppShowcase: React.FC<{
             onOpenChange={setEmbeddedOpen}
             envStage="alpha"
             apiBaseUrl="http://127.0.0.1:8000"
-            hideInspectSources={hideInspectSources}
-            showGroundedSources={false}
+              hideInspectSources={hideInspectSources}
+              showGroundedSources={false}
           />
         )}
       </div>

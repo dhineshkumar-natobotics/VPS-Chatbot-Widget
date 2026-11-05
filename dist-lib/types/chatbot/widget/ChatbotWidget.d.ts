@@ -8,7 +8,15 @@ export interface ChatbotWidgetProps {
     /** Environment badge stage. Omit for production. */
     envStage?: EnvStage;
     envPulse?: boolean;
-    /** Backend or proxy API base URL (e.g. "https://vpsai.onrender.com" or "/api") */
+    /** Direct role name (e.g. "VPS Admin", "Client User", "Captain") */
+    role?: string;
+    /** Direct role ID for server-side RAG access control */
+    roleId?: number;
+    /** Direct client experience ("web" | "mobile" | "admin") */
+    client?: "mobile" | "web" | "admin";
+    /** Optional custom initial welcome message */
+    welcomeMessage?: string;
+    /** Backend or proxy API base URL */
     apiBaseUrl?: string;
     /** Alias for apiBaseUrl */
     apiUrl?: string;
@@ -22,5 +30,9 @@ export interface ChatbotWidgetProps {
     disableSuggestions?: boolean;
     /** Initial welcome message to trigger on mount */
     initialMessage?: string;
+    /** If true, hides the "Inspect Sources" toggle button and drawer in grounded sources */
+    hideInspectSources?: boolean;
+    /** Whether to show grounded sources (default: true) */
+    showGroundedSources?: boolean;
 }
 export declare const ChatbotWidget: React.FC<ChatbotWidgetProps>;

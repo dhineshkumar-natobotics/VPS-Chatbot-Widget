@@ -1,4 +1,4 @@
 import React from "react";
-export declare function ChatMarkdown({ text }: {
+export declare const ChatMarkdown: React.FC<{
     text: string;
-}): React.JSX.Element | null;
+}>;

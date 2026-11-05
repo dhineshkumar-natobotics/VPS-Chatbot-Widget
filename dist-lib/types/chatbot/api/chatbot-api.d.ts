@@ -1,4 +1,4 @@
-import type { ChatMessage, ChatMessageDto, SessionCreated, Source, SourceDto, Ticket, ToolCall, ToolCallDto, TokenUsage, TokenUsageDto } from "./chatbot-types";
+import type { ChatAccessContext, ChatMessage, ChatMessageDto, SessionCreated, Source, SourceDto, Ticket, ToolCall, ToolCallDto, TokenUsage, TokenUsageDto } from "./chatbot-types";
 export declare function resolveApiBaseUrl(customUrl?: string): string;
 export declare function buildApiUrl(baseUrl: string | undefined, path: string): string;
 export declare function normalizeSource(dto: SourceDto): Source;
@@ -8,7 +8,15 @@ export declare function normalizeChatMessage(dto: ChatMessageDto): ChatMessage;
 export interface ChatApiClient {
     apiBaseUrl: string;
     createSession(): Promise<SessionCreated>;
-    sendMessage(sessionId: string, message: string): Promise<{
+    sendMessage(sessionId: string, message: string, access?: ChatAccessContext): Promise<{
+        requestId: string;
+        sessionId: string;
+        answer: string;
+        sources: Source[];
+        toolCalls: ToolCall[];
+        usage: TokenUsage;
+    }>;
+    sendMessageStream?(sessionId: string, message: string, access?: ChatAccessContext, onProgress?: (stage: string) => void): Promise<{
         requestId: string;
         sessionId: string;
         answer: string;
