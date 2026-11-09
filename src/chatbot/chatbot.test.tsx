@@ -148,9 +148,32 @@ describe("chatbot UI", () => {
       ).toBeInTheDocument();
     });
     expect(fetch).toHaveBeenCalledWith(
-      "/api/v1/sessions/session-1/messages",
+      "/api/v1/sessions/session-1/messages/stream",
       expect.objectContaining({ method: "POST" })
     );
+  });
+
+  it("selects a configured AI model for the next turn", async () => {
+    const user = userEvent.setup();
+    const original = vi.mocked(fetch).getMockImplementation()!;
+    vi.mocked(fetch).mockImplementation(async (input, init) => {
+      if (String(input).endsWith("/api/v1/models")) {
+        return jsonResponse({ default_model_id: "fast", models: [
+          { id: "fast", label: "Fast", model: "tested-fast", configured: true },
+          { id: "quality", label: "Detailed answers", model: "tested-quality", configured: true },
+        ] });
+      }
+      return original(input, init);
+    });
+    render(<ChatProvider><ChatPanel /></ChatProvider>);
+    const select = await screen.findByRole("combobox", { name: "AI model" });
+    await user.selectOptions(select, "quality");
+    await user.type(screen.getByLabelText("Chat message"), "What is FDR?");
+    await user.keyboard("{Enter}");
+    await screen.findByText("Transformer oil reports are available in the Reports page.");
+    const calls = vi.mocked(fetch).mock.calls.filter(([input]) => String(input).endsWith("/messages/stream"));
+    expect(calls).toHaveLength(1);
+    expect(JSON.parse(String(calls[0]![1]?.body))).toMatchObject({ model_id: "quality" });
   });
 
   it("filters suggestion badges as the user types", async () => {

@@ -1,4 +1,4 @@
-import type { ChatMessage, ChatUserContext, Suggestion, Ticket } from "../api/chatbot-types";
+import type { ChatMessage, ChatUserContext, Suggestion, Ticket, ModelOption } from "../api/chatbot-types";
 export type ChatUiStatus = "idle" | "connecting" | "awaiting" | "error";
 export interface PendingTicket {
     subject: string;
@@ -24,6 +24,9 @@ export interface ChatContextValue {
     confirmTicket: (customerIdOrEmail?: string) => Promise<void>;
     cancelTicket: () => void;
     resetConversation: () => Promise<void>;
+    models: ModelOption[];
+    selectedModelId: string;
+    selectModel: (modelId: string) => void;
 }
 export declare const ChatContext: import("react").Context<ChatContextValue | null>;
 export declare function useChatContext(): ChatContextValue;

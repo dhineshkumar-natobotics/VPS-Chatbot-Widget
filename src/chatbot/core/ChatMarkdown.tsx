@@ -1,5 +1,12 @@
 import React from "react";
 
+export function safeHref(value: string): string | undefined {
+  const url = value.trim();
+  if (/[\u0000-\u001f\u007f]/.test(url)) return undefined;
+  if (/^(https?:\/\/|mailto:|\/(?!\/)|#)/i.test(url)) return url;
+  return undefined;
+}
+
 /**
  * Robust inline Markdown renderer supporting:
  * - Markdown links [text](url)
@@ -25,11 +32,13 @@ function renderInline(text: string): React.ReactNode[] {
     if (linkMatch) {
       const linkText = linkMatch[1];
       const linkUrl = linkMatch[2];
+      const href = safeHref(linkUrl);
+      if (!href) return <React.Fragment key={index}>{linkText}</React.Fragment>;
       const isExternal = /^https?:\/\//i.test(linkUrl);
       return (
         <a
           key={index}
-          href={linkUrl}
+          href={href}
           target={isExternal ? "_blank" : undefined}
           rel={isExternal ? "noopener noreferrer" : undefined}
           className="md-link"
@@ -219,7 +228,7 @@ function parseBlocks(markdown: string): Block[] {
   return blocks;
 }
 
-export const ChatMarkdown: React.FC<{ text: string }> = ({ text }) => {
+export const ChatMarkdown = React.memo(function ChatMarkdown({ text }: { text: string }) {
   if (!text) return null;
 
   const blocks = parseBlocks(text);
@@ -309,4 +318,4 @@ export const ChatMarkdown: React.FC<{ text: string }> = ({ text }) => {
       })}
     </div>
   );
-};
+});

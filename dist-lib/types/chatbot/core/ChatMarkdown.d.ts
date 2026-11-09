@@ -1,4 +1,5 @@
 import React from "react";
-export declare const ChatMarkdown: React.FC<{
+export declare function safeHref(value: string): string | undefined;
+export declare const ChatMarkdown: React.NamedExoticComponent<{
     text: string;
 }>;

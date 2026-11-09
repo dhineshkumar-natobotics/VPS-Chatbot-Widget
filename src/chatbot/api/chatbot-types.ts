@@ -52,6 +52,20 @@ export interface ChatUserContext {
 export interface ChatAccessContext {
   roleId?: number;
   client?: "mobile" | "web" | "admin";
+  modelId?: string;
+}
+
+export interface ModelOption {
+  id: string;
+  label: string;
+  model: string;
+  configured: boolean;
+}
+
+export interface ModelCatalog {
+  defaultModelId: string;
+  complexModelId?: string | null;
+  models: ModelOption[];
 }
 
 export interface Ticket {

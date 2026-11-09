@@ -16,9 +16,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   disabled = false,
   placeholder = "Ask something…",
 }) => {
-  const { suggestions, showSuggestions, suggestionBadgesEnabled } = useChatbot();
+  const { suggestions, showSuggestions, suggestionBadgesEnabled, models, selectedModelId, selectModel } = useChatbot();
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const modelPickerId = React.useId();
   const resize = (element?: HTMLTextAreaElement | null) => {
     if (!element) return;
     element.style.height = "auto";
@@ -95,6 +96,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           <ArrowUp size={16} />
         </button>
       </div>
+      {models.length > 1 && (
+        <div className="chat-model-picker">
+          <label htmlFor={modelPickerId}>AI model</label>
+          <select id={modelPickerId} aria-label="AI model" value={selectedModelId} disabled={disabled}
+            onChange={(event) => selectModel(event.target.value)}>
+            <option value="auto">Automatic</option>
+            {models.map((model) => (
+              <option key={model.id} value={model.id} disabled={!model.configured}>{model.label}</option>
+            ))}
+          </select>
+        </div>
+      )}
       <p className="chat-input-footer">
         Powered by <span className="chat-input-footer-brand">VPS Veritas AI</span>
       </p>

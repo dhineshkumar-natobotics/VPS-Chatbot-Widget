@@ -4,6 +4,7 @@ import type {
   ChatUserContext,
   Suggestion,
   Ticket,
+  ModelOption,
 } from "../api/chatbot-types";
 
 export type ChatUiStatus = "idle" | "connecting" | "awaiting" | "error";
@@ -33,6 +34,9 @@ export interface ChatContextValue {
   confirmTicket: (customerIdOrEmail?: string) => Promise<void>;
   cancelTicket: () => void;
   resetConversation: () => Promise<void>;
+  models: ModelOption[];
+  selectedModelId: string;
+  selectModel: (modelId: string) => void;
 }
 
 export const ChatContext = createContext<ChatContextValue | null>(null);

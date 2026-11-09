@@ -41,6 +41,7 @@ export interface EmbeddedChatbotProps {
   hideInspectSources?: boolean;
   /** Whether to show grounded sources (default: true) */
   showGroundedSources?: boolean;
+  modelId?: string;
 }
 
 const EmbeddedChatbotView: React.FC<Omit<
@@ -93,6 +94,7 @@ export const EmbeddedChatbot: React.FC<EmbeddedChatbotProps> = ({
   initialMessage,
   hideInspectSources,
   showGroundedSources,
+  modelId,
   ...viewProps
 }) => {
   const existingContext = useOptionalChatContext();
@@ -110,7 +112,7 @@ export const EmbeddedChatbot: React.FC<EmbeddedChatbotProps> = ({
     disableSuggestions === undefined &&
     !initialMessage &&
     hideInspectSources === undefined &&
-    showGroundedSources === undefined;
+    showGroundedSources === undefined && modelId === undefined;
 
   if (canReuseContext) {
     return <EmbeddedChatbotView {...viewProps} />;
@@ -129,6 +131,7 @@ export const EmbeddedChatbot: React.FC<EmbeddedChatbotProps> = ({
       initialMessage={initialMessage}
       hideInspectSources={hideInspectSources}
       showGroundedSources={showGroundedSources}
+      modelId={modelId}
     >
       <EmbeddedChatbotView {...viewProps} />
     </ChatProvider>

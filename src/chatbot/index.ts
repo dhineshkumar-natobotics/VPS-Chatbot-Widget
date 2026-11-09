@@ -23,6 +23,8 @@ export type {
   TokenUsage,
   ChatRole,
   MessageStatus,
+  ModelOption,
+  ModelCatalog,
 } from "./api/chatbot-types";
 export type { EnvStage } from "../components/EnvBadge";
 

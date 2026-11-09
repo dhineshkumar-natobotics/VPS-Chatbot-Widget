@@ -41,6 +41,7 @@ export interface ChatbotWidgetProps {
   hideInspectSources?: boolean;
   /** Whether to show grounded sources (default: true) */
   showGroundedSources?: boolean;
+  modelId?: string;
 }
 
 const ChatbotWidgetView: React.FC<Omit<
@@ -90,6 +91,7 @@ export const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
   initialMessage,
   hideInspectSources,
   showGroundedSources,
+  modelId,
   ...viewProps
 }) => {
   const existingContext = useOptionalChatContext();
@@ -107,7 +109,7 @@ export const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
     disableSuggestions === undefined &&
     !initialMessage &&
     hideInspectSources === undefined &&
-    showGroundedSources === undefined;
+    showGroundedSources === undefined && modelId === undefined;
 
   if (canReuseContext) {
     return <ChatbotWidgetView {...viewProps} />;
@@ -126,6 +128,7 @@ export const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
       initialMessage={initialMessage}
       hideInspectSources={hideInspectSources}
       showGroundedSources={showGroundedSources}
+      modelId={modelId}
     >
       <ChatbotWidgetView {...viewProps} />
     </ChatProvider>

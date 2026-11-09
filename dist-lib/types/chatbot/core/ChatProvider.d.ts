@@ -27,5 +27,7 @@ export interface ChatProviderProps {
     hideInspectSources?: boolean;
     /** Whether to render grounded sources (default: true) */
     showGroundedSources?: boolean;
+    /** Configured model alias, or auto for server-side routing. */
+    modelId?: string;
 }
 export declare const ChatProvider: React.FC<ChatProviderProps>;

@@ -35,5 +35,6 @@ export interface EmbeddedChatbotProps {
     hideInspectSources?: boolean;
     /** Whether to show grounded sources (default: true) */
     showGroundedSources?: boolean;
+    modelId?: string;
 }
 export declare const EmbeddedChatbot: React.FC<EmbeddedChatbotProps>;

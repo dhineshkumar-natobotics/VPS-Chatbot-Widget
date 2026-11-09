@@ -4,6 +4,7 @@ import type { ChatMessage, ToolCall } from "../api/chatbot-types";
 import { ChatMarkdown } from "./ChatMarkdown";
 import { ChatTypingIndicator } from "./ChatTypingIndicator";
 import { AgentReasoning } from "./AgentReasoning";
+import { GroundedSources } from "./GroundedSources";
 
 import { useOptionalChatContext } from "./ChatContext";
 
@@ -103,6 +104,9 @@ export const ChatMessageBubble: React.FC<ChatMessageProps> = ({ message }) => {
           )}
 
           {message.toolCalls ? <Tools toolCalls={message.toolCalls} /> : null}
+          {!isUser && !isPending && !isError && showGroundedSources && message.sources?.length ? (
+            <GroundedSources sources={message.sources} hideInspectSources={hideInspectSources} />
+          ) : null}
         </div>
         {isUser && message.status !== "error" && (
           <Check size={13} className="msg-tick" aria-hidden="true" />

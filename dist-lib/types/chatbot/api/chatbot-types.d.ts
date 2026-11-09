@@ -25,6 +25,7 @@ export interface ChatMessage {
     createdAt: string;
     status?: MessageStatus;
     progressText?: string;
+    durationMs?: number;
     sources?: Source[];
     toolCalls?: ToolCall[];
     usage?: TokenUsage;
@@ -44,6 +45,18 @@ export interface ChatUserContext {
 export interface ChatAccessContext {
     roleId?: number;
     client?: "mobile" | "web" | "admin";
+    modelId?: string;
+}
+export interface ModelOption {
+    id: string;
+    label: string;
+    model: string;
+    configured: boolean;
+}
+export interface ModelCatalog {
+    defaultModelId: string;
+    complexModelId?: string | null;
+    models: ModelOption[];
 }
 export interface Ticket {
     ticketId: string;
@@ -117,6 +130,7 @@ export interface ChatResponseDto {
     sources: SourceDto[];
     tool_calls?: ToolCallDto[];
     usage: TokenUsageDto;
+    duration_ms?: number;
     role?: RoleDto | null;
 }
 export interface RoleDto {

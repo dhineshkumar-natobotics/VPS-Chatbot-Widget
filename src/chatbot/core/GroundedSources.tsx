@@ -83,7 +83,7 @@ export const GroundedSources: React.FC<GroundedSourcesProps> = ({
       <div className="grounded-sources-header">
         <div className="grounded-sources-badge">
           <ShieldCheck size={13} className="grounded-shield-icon" />
-          <span>Grounded in {topSources.length} Verified VPS Sources</span>
+          <span>{topSources.length} retrieved VPS sources</span>
         </div>
         {!shouldHideInspect && (
           <button
@@ -101,7 +101,6 @@ export const GroundedSources: React.FC<GroundedSourcesProps> = ({
       <div className="grounded-pills-row">
         {topSources.map((source, idx) => {
           const title = formatDocTitle(source);
-          const scorePct = Math.round(source.score * 100);
           const isSelected = activeSnippetIdx === idx;
 
           return (
@@ -118,8 +117,8 @@ export const GroundedSources: React.FC<GroundedSourcesProps> = ({
               title={source.source}
             >
               <BookOpen size={11} className="grounded-book-icon" />
-              <span className="grounded-pill-title">{title}</span>
-              <span className="grounded-pill-score">{scorePct}% match</span>
+              <span className="grounded-pill-title">[S{idx + 1}] {title}</span>
+              <span className="grounded-pill-score" title="Ranking score, not a probability of correctness">Score {source.score.toFixed(2)}</span>
             </button>
           );
         })}
@@ -129,7 +128,6 @@ export const GroundedSources: React.FC<GroundedSourcesProps> = ({
         <div className="grounded-sources-details-list">
           {topSources.map((source, idx) => {
             const title = formatDocTitle(source);
-            const scorePct = Math.round(source.score * 100);
             const routeHint = getRouteHint(source.source);
             const isHighlighted = activeSnippetIdx === idx;
 
@@ -144,7 +142,7 @@ export const GroundedSources: React.FC<GroundedSourcesProps> = ({
                     <span className="grounded-detail-title">{title}</span>
                   </div>
                   <div className="grounded-detail-meta">
-                    <span className="grounded-detail-score">{scorePct}% Match</span>
+                    <span className="grounded-detail-score">Rank score {source.score.toFixed(2)}</span>
                     {routeHint && (
                       <a
                         href={routeHint.path}

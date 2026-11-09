@@ -34,5 +34,6 @@ export interface ChatbotWidgetProps {
     hideInspectSources?: boolean;
     /** Whether to show grounded sources (default: true) */
     showGroundedSources?: boolean;
+    modelId?: string;
 }
 export declare const ChatbotWidget: React.FC<ChatbotWidgetProps>;

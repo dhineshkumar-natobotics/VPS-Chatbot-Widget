@@ -4,6 +4,7 @@ import type {
   ChatMessage,
   ChatUserContext,
   Suggestion,
+  ModelOption,
 } from "../api/chatbot-types";
 import { DEFAULT_SUGGESTIONS } from "../config/suggestions";
 import { ChatContext, type ChatUiStatus } from "./ChatContext";
@@ -34,6 +35,8 @@ export interface ChatProviderProps {
   hideInspectSources?: boolean;
   /** Whether to render grounded sources (default: true) */
   showGroundedSources?: boolean;
+  /** Configured model alias, or auto for server-side routing. */
+  modelId?: string;
 }
 
 const DEFAULT_WELCOME_TEXT = `Hello! I am your **VPS Veritas assistant**.
@@ -77,6 +80,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   api,
   hideInspectSources = false,
   showGroundedSources = true,
+  modelId = "auto",
 }) => {
   const resolvedBaseUrl = apiBaseUrl ?? apiUrl ?? proxyUrl;
   const client = useMemo(
@@ -112,17 +116,50 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const [error, setError] = useState<string | null>(null);
   const lastUserTextRef = useRef<string | null>(null);
   const initialSentRef = useRef(false);
+  const activeRequest = useRef<AbortController | null>(null);
+  const busyRef = useRef(false);
+  const [models, setModels] = useState<ModelOption[]>([]);
+  const [selectedModelId, setSelectedModelId] = useState(modelId);
 
-  const ensureSession = useCallback(async (): Promise<string> => {
+  React.useEffect(() => setSelectedModelId(modelId), [modelId]);
+  React.useEffect(() => {
+    let active = true;
+    setModels([]);
+    void client.listModels?.().then((catalog) => {
+      if (active) setModels(catalog?.models || []);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [client]);
+
+  const selectModel = useCallback((next: string) => {
+    if (!busyRef.current && (next === "auto" || models.some((m) => m.id === next && m.configured))) {
+      setSelectedModelId(next);
+    }
+  }, [models]);
+
+  React.useEffect(() => () => activeRequest.current?.abort(), []);
+
+  const ensureSession = useCallback(async (signal: AbortSignal): Promise<string> => {
     if (sessionId) return sessionId;
     setStatus("connecting");
-    const created = await client.createSession();
+    const created = await client.createSession(signal);
+    if (signal.aborted) throw new DOMException("Aborted", "AbortError");
     setSessionId(created.sessionId);
     return created.sessionId;
   }, [sessionId, client]);
 
   const sendToBackend = useCallback(
     async (text: string) => {
+      if (busyRef.current) return;
+      busyRef.current = true;
+      const controller = new AbortController();
+      activeRequest.current = controller;
+      let frame: number | undefined;
+      let pendingText = "";
+      const cancelFrame = () => {
+        if (frame !== undefined) cancelAnimationFrame(frame);
+        frame = undefined;
+      };
       lastUserTextRef.current = text;
       const userMessage: ChatMessage = {
         id: newId("user"),
@@ -147,6 +184,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       setError(null);
 
       const updateProgress = (stageText: string) => {
+        if (controller.signal.aborted) return;
         setMessages((prev) =>
           prev.map((message) =>
             message.id === pendingId
@@ -157,7 +195,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       };
 
       try {
-        const currentSession = await ensureSession();
+        const currentSession = await ensureSession(controller.signal);
         const response = client.sendMessageStream
           ? await client.sendMessageStream(
             currentSession,
@@ -165,22 +203,28 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
             {
               roleId: effectiveUserContext.roleId,
               client: effectiveUserContext.client,
+              modelId: selectedModelId,
             },
             updateProgress,
             (token) => {
-              setMessages((prev) =>
-                prev.map((message) =>
-                  message.id === pendingId
-                    ? { ...message, content: message.content + token }
-                    : message
-                )
-              );
-            }
+              if (controller.signal.aborted) return;
+              pendingText += token;
+              if (frame === undefined) frame = requestAnimationFrame(() => {
+                frame = undefined;
+                if (!controller.signal.aborted) setMessages((prev) => prev.map((message) =>
+                  message.id === pendingId ? { ...message, content: pendingText } : message));
+              });
+            },
+            controller.signal
           )
           : await client.sendMessage(currentSession, text, {
             roleId: effectiveUserContext.roleId,
             client: effectiveUserContext.client,
-          });
+            modelId: selectedModelId,
+          }, controller.signal);
+
+        cancelFrame();
+        if (controller.signal.aborted) return;
 
         setMessages((prev) =>
           prev.map((message) =>
@@ -204,6 +248,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         );
         setStatus("idle");
       } catch (err) {
+        cancelFrame();
+        if (controller.signal.aborted) return;
         const message = friendlyError(err);
         setMessages((prev) =>
           prev.map((item) =>
@@ -214,9 +260,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         );
         setError(message);
         setStatus("error");
+      } finally {
+        cancelFrame();
+        if (activeRequest.current === controller) {
+          activeRequest.current = null;
+          busyRef.current = false;
+        }
       }
     },
-    [ensureSession, client, effectiveUserContext.client, effectiveUserContext.roleId]
+    [ensureSession, client, effectiveUserContext.client, effectiveUserContext.roleId, selectedModelId]
   );
 
   const sendMessage = useCallback(
@@ -229,6 +281,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   );
 
   const retryLast = useCallback(async () => {
+    if (busyRef.current) return;
     const last = lastUserTextRef.current;
     if (!last) return;
     setMessages((prev) => prev.filter((message) => message.status !== "error"));
@@ -239,14 +292,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const cancelTicket = useCallback(() => { }, []);
 
   const resetConversation = useCallback(async () => {
-    if (sessionId) {
-      await client.closeSession(sessionId);
-    }
+    activeRequest.current?.abort();
+    activeRequest.current = null;
+    busyRef.current = false;
     setSessionId(null);
     setMessages(defaultWelcomeMsg ? [defaultWelcomeMsg] : []);
     setStatus("idle");
     setError(null);
     lastUserTextRef.current = null;
+    if (sessionId) await client.closeSession(sessionId);
   }, [sessionId, client, defaultWelcomeMsg]);
 
   React.useEffect(() => {
@@ -279,6 +333,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       confirmTicket,
       cancelTicket,
       resetConversation,
+      models,
+      selectedModelId,
+      selectModel,
     }),
     [
       messages,
@@ -296,6 +353,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       confirmTicket,
       cancelTicket,
       resetConversation,
+      models,
+      selectedModelId,
+      selectModel,
     ]
   );
 
