@@ -1806,7 +1806,7 @@ button {
   transform: rotate(180deg);
 }
 
-/* ── AgentReasoning (ChatGPT / Open WebUI style thinking) ───────── */
+/* ── Live response progress and timing ────────────────────────── */
 .agent-reasoning-container {
   margin-bottom: 8px;
   font-family: var(--font-main);
@@ -1824,21 +1824,15 @@ button {
   font-family: var(--font-main);
   font-size: 11.5px;
   font-weight: 500;
-  cursor: pointer;
+  cursor: default;
   user-select: none;
   transition: all 0.15s ease;
 }
 
-.agent-reasoning-header:hover {
-  background: var(--dark-blue-100);
-  border-color: var(--dark-blue-200);
-  color: var(--vps-dark-blue);
-}
-
 .agent-reasoning--active .agent-reasoning-header {
-  background: var(--orange-50);
-  border-color: var(--orange-100);
-  color: var(--vps-orange);
+  background: var(--dark-blue-50);
+  border-color: var(--dark-blue-100);
+  color: var(--vps-dark-blue);
 }
 
 .agent-reasoning-header-left {
@@ -1847,28 +1841,15 @@ button {
   gap: 6px;
 }
 
-.agent-reasoning-brain-icon {
-  color: var(--vps-orange);
+.agent-reasoning-spinner {
+  color: var(--primary, #0284c7);
   flex-shrink: 0;
+  animation: spinSlow 1s linear infinite;
 }
 
-.agent-reasoning-brain--pulse {
-  color: var(--vps-orange);
-  animation: brainPulse 1.4s ease-in-out infinite;
-}
-
-@keyframes brainPulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  50% {
-    transform: scale(1.15);
-    opacity: 0.7;
-  }
+.agent-reasoning-done-icon {
+  color: var(--green-600, #16a34a);
+  flex-shrink: 0;
 }
 
 .agent-reasoning-title {
@@ -1876,137 +1857,6 @@ button {
   font-weight: 500;
   font-family: var(--font-main);
   letter-spacing: -0.01em;
-}
-
-.agent-reasoning-header-right {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--grey-600);
-}
-
-.agent-live-badge {
-  font-size: 9px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 1px 5px;
-  border-radius: 3px;
-  background: var(--orange-100);
-  color: var(--vps-orange);
-  font-family: var(--font-main);
-}
-
-.agent-reasoning-body {
-  margin-top: 5px;
-  margin-bottom: 8px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: var(--dark-blue-50);
-  border: 1px solid var(--dark-blue-100);
-  font-family: var(--font-main);
-}
-
-.agent-stepper {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.agent-step-item {
-  display: flex;
-  gap: 10px;
-  position: relative;
-  font-family: var(--font-main);
-}
-
-.agent-step-indicator {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 16px;
-}
-
-.agent-step-circle {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  font-size: 9px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--dark-blue-100);
-  color: var(--vps-dark-blue);
-  flex-shrink: 0;
-  z-index: 1;
-  font-family: var(--font-main);
-}
-
-.agent-step-check {
-  color: var(--success-600);
-  flex-shrink: 0;
-  z-index: 1;
-}
-
-.agent-step-spinner {
-  width: 13px;
-  height: 13px;
-  border: 2px solid var(--orange-100);
-  border-top-color: var(--vps-orange);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  flex-shrink: 0;
-  z-index: 1;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.agent-step-line {
-  width: 1.5px;
-  flex-grow: 1;
-  min-height: 14px;
-  background: var(--dark-blue-200);
-  margin: 2px 0;
-}
-
-.agent-step-content {
-  padding-bottom: 8px;
-}
-
-.agent-step-label-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.agent-step-label {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--vps-dark-blue);
-  font-family: var(--font-main);
-}
-
-.agent-step-active-tag {
-  font-size: 9px;
-  padding: 1px 4px;
-  border-radius: 3px;
-  background: var(--orange-50);
-  color: var(--vps-orange);
-  border: 1px solid var(--orange-100);
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
-.agent-step-detail {
-  font-size: 10.5px;
-  color: var(--grey-600);
-  margin-top: 1px;
-  font-family: var(--font-main);
 }
 
 /* ── Grounded Knowledge Sources ───────────────────────────────── */

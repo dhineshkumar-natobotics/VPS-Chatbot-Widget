@@ -138,8 +138,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         content: "",
         createdAt: new Date().toISOString(),
         status: "pending",
-        progressText: "Analyzing question & expanding domain terms ",
+        progressText: "Preparing your answer…",
       };
+      const requestStartedAt = performance.now();
 
       setMessages((prev) => [...prev, userMessage, pendingAssistant]);
       setStatus("awaiting");
@@ -155,8 +156,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         );
       };
 
-
-
       try {
         const currentSession = await ensureSession();
         const response = client.sendMessageStream
@@ -167,9 +166,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
               roleId: effectiveUserContext.roleId,
               client: effectiveUserContext.client,
             },
-            (liveStage) => {
-
-              updateProgress(liveStage);
+            updateProgress,
+            (token) => {
+              setMessages((prev) =>
+                prev.map((message) =>
+                  message.id === pendingId
+                    ? { ...message, content: message.content + token }
+                    : message
+                )
+              );
             }
           )
           : await client.sendMessage(currentSession, text, {
@@ -189,6 +194,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
                 sources: response.sources,
                 toolCalls: response.toolCalls,
                 usage: response.usage,
+                durationMs: Math.max(
+                  Math.round(performance.now() - requestStartedAt),
+                  response.durationMs ?? 0
+                ),
               }
               : message
           )

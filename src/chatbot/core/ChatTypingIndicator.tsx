@@ -1,5 +1,4 @@
 import React from "react";
-import { Sparkles } from "lucide-react";
 import { cn } from "../../lib/cn";
 
 export const ChatTypingIndicator: React.FC<{
@@ -12,16 +11,12 @@ export const ChatTypingIndicator: React.FC<{
       role="status"
       aria-label="Assistant is preparing a reply"
     >
-      {/* <div className="typing-indicator">
+      <div className="typing-indicator" aria-hidden="true">
         <span className="typing-dot" />
         <span className="typing-dot" />
         <span className="typing-dot" />
-      </div> */}
-      <div className="typing-progress-pill">
-        <span className="typing-progress-text">
-          {text || "Retrieving knowledge & generating answer ..."}
-        </span>
       </div>
+      {text && <div className="typing-progress-pill">{text}</div>}
     </div>
   );
 };

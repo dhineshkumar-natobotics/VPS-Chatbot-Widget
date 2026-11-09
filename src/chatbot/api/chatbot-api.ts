@@ -154,12 +154,14 @@ export interface ChatApiClient {
     sources: Source[];
     toolCalls: ToolCall[];
     usage: TokenUsage;
+    durationMs?: number;
   }>;
   sendMessageStream?(
     sessionId: string,
     message: string,
     access?: ChatAccessContext,
-    onProgress?: (stage: string) => void
+    onProgress?: (stage: string) => void,
+    onToken?: (token: string) => void
   ): Promise<{
     requestId: string;
     sessionId: string;
@@ -167,6 +169,7 @@ export interface ChatApiClient {
     sources: Source[];
     toolCalls: ToolCall[];
     usage: TokenUsage;
+    durationMs?: number;
   }>;
   getHistory(sessionId: string): Promise<ChatMessage[]>;
   closeSession(sessionId: string): Promise<void>;
@@ -236,6 +239,7 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
         sources: (dto.sources || []).map(normalizeSource),
         toolCalls: (dto.tool_calls || []).map(normalizeToolCall),
         usage: normalizeUsage(dto.usage),
+        durationMs: dto.duration_ms,
       };
     },
 
@@ -243,7 +247,8 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
       sessionId: string,
       message: string,
       access?: ChatAccessContext,
-      onProgress?: (stage: string) => void
+      onProgress?: (stage: string) => void,
+      onToken?: (token: string) => void
     ) {
       const url = buildApiUrl(baseUrl, `/api/v1/sessions/${sessionId}/messages/stream`);
       try {
@@ -259,65 +264,112 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
           }),
         });
 
-        if (!response.ok || !response.body) {
-          return await this.sendMessage(sessionId, message, access);
+        if (!response.ok) {
+          if (response.status === 404 || response.status === 405) {
+            return await this.sendMessage(sessionId, message, access);
+          }
+          const payload = await readJson(response);
+          throw parseApiError(
+            payload,
+            "I couldn't process that request right now.",
+            response.status
+          );
+        }
+        if (!response.body) {
+          throw { message: "The response stream ended unexpectedly." } satisfies ChatApiError;
         }
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = "";
-        let finalResult: {
+        type StreamResult = {
           requestId: string;
           sessionId: string;
           answer: string;
           sources: Source[];
           toolCalls: ToolCall[];
           usage: TokenUsage;
-        } | null = null;
+          durationMs?: number;
+        };
+        const finalResult: { value: StreamResult | null } = { value: null };
+
+        const processFrame = (frame: string) => {
+          const dataLine = frame
+            .split(/\r?\n/)
+            .find((line) => line.startsWith("data:"));
+          if (!dataLine) return;
+
+          let data: {
+            type?: string;
+            stage?: string;
+            text?: string;
+            request_id?: string;
+            session_id?: string;
+            answer?: string;
+            sources?: SourceDto[];
+            tool_calls?: ToolCallDto[];
+            usage?: TokenUsageDto;
+            duration_ms?: number;
+            message?: string;
+          } = {};
+          try {
+            const parsed: unknown = JSON.parse(dataLine.slice(5).trim());
+            if (!parsed || typeof parsed !== "object") return;
+            data = parsed as typeof data;
+          } catch {
+            return;
+          }
+
+          if (data.type === "progress" && typeof data.stage === "string") {
+            onProgress?.(data.stage);
+          } else if (data.type === "token" && typeof data.text === "string") {
+            onToken?.(data.text);
+          } else if (data.type === "complete") {
+            finalResult.value = {
+              requestId: data.request_id || "",
+              sessionId: data.session_id || sessionId,
+              answer: data.answer || "",
+              sources: (data.sources || []).map(normalizeSource),
+              toolCalls: (data.tool_calls || []).map(normalizeToolCall),
+              usage: data.usage
+                ? normalizeUsage(data.usage)
+                : { model: "", promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+              durationMs: data.duration_ms,
+            };
+          } else if (data.type === "error") {
+            throw {
+              message: data.message || "I couldn't process that request right now.",
+              requestId: data.request_id,
+            } satisfies ChatApiError;
+          }
+        };
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n\n");
-          buffer = lines.pop() || "";
-
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (trimmed.startsWith("data:")) {
-              try {
-                const data = JSON.parse(trimmed.slice(5).trim());
-                if (data.type === "progress" && data.stage) {
-                  onProgress?.(data.stage);
-                } else if (data.type === "complete") {
-                  finalResult = {
-                    requestId: data.request_id,
-                    sessionId: data.session_id,
-                    answer: data.answer,
-                    sources: (data.sources || []).map(normalizeSource),
-                    toolCalls: (data.tool_calls || []).map(normalizeToolCall),
-                    usage: normalizeUsage(data.usage),
-                  };
-                } else if (data.type === "error") {
-                  throw new Error(data.message || "An error occurred");
-                }
-              } catch (e) {
-                if (e instanceof Error && e.message !== "An error occurred") {
-                  // Ignore JSON parse error on incomplete chunk
-                } else {
-                  throw e;
-                }
-              }
-            }
-          }
+          const frames = buffer.split(/\r?\n\r?\n/);
+          buffer = frames.pop() || "";
+          for (const frame of frames) processFrame(frame);
         }
+        buffer += decoder.decode();
+        if (buffer.trim()) processFrame(buffer);
 
-        if (finalResult) {
-          return finalResult;
+        const completedResult = finalResult.value;
+        if (completedResult) {
+          return completedResult;
         }
-        return await this.sendMessage(sessionId, message, access);
-      } catch {
-        return await this.sendMessage(sessionId, message, access);
+        throw { message: "The response stream ended before the answer was complete." } satisfies ChatApiError;
+      } catch (error) {
+        if (
+          !(error instanceof Error) &&
+          error &&
+          typeof error === "object" &&
+          "message" in error
+        ) {
+          throw error;
+        }
+        throw { message: "Something went wrong while connecting. Please try again." } satisfies ChatApiError;
       }
     },
 

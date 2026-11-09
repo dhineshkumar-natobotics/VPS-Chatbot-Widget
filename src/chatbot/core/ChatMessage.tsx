@@ -47,9 +47,10 @@ export const ChatMessageBubble: React.FC<ChatMessageProps> = ({ message }) => {
     message.id.startsWith("welcome") ||
     message.id === "welcome";
 
-  // Only actual AI responses with retrieval, tools, or live pending state show the reasoning accordion
+  // Show response timing only for actual assistant replies and live requests.
   const isRealAssistantQuery = Boolean(
     isPending ||
+    message.durationMs !== undefined ||
     (message.sources && message.sources.length > 0) ||
     (message.toolCalls && message.toolCalls.length > 0) ||
     message.usage
@@ -76,17 +77,23 @@ export const ChatMessageBubble: React.FC<ChatMessageProps> = ({ message }) => {
                 : "msg-bubble msg-bubble--bot"
           }
         >
-          {/* Agent Reasoning Accordion (ChatGPT / Open WebUI style) only on real queries */}
+          {/* Show progress and elapsed time without exposing internal model reasoning. */}
           {showReasoning && (
             <AgentReasoning
               status={isPending ? "pending" : "complete"}
               progressText={message.progressText}
-              sourcesCount={message.sources?.length || 5}
+              durationMs={message.durationMs}
             />
           )}
 
           {isPending ? (
-            <ChatTypingIndicator text={message.progressText} />
+            message.content ? (
+              <div className="msg-content-wrapper msg-content-wrapper--streaming">
+                <ChatMarkdown text={message.content} />
+              </div>
+            ) : (
+              <ChatTypingIndicator />
+            )
           ) : isUser ? (
             <p className="msg-user-pre">{message.content}</p>
           ) : (

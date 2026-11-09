@@ -30,6 +30,7 @@ export interface ChatMessage {
   createdAt: string;
   status?: MessageStatus;
   progressText?: string;
+  durationMs?: number;
   sources?: Source[];
   toolCalls?: ToolCall[];
   usage?: TokenUsage;
@@ -136,6 +137,7 @@ export interface ChatResponseDto {
   sources: SourceDto[];
   tool_calls?: ToolCallDto[];
   usage: TokenUsageDto;
+  duration_ms?: number;
   role?: RoleDto | null;
 }
 
