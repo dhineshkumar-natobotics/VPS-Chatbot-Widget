@@ -1827,6 +1827,12 @@ button {
 }
 
 /* ── Live response progress and timing ────────────────────────── */
+.msg-streaming-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+}
+
 .agent-reasoning-container {
   margin-bottom: 8px;
   font-family: var(--font-main);

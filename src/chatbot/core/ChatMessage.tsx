@@ -90,7 +90,8 @@ export const ChatMessageBubble: React.FC<ChatMessageProps> = ({ message }) => {
           {isPending ? (
             message.content ? (
               <div className="msg-content-wrapper msg-content-wrapper--streaming">
-                <ChatMarkdown text={message.content} />
+                {/* Avoid reparsing the full Markdown document on every token frame. */}
+                <div className="msg-streaming-text">{message.content}</div>
               </div>
             ) : (
               <ChatTypingIndicator />

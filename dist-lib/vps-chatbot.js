@@ -1,7 +1,7 @@
 import { jsx as l, jsxs as w, Fragment as De } from "react/jsx-runtime";
 import * as d from "react";
-import oe, { createContext as Rt, useContext as ct, useMemo as ye, useState as U, useRef as re, useCallback as ue, forwardRef as ut, createElement as He, useEffect as ke } from "react";
-const At = {};
+import oe, { createContext as Et, useContext as it, useMemo as ye, useState as U, useRef as re, useCallback as ue, forwardRef as ct, createElement as He, useEffect as ke } from "react";
+const Rt = {};
 function ve(e) {
   return e != null && e.trim() !== "" ? e.trim().replace(/\/+$/, "") : String("").trim().replace(/\/+$/, "");
 }
@@ -24,13 +24,13 @@ function Xe(e) {
 function Ze(e, t, n) {
   var o, a, i;
   const r = e, s = (o = r == null ? void 0 : r.error) == null ? void 0 : o.message;
-  return s && !Nt(s) ? {
+  return s && !At(s) ? {
     code: (a = r == null ? void 0 : r.error) == null ? void 0 : a.code,
     message: s,
     requestId: (i = r == null ? void 0 : r.error) == null ? void 0 : i.request_id
   } : n >= 500 ? { message: "I couldn't process that request right now." } : n === 0 ? { message: "Something went wrong while connecting. Please try again." } : { message: t };
 }
-function Nt(e) {
+function At(e) {
   return /traceback|sql|exception|stack|api[_ ]?key|password/i.test(e);
 }
 function xe(e) {
@@ -57,7 +57,7 @@ function qe(e) {
     totalTokens: e.total_tokens
   };
 }
-function It(e) {
+function Nt(e) {
   const t = e.role === "user" || e.role === "system" ? e.role : "assistant";
   return {
     id: String(e.id),
@@ -82,7 +82,7 @@ async function Oe(e) {
     return {};
   }
 }
-function dt(e) {
+function ut(e) {
   const t = ve(e);
   async function n(r, s) {
     let o;
@@ -254,7 +254,7 @@ function dt(e) {
       try {
         return ((await n(
           `/api/v1/sessions/${r}/messages`
-        )).messages || []).map(It);
+        )).messages || []).map(Nt);
       } catch {
         return [];
       }
@@ -278,7 +278,7 @@ function dt(e) {
     }
   };
 }
-const Sn = dt(), Mt = [
+const Sn = ut(), It = [
   {
     label: "How do I access my reports?",
     query: "How do I access my reports in the VPS Customer Portal?"
@@ -295,17 +295,17 @@ const Sn = dt(), Mt = [
     label: "How do I contact VPS Support?",
     query: "How can I contact VPS Customer Support?"
   }
-], Ve = Rt(null);
-function Dt() {
-  const e = ct(Ve);
+], Ve = Et(null);
+function Mt() {
+  const e = it(Ve);
   if (!e)
     throw new Error("useChatbot must be used inside ChatProvider.");
   return e;
 }
 function Ge() {
-  return ct(Ve);
+  return it(Ve);
 }
-const Bt = `Hello! I am your **VPS Veritas assistant**.
+const Dt = `Hello! I am your **VPS Veritas assistant**.
 
 I can help you with:
 - **Fuel Quality Testing (FQT)** & **Oil Condition Monitoring (OCM)**
@@ -318,7 +318,7 @@ Feel free to ask a question or select one of the suggested topics below!`;
 function et(e) {
   return `${e}-${crypto.randomUUID()}`;
 }
-function Pt(e) {
+function Bt(e) {
   if (e && typeof e == "object" && "message" in e) {
     const t = String(e.message);
     if (t && !/traceback|sql|exception|stack|api[_ ]?key|password/i.test(t))
@@ -326,14 +326,14 @@ function Pt(e) {
   }
   return "I couldn't process that request right now.";
 }
-const ht = ({
+const dt = ({
   children: e,
   userContext: t = {},
   role: n,
   roleId: r,
   client: s,
   welcomeMessage: o,
-  suggestions: a = Mt,
+  suggestions: a = It,
   disableSuggestions: i = !1,
   initialMessage: u,
   apiBaseUrl: h,
@@ -345,7 +345,7 @@ const ht = ({
   modelId: k = "auto"
 }) => {
   const v = h ?? g ?? f, m = ye(
-    () => c ?? dt(v),
+    () => c ?? ut(v),
     [c, v]
   ), B = ye(() => ({
     ...t,
@@ -355,7 +355,7 @@ const ht = ({
   }), [t, n, r, s]), T = ye(() => o === "" ? null : {
     id: "welcome-default",
     role: "assistant",
-    content: o || Bt,
+    content: o || Dt,
     createdAt: (/* @__PURE__ */ new Date()).toISOString(),
     status: "complete"
   }, [o]), [x, C] = U(null), [N, I] = U(() => T ? [T] : []), [z, q] = U("idle"), [le, K] = U(null), y = re(null), A = re(!1), M = re(null), D = re(!1), [P, O] = U([]), [L, Y] = U(k);
@@ -457,7 +457,7 @@ const ht = ({
         ), q("idle");
       } catch (X) {
         if (me(), S.signal.aborted) return;
-        const j = Pt(X);
+        const j = Bt(X);
         I(
           (Z) => Z.map(
             (Q) => Q.id === se ? { ...Q, content: j, status: "error", progressText: void 0 } : Q
@@ -536,9 +536,9 @@ const ht = ({
   return /* @__PURE__ */ l(Ve.Provider, { value: Te, children: e });
 };
 function Be() {
-  return Dt();
+  return Mt();
 }
-const xt = ({ message: e, onRetry: t }) => /* @__PURE__ */ w(
+const Pt = ({ message: e, onRetry: t }) => /* @__PURE__ */ w(
   "div",
   {
     className: "chat-error-banner",
@@ -563,14 +563,14 @@ const xt = ({ message: e, onRetry: t }) => /* @__PURE__ */ w(
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Lt = (e) => e.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase(), pt = (...e) => e.filter((t, n, r) => !!t && t.trim() !== "" && r.indexOf(t) === n).join(" ").trim();
+const xt = (e) => e.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase(), ht = (...e) => e.filter((t, n, r) => !!t && t.trim() !== "" && r.indexOf(t) === n).join(" ").trim();
 /**
  * @license lucide-react v0.468.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-var qt = {
+var Lt = {
   xmlns: "http://www.w3.org/2000/svg",
   width: 24,
   height: 24,
@@ -587,7 +587,7 @@ var qt = {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Ot = ut(
+const qt = ct(
   ({
     color: e = "currentColor",
     size: t = 24,
@@ -601,12 +601,12 @@ const Ot = ut(
     "svg",
     {
       ref: u,
-      ...qt,
+      ...Lt,
       width: t,
       height: t,
       stroke: e,
       strokeWidth: r ? Number(n) * 24 / Number(t) : n,
-      className: pt("lucide", s),
+      className: ht("lucide", s),
       ...i
     },
     [
@@ -622,11 +622,11 @@ const Ot = ut(
  * See the LICENSE file in the root directory of this source tree.
  */
 const H = (e, t) => {
-  const n = ut(
-    ({ className: r, ...s }, o) => He(Ot, {
+  const n = ct(
+    ({ className: r, ...s }, o) => He(qt, {
       ref: o,
       iconNode: t,
-      className: pt(`lucide-${Lt(e)}`, r),
+      className: ht(`lucide-${xt(e)}`, r),
       ...s
     })
   );
@@ -638,7 +638,7 @@ const H = (e, t) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const $t = H("ArrowDown", [
+const Ot = H("ArrowDown", [
   ["path", { d: "M12 5v14", key: "s699le" }],
   ["path", { d: "m19 12-7 7-7-7", key: "1idqje" }]
 ]);
@@ -648,7 +648,7 @@ const $t = H("ArrowDown", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Ht = H("ArrowLeft", [
+const $t = H("ArrowLeft", [
   ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
   ["path", { d: "M19 12H5", key: "x3x0zl" }]
 ]);
@@ -658,7 +658,7 @@ const Ht = H("ArrowLeft", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const zt = H("ArrowUp", [
+const Ht = H("ArrowUp", [
   ["path", { d: "m5 12 7-7 7 7", key: "hav0vg" }],
   ["path", { d: "M12 19V5", key: "x0mq9r" }]
 ]);
@@ -668,7 +668,7 @@ const zt = H("ArrowUp", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Wt = H("BookOpen", [
+const zt = H("BookOpen", [
   ["path", { d: "M12 7v14", key: "1akyts" }],
   [
     "path",
@@ -684,7 +684,7 @@ const Wt = H("BookOpen", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const ft = H("BotMessageSquare", [
+const pt = H("BotMessageSquare", [
   ["path", { d: "M12 6V2H8", key: "1155em" }],
   ["path", { d: "m8 18-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z", key: "w2lp3e" }],
   ["path", { d: "M2 12h2", key: "1t8f8n" }],
@@ -698,14 +698,14 @@ const ft = H("BotMessageSquare", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Vt = H("Check", [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]]);
+const Wt = H("Check", [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]]);
 /**
  * @license lucide-react v0.468.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Gt = H("ChevronDown", [
+const Vt = H("ChevronDown", [
   ["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]
 ]);
 /**
@@ -714,14 +714,14 @@ const Gt = H("ChevronDown", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Ut = H("ChevronUp", [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]]);
+const Gt = H("ChevronUp", [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]]);
 /**
  * @license lucide-react v0.468.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const jt = H("CircleCheck", [
+const Ut = H("CircleCheck", [
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
   ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
 ]);
@@ -731,7 +731,7 @@ const jt = H("CircleCheck", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Yt = H("ClipboardCheck", [
+const jt = H("ClipboardCheck", [
   ["rect", { width: "8", height: "4", x: "8", y: "2", rx: "1", ry: "1", key: "tgr4d6" }],
   [
     "path",
@@ -748,7 +748,7 @@ const Yt = H("ClipboardCheck", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Jt = H("ExternalLink", [
+const Yt = H("ExternalLink", [
   ["path", { d: "M15 3h6v6", key: "1q9fwt" }],
   ["path", { d: "M10 14 21 3", key: "gplh6r" }],
   ["path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6", key: "a6xqqp" }]
@@ -759,7 +759,7 @@ const Jt = H("ExternalLink", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Kt = H("FlaskConical", [
+const Jt = H("FlaskConical", [
   [
     "path",
     {
@@ -776,7 +776,7 @@ const Kt = H("FlaskConical", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Qt = H("LoaderCircle", [
+const Kt = H("LoaderCircle", [
   ["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]
 ]);
 /**
@@ -785,7 +785,7 @@ const Qt = H("LoaderCircle", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const mt = H("MessageSquare", [
+const ft = H("MessageSquare", [
   ["path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z", key: "1lielz" }]
 ]);
 /**
@@ -794,7 +794,7 @@ const mt = H("MessageSquare", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Xt = H("Microscope", [
+const Qt = H("Microscope", [
   ["path", { d: "M6 18h8", key: "1borvv" }],
   ["path", { d: "M3 22h18", key: "8prr45" }],
   ["path", { d: "M14 22a7 7 0 1 0 0-14h-1", key: "1jwaiy" }],
@@ -808,14 +808,14 @@ const Xt = H("Microscope", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const Zt = H("Minus", [["path", { d: "M5 12h14", key: "1ays0h" }]]);
+const Xt = H("Minus", [["path", { d: "M5 12h14", key: "1ays0h" }]]);
 /**
  * @license lucide-react v0.468.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const er = H("RefreshCw", [
+const Zt = H("RefreshCw", [
   ["path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8", key: "v9h5vc" }],
   ["path", { d: "M21 3v5h-5", key: "1q7to0" }],
   ["path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16", key: "3uifl3" }],
@@ -827,7 +827,7 @@ const er = H("RefreshCw", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const tr = H("ShieldCheck", [
+const er = H("ShieldCheck", [
   [
     "path",
     {
@@ -843,7 +843,7 @@ const tr = H("ShieldCheck", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const rr = H("TestTubeDiagonal", [
+const tr = H("TestTubeDiagonal", [
   [
     "path",
     { d: "M21 7 6.82 21.18a2.83 2.83 0 0 1-3.99-.01a2.83 2.83 0 0 1 0-4L17 3", key: "1ub6xw" }
@@ -857,41 +857,41 @@ const rr = H("TestTubeDiagonal", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const nr = H("X", [
+const rr = H("X", [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
-]), sr = {
+]), nr = {
   alpha: {
     label: "Alpha",
-    Icon: Kt,
+    Icon: Jt,
     variant: "env-badge--alpha",
     tooltip: "Alpha build — internal testing only"
   },
   beta: {
     label: "Beta",
-    Icon: rr,
+    Icon: tr,
     variant: "env-badge--beta",
     tooltip: "Beta build — public pre-release"
   },
   gamma: {
     label: "Gamma",
-    Icon: Xt,
+    Icon: Qt,
     variant: "env-badge--gamma",
     tooltip: "Gamma / Release Candidate"
   },
   qa: {
     label: "QA",
-    Icon: Yt,
+    Icon: jt,
     variant: "env-badge--qa",
     tooltip: "Quality Assurance build"
   }
-}, or = ({
+}, sr = ({
   stage: e,
   pulse: t = !0,
   className: n = ""
 }) => {
   if (!e) return null;
-  const { label: r, Icon: s, variant: o, tooltip: a } = sr[e];
+  const { label: r, Icon: s, variant: o, tooltip: a } = nr[e];
   return /* @__PURE__ */ w(
     "span",
     {
@@ -905,7 +905,7 @@ const nr = H("X", [
       ]
     }
   );
-}, lr = (e) => /* @__PURE__ */ l(
+}, or = (e) => /* @__PURE__ */ l(
   "svg",
   {
     width: e.width || "24px",
@@ -917,7 +917,7 @@ const nr = H("X", [
     ...e,
     children: /* @__PURE__ */ l("path", { d: "M11.999 0c-2.25 0-4.5.06-6.6.21a5.57 5.57 0 0 0-5.19 5.1c-.24 3.21-.27 6.39-.06 9.6a5.644 5.644 0 0 0 5.7 5.19h3.15v-3.9h-3.15c-.93.03-1.74-.63-1.83-1.56-.18-3-.15-6 .06-9 .06-.84.72-1.47 1.56-1.53 2.04-.15 4.2-.21 6.36-.21s4.32.09 6.36.18c.81.06 1.5.69 1.56 1.53.24 3 .24 6 .06 9-.12.93-.9 1.62-1.83 1.59h-3.15l-6 3.9V24l6-3.9h3.15c2.97.03 5.46-2.25 5.7-5.19.21-3.18.18-6.39-.03-9.57a5.57 5.57 0 0 0-5.19-5.1c-2.13-.18-4.38-.24-6.63-.24zm-5.04 8.76c-.36 0-.66.3-.66.66v2.34c0 .33.18.63.48.78 1.62.78 3.42 1.2 5.22 1.26 1.8-.06 3.6-.48 5.22-1.26.3-.15.48-.45.48-.78V9.42c0-.09-.03-.15-.09-.21a.648.648 0 0 0-.87-.36c-1.5.66-3.12 1.02-4.77 1.05-1.65-.03-3.27-.42-4.77-1.08a.566.566 0 0 0-.24-.06z" })
   }
-), ar = ({
+), lr = ({
   title: e = "VPS AI Assistant",
   subtitle: t = "Customer portal support",
   onClose: n,
@@ -935,7 +935,7 @@ const nr = H("X", [
         onClick: s,
         className: "icon-btn-back",
         "aria-label": "Back",
-        children: /* @__PURE__ */ l(Ht, { size: 16 })
+        children: /* @__PURE__ */ l($t, { size: 16 })
       }
     ),
     /* @__PURE__ */ l(
@@ -943,13 +943,13 @@ const nr = H("X", [
       {
         className: "avatar-circle",
         "aria-hidden": "true",
-        children: /* @__PURE__ */ l(lr, { width: "16px", height: "16px", color: "white" })
+        children: /* @__PURE__ */ l(or, { width: "16px", height: "16px", color: "white" })
       }
     ),
     /* @__PURE__ */ w("div", { children: [
       /* @__PURE__ */ w("div", { className: "chat-header-title-row", children: [
         /* @__PURE__ */ l("h2", { className: "chat-header-title", children: e }),
-        /* @__PURE__ */ l(or, { stage: a, pulse: i })
+        /* @__PURE__ */ l(sr, { stage: a, pulse: i })
       ] }),
       /* @__PURE__ */ l("p", { className: "chat-header-subtitle", children: t || "Customer portal support" })
     ] })
@@ -963,7 +963,7 @@ const nr = H("X", [
         className: "icon-btn-action",
         "aria-label": "Start a new conversation",
         title: "New conversation",
-        children: /* @__PURE__ */ l(er, { size: 15 })
+        children: /* @__PURE__ */ l(Zt, { size: 15 })
       }
     ),
     n && /* @__PURE__ */ l(
@@ -973,25 +973,25 @@ const nr = H("X", [
         onClick: n,
         className: "icon-btn-action",
         "aria-label": o ? "Minimize chat" : "Close chat",
-        children: /* @__PURE__ */ l(Zt, { size: 16 })
+        children: /* @__PURE__ */ l(Xt, { size: 16 })
       }
     )
   ] })
 ] });
-function ir(e, t) {
+function ar(e, t) {
   const n = re(e);
   ke(() => {
     var r;
     n.current && !e && ((r = t.current) == null || r.focus()), n.current = e;
   }, [e, t]);
 }
-function cr(e, t) {
+function ir(e, t) {
   const n = t.trim().toLowerCase();
   return n ? e.filter(
     (r) => r.label.toLowerCase().includes(n) || r.query.toLowerCase().includes(n)
   ) : e;
 }
-const ur = ({
+const cr = ({
   suggestions: e,
   onSelect: t,
   disabled: n,
@@ -1023,7 +1023,7 @@ const ur = ({
     children: s.label
   },
   s.query
-)) }) : null, dr = ({
+)) }) : null, ur = ({
   onSend: e,
   disabled: t = !1,
   placeholder: n = "Ask something…"
@@ -1031,13 +1031,13 @@ const ur = ({
   const { suggestions: r, showSuggestions: s, suggestionBadgesEnabled: o, models: a, selectedModelId: i, selectModel: u } = Be(), [h, g] = U(""), f = re(null), c = oe.useId(), p = (m) => {
     m && (m.style.height = "auto", m.style.height = `${Math.min(m.scrollHeight, 96)}px`);
   };
-  ir(t, f), ke(() => {
+  ar(t, f), ke(() => {
     p(f.current);
   }, [h]);
   const b = ye(() => {
     if (!o || t) return [];
     const m = h.trim();
-    return m ? cr(r, m) : s ? r : [];
+    return m ? ir(r, m) : s ? r : [];
   }, [t, s, o, r, h]), k = (m) => {
     g(m.query);
     const B = f.current;
@@ -1048,7 +1048,7 @@ const ur = ({
   };
   return /* @__PURE__ */ w("div", { className: "chat-input-wrapper", children: [
     /* @__PURE__ */ l(
-      ur,
+      cr,
       {
         variant: "badge",
         suggestions: b,
@@ -1084,7 +1084,7 @@ const ur = ({
           disabled: t || !h.trim(),
           "aria-label": "Send message",
           className: "chat-send-btn",
-          children: /* @__PURE__ */ l(zt, { size: 16 })
+          children: /* @__PURE__ */ l(Ht, { size: 16 })
         }
       )
     ] }),
@@ -1111,8 +1111,8 @@ const ur = ({
     ] })
   ] });
 };
-function hr({ defaultTagName: e, props: t, render: n, state: r = {}, stateAttributesMapping: s }) {
-  let o = ze(pr(r, s), t);
+function dr({ defaultTagName: e, props: t, render: n, state: r = {}, stateAttributesMapping: s }) {
+  let o = ze(hr(r, s), t);
   if (!n) return d.createElement(e, o);
   if (typeof n == "function") return n(o, r);
   if (!d.isValidElement(n)) return null;
@@ -1128,12 +1128,12 @@ function ze(...e) {
       let o = r[s];
       if (o === void 0) continue;
       let a = t[s];
-      s === "className" ? t[s] = [a, o].filter(Boolean).join(" ") : s === "style" ? t[s] = { ...a, ...o } : s === "ref" ? t[s] = Se(a, o) : mr(s) && typeof a == "function" && typeof o == "function" ? t[s] = fr(o, a) : t[s] = o;
+      s === "className" ? t[s] = [a, o].filter(Boolean).join(" ") : s === "style" ? t[s] = { ...a, ...o } : s === "ref" ? t[s] = Se(a, o) : fr(s) && typeof a == "function" && typeof o == "function" ? t[s] = pr(o, a) : t[s] = o;
     }
   }
   return t;
 }
-function pr(e, t) {
+function hr(e, t) {
   var r;
   let n = {};
   for (let s of Object.keys(e)) {
@@ -1151,12 +1151,12 @@ function pr(e, t) {
   }
   return n;
 }
-function fr(e, t) {
+function pr(e, t) {
   return function(n) {
     e(n), n.defaultPrevented || t(n);
   };
 }
-function mr(e) {
+function fr(e) {
   return /^on[A-Z]/.test(e);
 }
 function Se(...e) {
@@ -1165,13 +1165,13 @@ function Se(...e) {
     for (let r of t) typeof r == "function" ? r(n) : r && (r.current = n);
   };
 }
-var gr = 8, br = 64, vr = 0, Ie = 0.5, _r = 180, wr = /* @__PURE__ */ new Set(["ArrowDown", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "]), gt = { start: !1, end: !1 }, yr = [], Me = { currentAnchorId: null, visibleMessageIds: yr };
-function kr({ content: e, scrollEdgeThreshold: t, spacer: n, viewport: r }) {
-  if (!r || !e) return gt;
+var mr = 8, gr = 64, br = 0, Ie = 0.5, vr = 180, _r = /* @__PURE__ */ new Set(["ArrowDown", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "]), mt = { start: !1, end: !1 }, wr = [], Me = { currentAnchorId: null, visibleMessageIds: wr };
+function yr({ content: e, scrollEdgeThreshold: t, spacer: n, viewport: r }) {
+  if (!r || !e) return mt;
   let s = Ue({ content: e, spacer: n, viewport: r });
   return { start: r.scrollTop > t, end: s - r.scrollTop - r.clientHeight > t };
 }
-function Cr({ content: e, scrollMargin: t, scrollPreviousItemPeek: n, spacer: r, viewport: s, visibleMessageIds: o }) {
+function kr({ content: e, scrollMargin: t, scrollPreviousItemPeek: n, spacer: r, viewport: s, visibleMessageIds: o }) {
   if (!e || !s) return Me;
   let a = s.getBoundingClientRect(), i = a.top + t + n, u = typeof IntersectionObserver > "u", h = [], g = null;
   for (let f of Ce(e, r)) {
@@ -1185,31 +1185,31 @@ function Cr({ content: e, scrollMargin: t, scrollPreviousItemPeek: n, spacer: r,
 function Ce(e, t) {
   return Array.from(e.children).filter((n) => n instanceof HTMLElement && n !== t);
 }
-function Sr(e, t) {
+function Cr(e, t) {
   for (let n = t; n < e.length; n++) {
     let r = e[n];
     if ((r == null ? void 0 : r.dataset.scrollAnchor) === "true") return r;
   }
   return null;
 }
-function Fr(e, t) {
+function Sr(e, t) {
   for (let n of e) if (n.dataset.scrollAnchor === "true" && !t.has(n)) return n;
   return null;
 }
-function Tr(e, t) {
+function Fr(e, t) {
   var r;
   let n = 0;
   for (let s = t; s < e.length; s++) if (((r = e[s]) == null ? void 0 : r.dataset.scrollAnchor) === "true" && (n += 1, n > 1)) return !0;
   return !1;
 }
-function Er(e) {
+function Tr(e) {
   for (let t = e.length - 1; t >= 0; t--) {
     let n = e[t];
     if ((n == null ? void 0 : n.dataset.scrollAnchor) === "true") return n;
   }
   return null;
 }
-function Rr({ content: e, spacer: t, viewport: n }) {
+function Er({ content: e, spacer: t, viewport: n }) {
   let r = n.getBoundingClientRect();
   for (let s of Ce(e, t)) {
     if (!s.dataset.messageId) continue;
@@ -1218,8 +1218,8 @@ function Rr({ content: e, spacer: t, viewport: n }) {
   }
   return null;
 }
-function Ar({ align: e, element: t, scrollMargin: n, spacer: r, viewport: s }) {
-  let o = bt(t, s), a = t.getBoundingClientRect().height, i = Mr(r);
+function Rr({ align: e, element: t, scrollMargin: n, spacer: r, viewport: s }) {
+  let o = gt(t, s), a = t.getBoundingClientRect().height, i = Ir(r);
   if (e === "center") {
     let u = Math.max(0, s.clientHeight - i.start - i.end);
     return o - i.start - (u - a) / 2 - n;
@@ -1231,37 +1231,37 @@ function Ar({ align: e, element: t, scrollMargin: n, spacer: r, viewport: s }) {
   }
   return o - i.start - n;
 }
-function bt(e, t) {
+function gt(e, t) {
   let n = e.getBoundingClientRect(), r = t.getBoundingClientRect();
   return n.top - r.top + t.scrollTop;
 }
 function Ae(e, t) {
   return e.getBoundingClientRect().top - t.getBoundingClientRect().top;
 }
-function Nr({ content: e, scrollTop: t, spacer: n, viewport: r }) {
+function Ar({ content: e, scrollTop: t, spacer: n, viewport: r }) {
   let s = Ue({ content: e, spacer: n, viewport: r });
   return t + r.clientHeight - s;
 }
 function Ue({ content: e, spacer: t, viewport: n }) {
-  let r = Ce(e, t), s = vt(e), o = n.getBoundingClientRect(), a = n.scrollTop, i = s.start + s.end;
+  let r = Ce(e, t), s = bt(e), o = n.getBoundingClientRect(), a = n.scrollTop, i = s.start + s.end;
   for (let u of r) {
     let h = u.getBoundingClientRect();
     i = Math.max(i, h.bottom - o.top + a + s.end);
   }
   return i;
 }
-function Ir(e) {
+function Nr(e) {
   return Math.max(0, e.scrollHeight - e.clientHeight);
 }
-function vt(e) {
+function bt(e) {
   let t = window.getComputedStyle(e);
   return { end: We(t.paddingBlockEnd || t.paddingBottom), start: We(t.paddingBlockStart || t.paddingTop) };
 }
-function Mr(e) {
+function Ir(e) {
   let t = e == null ? void 0 : e.parentElement;
-  return t ? vt(t) : { end: 0, start: 0 };
+  return t ? bt(t) : { end: 0, start: 0 };
 }
-function Dr(e) {
+function Mr(e) {
   if (!e) return 0;
   let t = window.getComputedStyle(e), n = t.rowGap === "normal" ? t.gap : t.rowGap;
   return We(n);
@@ -1271,7 +1271,7 @@ function We(e) {
   let t = Number.parseFloat(e);
   return Number.isFinite(t) ? t : 0;
 }
-function _t(e, t) {
+function vt(e, t) {
   let n = e, r = /* @__PURE__ */ new Set();
   return { getSnapshot: () => n, hasListeners: () => r.size > 0, setSnapshot: (s) => {
     t(n, s) || (n = s, r.forEach((o) => o()));
@@ -1283,32 +1283,32 @@ function _t(e, t) {
   } };
 }
 function tt(e, t) {
-  return _t(e, t);
+  return vt(e, t);
 }
-function Br() {
-  return _t(Me, xr);
+function Dr() {
+  return vt(Me, Pr);
 }
-function Pr(e, t) {
+function Br(e, t) {
   return e.start === t.start && e.end === t.end;
 }
-function xr(e, t) {
+function Pr(e, t) {
   return e.currentAnchorId !== t.currentAnchorId || e.visibleMessageIds.length !== t.visibleMessageIds.length ? !1 : e.visibleMessageIds.every((n, r) => n === t.visibleMessageIds[r]);
 }
-function Lr({ autoScroll: e, defaultScrollPosition: t, scrollEdgeThreshold: n, scrollMargin: r, scrollPreviousItemPeek: s }) {
+function xr({ autoScroll: e, defaultScrollPosition: t, scrollEdgeThreshold: n, scrollMargin: r, scrollPreviousItemPeek: s }) {
   let o = d.useRef(e), a = d.useRef(!1), i = d.useRef(null), u = d.useRef(!1), h = d.useRef(n), g = d.useRef(0), f = d.useRef(null), c = d.useRef(0), p = d.useRef(e ? "following-bottom" : "free-scrolling"), b = d.useRef(/* @__PURE__ */ new Map()), k = d.useRef(null), v = d.useRef(null), m = d.useRef(null), B = d.useRef(s), T = d.useRef(!0), x = d.useRef(null), C = d.useRef(r), N = d.useRef(null), I = d.useRef(0), z = d.useRef(0), q = d.useRef(null), le = d.useRef(null), K = d.useRef(null), y = d.useRef(null), A = d.useRef(null), M = d.useRef(null), D = d.useRef(null), P = d.useRef(null), O = d.useRef(null), L = d.useRef(/* @__PURE__ */ new Set()), Y = d.useRef(/* @__PURE__ */ new WeakSet());
-  return K.current === null && (K.current = tt(t === "end" || t === "last-anchor", (ee, de) => ee === de)), y.current === null && (y.current = tt(gt, Pr)), O.current === null && (O.current = Br()), o.current = e, h.current = n, C.current = r, B.current = s, { autoScrollRef: o, autoscrollingRef: a, autoscrollingTimeoutRef: A, streamingTurnRef: m, contentRef: i, defaultScrollPositionAppliedRef: u, firstItemRef: f, itemCountRef: g, lastScrollTopRef: c, messageElementsRef: b, modeRef: p, pendingScrollFrameRef: N, pendingScrollToMessageRef: k, prependRestoreRef: v, preserveScrollOnPrependRef: T, pendingDefaultScrollStore: K.current, rootRef: x, scrollEdgeThresholdRef: h, scrollMarginRef: C, scrollPreviousItemPeekRef: B, spacerGapRef: I, spacerHeightRef: z, spacerRef: q, stateFrameRef: le, stateStore: y.current, viewportRef: M, visibilityFrameRef: D, visibilityObserverRef: P, visibilityStore: O.current, visibleMessageIdsRef: L, handledScrollAnchorsRef: Y };
+  return K.current === null && (K.current = tt(t === "end" || t === "last-anchor", (ee, de) => ee === de)), y.current === null && (y.current = tt(mt, Br)), O.current === null && (O.current = Dr()), o.current = e, h.current = n, C.current = r, B.current = s, { autoScrollRef: o, autoscrollingRef: a, autoscrollingTimeoutRef: A, streamingTurnRef: m, contentRef: i, defaultScrollPositionAppliedRef: u, firstItemRef: f, itemCountRef: g, lastScrollTopRef: c, messageElementsRef: b, modeRef: p, pendingScrollFrameRef: N, pendingScrollToMessageRef: k, prependRestoreRef: v, preserveScrollOnPrependRef: T, pendingDefaultScrollStore: K.current, rootRef: x, scrollEdgeThresholdRef: h, scrollMarginRef: C, scrollPreviousItemPeekRef: B, spacerGapRef: I, spacerHeightRef: z, spacerRef: q, stateFrameRef: le, stateStore: y.current, viewportRef: M, visibilityFrameRef: D, visibilityObserverRef: P, visibilityStore: O.current, visibleMessageIdsRef: L, handledScrollAnchorsRef: Y };
 }
-function wt(e) {
+function _t(e) {
   e.pendingDefaultScrollStore.setSnapshot(!1);
 }
 function Ne(e) {
-  e.defaultScrollPositionAppliedRef.current = !0, wt(e);
+  e.defaultScrollPositionAppliedRef.current = !0, _t(e);
 }
-function qr({ refs: e, commitScrollState: t, scheduleStateCommit: n, scheduleVisibilitySync: r }) {
+function Lr({ refs: e, commitScrollState: t, scheduleStateCommit: n, scheduleVisibilitySync: r }) {
   let { streamingTurnRef: s, autoScrollRef: o, autoscrollingRef: a, autoscrollingTimeoutRef: i, contentRef: u, itemCountRef: h, messageElementsRef: g, modeRef: f, pendingScrollToMessageRef: c, prependRestoreRef: p, scrollMarginRef: b, scrollPreviousItemPeekRef: k, spacerGapRef: v, spacerHeightRef: m, spacerRef: B, viewportRef: T } = e, x = d.useCallback((y) => {
     i.current !== null && (window.clearTimeout(i.current), i.current = null), a.current !== y && (a.current = y, t()), y && (i.current = window.setTimeout(() => {
       i.current = null, a.current = !1, t();
-    }, _r));
+    }, vr));
   }, [t]), C = d.useCallback((y) => {
     let A = B.current;
     if (!A) return;
@@ -1325,11 +1325,11 @@ function qr({ refs: e, commitScrollState: t, scheduleStateCommit: n, scheduleVis
     M && x(!0), D.scrollTo({ top: P, behavior: A }), n();
   }, [t, n, x]), I = d.useCallback(({ behavior: y = "auto" } = {}) => T.current ? (C(0), s.current = null, f.current = "free-scrolling", N(0, { behavior: y }), r(), !0) : !1, [r, N, C]), z = d.useCallback(({ behavior: y = "auto" } = {}) => {
     let A = T.current;
-    return A ? (C(0), s.current = null, f.current = o.current ? "following-bottom" : "free-scrolling", N(Ir(A), { autoscrolling: !0, behavior: y }), r(), !0) : !1;
+    return A ? (C(0), s.current = null, f.current = o.current ? "following-bottom" : "free-scrolling", N(Nr(A), { autoscrolling: !0, behavior: y }), r(), !0) : !1;
   }, [r, N, C]), q = d.useCallback((y, { align: A = "start", behavior: M = "auto", scrollMargin: D = b.current } = {}, { keepPreviousPeek: P = !1 } = {}) => {
     let O = u.current, L = T.current;
     if (!O || !L || !O.contains(y)) return !1;
-    let Y = Ar({ align: A, element: y, scrollMargin: P ? D + k.current : D, spacer: B.current, viewport: L }), ee = Nr({ content: O, scrollTop: Y, spacer: B.current, viewport: L });
+    let Y = Rr({ align: A, element: y, scrollMargin: P ? D + k.current : D, spacer: B.current, viewport: L }), ee = Ar({ content: O, scrollTop: Y, spacer: B.current, viewport: L });
     return C(ee), p.current = { element: y, viewportTop: Ae(y, L) }, f.current = P ? "anchored-to-message" : "settling-jump", s.current = P ? y : null, N(Y, { behavior: M }), r(), !0;
   }, [r, N, C]), le = d.useCallback(() => {
     let y = s.current;
@@ -1350,8 +1350,8 @@ function rt(e, t) {
     e.current = n, n && t();
   }, [e, t]);
 }
-function Or({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeThreshold: n = gr, scrollPreviousItemPeek: r = br, scrollMargin: s = vr }) {
-  let o = Lr({ autoScroll: e, defaultScrollPosition: t, scrollEdgeThreshold: n, scrollMargin: s, scrollPreviousItemPeek: r }), { streamingTurnRef: a, autoScrollRef: i, autoscrollingRef: u, autoscrollingTimeoutRef: h, contentRef: g, defaultScrollPositionAppliedRef: f, firstItemRef: c, itemCountRef: p, lastScrollTopRef: b, messageElementsRef: k, modeRef: v, pendingScrollFrameRef: m, pendingScrollToMessageRef: B, prependRestoreRef: T, preserveScrollOnPrependRef: x, pendingDefaultScrollStore: C, rootRef: N, scrollEdgeThresholdRef: I, scrollMarginRef: z, scrollPreviousItemPeekRef: q, spacerGapRef: le, spacerHeightRef: K, spacerRef: y, stateFrameRef: A, stateStore: M, viewportRef: D, visibilityFrameRef: P, visibilityObserverRef: O, visibilityStore: L, visibleMessageIdsRef: Y, handledScrollAnchorsRef: ee } = o, de = d.useRef(t);
+function qr({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeThreshold: n = mr, scrollPreviousItemPeek: r = gr, scrollMargin: s = br }) {
+  let o = xr({ autoScroll: e, defaultScrollPosition: t, scrollEdgeThreshold: n, scrollMargin: s, scrollPreviousItemPeek: r }), { streamingTurnRef: a, autoScrollRef: i, autoscrollingRef: u, autoscrollingTimeoutRef: h, contentRef: g, defaultScrollPositionAppliedRef: f, firstItemRef: c, itemCountRef: p, lastScrollTopRef: b, messageElementsRef: k, modeRef: v, pendingScrollFrameRef: m, pendingScrollToMessageRef: B, prependRestoreRef: T, preserveScrollOnPrependRef: x, pendingDefaultScrollStore: C, rootRef: N, scrollEdgeThresholdRef: I, scrollMarginRef: z, scrollPreviousItemPeekRef: q, spacerGapRef: le, spacerHeightRef: K, spacerRef: y, stateFrameRef: A, stateStore: M, viewportRef: D, visibilityFrameRef: P, visibilityObserverRef: O, visibilityStore: L, visibleMessageIdsRef: Y, handledScrollAnchorsRef: ee } = o, de = d.useRef(t);
   de.current !== t && (de.current = t, f.current = !1);
   let ne = d.useCallback((_) => {
     let F = N.current, E = D.current, W = [_.start && "start", _.end && "end"].filter(Boolean).join(" "), ce = u.current;
@@ -1361,7 +1361,7 @@ function Or({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeTh
     let F = ((W = D.current) == null ? void 0 : W.scrollTop) ?? 0, E = F < b.current - Ie;
     b.current = F, i.current && !_.end && v.current !== "settling-jump" && v.current !== "anchored-to-message" ? v.current = "following-bottom" : v.current === "following-bottom" && _.end && E && !u.current && (v.current = "free-scrolling");
   }, []), J = d.useCallback(() => {
-    let _ = kr({ content: g.current, scrollEdgeThreshold: I.current, spacer: y.current, viewport: D.current });
+    let _ = yr({ content: g.current, scrollEdgeThreshold: I.current, spacer: y.current, viewport: D.current });
     he(_);
     let F = v.current === "following-bottom" ? { ..._, end: !1 } : _;
     ne(F), M.setSnapshot(F);
@@ -1371,9 +1371,9 @@ function Or({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeTh
     }));
   }, [J]), $ = d.useCallback(() => {
     L.hasListeners() && P.current === null && (P.current = window.requestAnimationFrame(() => {
-      P.current = null, L.hasListeners() && L.setSnapshot(Cr({ content: g.current, scrollMargin: z.current, scrollPreviousItemPeek: q.current, spacer: y.current, viewport: D.current, visibleMessageIds: Y.current }));
+      P.current = null, L.hasListeners() && L.setSnapshot(kr({ content: g.current, scrollMargin: z.current, scrollPreviousItemPeek: q.current, spacer: y.current, viewport: D.current, visibleMessageIds: Y.current }));
     }));
-  }, [L]), { flushPendingScrollToMessage: pe, reanchorToAnchoredMessage: Te, scrollToElement: R, scrollToEnd: S, scrollToMessage: V, scrollToStart: fe } = qr({ refs: o, commitScrollState: J, scheduleStateCommit: ae, scheduleVisibilitySync: $ }), me = d.useCallback(() => {
+  }, [L]), { flushPendingScrollToMessage: pe, reanchorToAnchoredMessage: Te, scrollToElement: R, scrollToEnd: S, scrollToMessage: V, scrollToStart: fe } = Lr({ refs: o, commitScrollState: J, scheduleStateCommit: ae, scheduleVisibilitySync: $ }), me = d.useCallback(() => {
     let _ = T.current, F = D.current;
     if (!_ || !F || !_.element.isConnected) return !1;
     let E = Ae(_.element, F) - _.viewportTop;
@@ -1384,7 +1384,7 @@ function Or({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeTh
       T.current = null;
       return;
     }
-    let E = Rr({ content: _, spacer: y.current, viewport: F });
+    let E = Er({ content: _, spacer: y.current, viewport: F });
     T.current = E ? { element: E, viewportTop: Ae(E, F) } : null;
   }, []), se = d.useCallback(() => {
     m.current === null && (m.current = window.requestAnimationFrame(() => {
@@ -1394,10 +1394,10 @@ function Or({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeTh
     if (!t || f.current || p.current === 0) return !1;
     let _ = !1;
     if (t === "last-anchor") {
-      let F = g.current, E = D.current, W = F && E ? Er(Ce(F, y.current)) : null;
+      let F = g.current, E = D.current, W = F && E ? Tr(Ce(F, y.current)) : null;
       if (!F || !E || !W) _ = S({ behavior: "auto" });
       else {
-        let ce = bt(W, E);
+        let ce = gt(W, E);
         _ = Ue({ content: F, spacer: y.current, viewport: E }) - ce <= E.clientHeight ? S({ behavior: "auto" }) : R(W, { align: "start" }, { keepPreviousPeek: !0 });
       }
     } else _ = t === "end" ? S({ behavior: "auto" }) : fe({ behavior: "auto" });
@@ -1419,9 +1419,9 @@ function Or({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeTh
         return;
       }
       if (F.length > E) {
-        let G = Sr(F, E);
+        let G = Cr(F, E);
         if (G) {
-          if (i.current && v.current === "following-bottom" && Tr(F, E)) {
+          if (i.current && v.current === "following-bottom" && Fr(F, E)) {
             S({ behavior: "auto" });
             return;
           }
@@ -1430,7 +1430,7 @@ function Or({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeTh
         }
       }
       if (F.length === E) {
-        let G = Fr(F, ee.current);
+        let G = Sr(F, ee.current);
         if (G) {
           R(G, { align: "start" }, { keepPreviousPeek: !0 }), ee.current.add(G);
           return;
@@ -1482,12 +1482,12 @@ function Or({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeTh
   }, []), be = d.useCallback(() => ne(M.getSnapshot()), [M, ne]), je = rt(N, be), Ye = rt(D, be), Je = d.useCallback((_) => {
     g.current = _;
   }, []), Ke = d.useCallback((_) => {
-    y.current = _, le.current = Dr((_ == null ? void 0 : _.parentElement) ?? null);
+    y.current = _, le.current = Mr((_ == null ? void 0 : _.parentElement) ?? null);
   }, []), Qe = d.useCallback(() => {
     J(), $(), ie();
-  }, [ie, J, $]), Et = d.useMemo(() => ({ handleContentChange: Ee, handleResize: Re, observeVisibility: X, pendingDefaultScrollStore: C, preserveScrollOnPrependRef: x, scrollToEnd: S, scrollToMessage: V, scrollToStart: fe, setContentElement: Je, setRootElement: je, setSpacerElement: Ke, setViewportElement: Ye, stateStore: M, syncAfterScroll: Qe, unobserveVisibility: j, userScrollIntent: Q, viewportRef: D, visibilityStore: L }), [Ee, Re, X, C, S, V, fe, Je, je, Ke, Ye, M, Qe, j, Q, L]);
+  }, [ie, J, $]), Tt = d.useMemo(() => ({ handleContentChange: Ee, handleResize: Re, observeVisibility: X, pendingDefaultScrollStore: C, preserveScrollOnPrependRef: x, scrollToEnd: S, scrollToMessage: V, scrollToStart: fe, setContentElement: Je, setRootElement: je, setSpacerElement: Ke, setViewportElement: Ye, stateStore: M, syncAfterScroll: Qe, unobserveVisibility: j, userScrollIntent: Q, viewportRef: D, visibilityStore: L }), [Ee, Re, X, C, S, V, fe, Je, je, Ke, Ye, M, Qe, j, Q, L]);
   return d.useLayoutEffect(() => {
-    ge() || p.current === 0 && wt(o);
+    ge() || p.current === 0 && _t(o);
   }, [ge]), d.useEffect(() => () => {
     var _;
     A.current !== null && (window.cancelAnimationFrame(A.current), A.current = null), P.current !== null && (window.cancelAnimationFrame(P.current), P.current = null), h.current !== null && (window.clearTimeout(h.current), h.current = null), m.current !== null && (window.cancelAnimationFrame(m.current), m.current = null), (_ = O.current) == null || _.disconnect(), O.current = null;
@@ -1497,37 +1497,37 @@ function Or({ autoScroll: e = !1, defaultScrollPosition: t = "end", scrollEdgeTh
       return;
     }
     J();
-  }, [e, J, S]), { context: Et, registerMessage: Z };
+  }, [e, J, S]), { context: Tt, registerMessage: Z };
 }
-function $r(e) {
+function Or(e) {
   let t = d.useRef(e);
   return t.current = e, t;
 }
-var yt = d.createContext(null), kt = d.createContext(null);
+var wt = d.createContext(null), yt = d.createContext(null);
 function Fe() {
-  let e = d.useContext(yt);
+  let e = d.useContext(wt);
   if (!e) throw new Error("useMessageScroller must be used within a MessageScroller.");
   return e;
 }
-function Hr() {
-  let e = d.useContext(kt);
+function $r() {
+  let e = d.useContext(yt);
   if (!e) throw new Error("MessageScrollerItem must be used within a MessageScroller.");
   return e;
 }
-function zr({ autoScroll: e = !1, children: t, defaultScrollPosition: n = "end", scrollEdgeThreshold: r, scrollPreviousItemPeek: s, scrollMargin: o }) {
-  let { context: a, registerMessage: i } = Or({ autoScroll: e, defaultScrollPosition: n, scrollEdgeThreshold: r, scrollPreviousItemPeek: s, scrollMargin: o });
-  return l(yt.Provider, { value: a, children: l(kt.Provider, { value: i, children: t }) });
+function Hr({ autoScroll: e = !1, children: t, defaultScrollPosition: n = "end", scrollEdgeThreshold: r, scrollPreviousItemPeek: s, scrollMargin: o }) {
+  let { context: a, registerMessage: i } = qr({ autoScroll: e, defaultScrollPosition: n, scrollEdgeThreshold: r, scrollPreviousItemPeek: s, scrollMargin: o });
+  return l(wt.Provider, { value: a, children: l(yt.Provider, { value: i, children: t }) });
 }
-function Ct() {
+function kt() {
   let { pendingDefaultScrollStore: e } = Fe();
   return d.useSyncExternalStore(e.subscribe, e.getSnapshot, e.getSnapshot);
 }
-function Wr({ children: e, ...t }) {
-  let { setRootElement: n } = Fe(), r = Ct();
+function zr({ children: e, ...t }) {
+  let { setRootElement: n } = Fe(), r = kt();
   return l("div", { ref: n, ...t, ...r ? { "data-pending-scroll": "" } : null, children: e });
 }
-function Vr({ "aria-label": e, children: t, onKeyDown: n, onScroll: r, onTouchMove: s, onWheel: o, preserveScrollOnPrepend: a = !0, ref: i, role: u, tabIndex: h, ...g }) {
-  let { handleResize: f, preserveScrollOnPrependRef: c, setViewportElement: p, syncAfterScroll: b, userScrollIntent: k, viewportRef: v } = Fe(), m = Ct();
+function Wr({ "aria-label": e, children: t, onKeyDown: n, onScroll: r, onTouchMove: s, onWheel: o, preserveScrollOnPrepend: a = !0, ref: i, role: u, tabIndex: h, ...g }) {
+  let { handleResize: f, preserveScrollOnPrependRef: c, setViewportElement: p, syncAfterScroll: b, userScrollIntent: k, viewportRef: v } = Fe(), m = kt();
   c.current = a;
   let B = d.useCallback((I) => {
     var z;
@@ -1543,7 +1543,7 @@ function Vr({ "aria-label": e, children: t, onKeyDown: n, onScroll: r, onTouchMo
     k(), s == null || s(I);
   }
   function N(I) {
-    wr.has(I.key) && k(), n == null || n(I);
+    _r.has(I.key) && k(), n == null || n(I);
   }
   return d.useEffect(() => {
     let I = v.current;
@@ -1556,7 +1556,7 @@ function Vr({ "aria-label": e, children: t, onKeyDown: n, onScroll: r, onTouchMo
     };
   }, [f, v]), l("div", { ref: B, role: u ?? "region", "aria-label": e ?? "Messages", tabIndex: h ?? 0, onKeyDown: N, onScroll: T, onTouchMove: C, onWheel: x, ...g, ...m ? { "data-pending-scroll": "" } : null, children: t });
 }
-function Gr({ "aria-relevant": e, children: t, ref: n, role: r, spacerClassName: s, ...o }) {
+function Vr({ "aria-relevant": e, children: t, ref: n, role: r, spacerClassName: s, ...o }) {
   let { handleContentChange: a, handleResize: i, setContentElement: u, setSpacerElement: h } = Fe(), g = d.useRef(null), f = d.useCallback((c) => {
     var p;
     g.current = c, u(c), (p = Se(n)) == null || p(c);
@@ -1579,45 +1579,45 @@ function Gr({ "aria-relevant": e, children: t, ref: n, role: r, spacerClassName:
     };
   }, [i]), w("div", { ref: f, role: r ?? "log", "aria-relevant": e ?? "additions", ...o, children: [t, l("div", { ref: h, "aria-hidden": "true", "data-message-scroller-spacer": "", hidden: !0, className: s })] });
 }
-function Ur({ messageId: e, ref: t, scrollAnchor: n = !1, ...r }) {
-  let s = Hr(), o = d.useRef(null), a = d.useCallback((i) => {
+function Gr({ messageId: e, ref: t, scrollAnchor: n = !1, ...r }) {
+  let s = $r(), o = d.useRef(null), a = d.useCallback((i) => {
     var h;
     let u = o.current;
     o.current = i, e && s(e, i, u), (h = Se(t)) == null || h(i);
   }, [e, t, s]);
   return l("div", { ref: a, "data-message-id": e, "data-scroll-anchor": n ? "true" : "false", ...r });
 }
-function jr({ behavior: e = "smooth", children: t, direction: n = "end", onClick: r, render: s, tabIndex: o, type: a = "button", ...i }) {
-  let { scrollToEnd: u, scrollToStart: h, stateStore: g } = Fe(), f = $r(r), c = d.useCallback((v) => g.subscribe(v), [g]), p = d.useCallback(() => {
+function Ur({ behavior: e = "smooth", children: t, direction: n = "end", onClick: r, render: s, tabIndex: o, type: a = "button", ...i }) {
+  let { scrollToEnd: u, scrollToStart: h, stateStore: g } = Fe(), f = Or(r), c = d.useCallback((v) => g.subscribe(v), [g]), p = d.useCallback(() => {
     let v = g.getSnapshot();
     return n === "start" ? v.start : v.end;
   }, [n, g]), b = d.useSyncExternalStore(c, p, p), k = d.useCallback((v) => {
     var m;
     b && ((m = f.current) == null || m.call(f, v), v.defaultPrevented || (v.currentTarget.blur(), n === "start" ? h({ behavior: e }) : u({ behavior: e })));
   }, [e, n, b, f, u, h]);
-  return hr({ defaultTagName: "button", props: ze({ type: a, inert: !b, tabIndex: b ? o : -1, children: t ?? w("span", { children: ["Scroll to ", n] }), onClick: k }, i), render: s, state: { active: b, direction: n }, stateAttributesMapping: { active: (v) => ({ "data-active": v ? "true" : "false" }) } });
+  return dr({ defaultTagName: "button", props: ze({ type: a, inert: !b, tabIndex: b ? o : -1, children: t ?? w("span", { children: ["Scroll to ", n] }), onClick: k }, i), render: s, state: { active: b, direction: n }, stateAttributesMapping: { active: (v) => ({ "data-active": v ? "true" : "false" }) } });
 }
-var _e = { Provider: zr, Root: Wr, Viewport: Vr, Content: Gr, Item: Ur, Button: jr };
-function St(e) {
+var _e = { Provider: Hr, Root: zr, Viewport: Wr, Content: Vr, Item: Gr, Button: Ur };
+function Ct(e) {
   var t, n, r = "";
   if (typeof e == "string" || typeof e == "number") r += e;
   else if (typeof e == "object") if (Array.isArray(e)) {
     var s = e.length;
-    for (t = 0; t < s; t++) e[t] && (n = St(e[t])) && (r && (r += " "), r += n);
+    for (t = 0; t < s; t++) e[t] && (n = Ct(e[t])) && (r && (r += " "), r += n);
   } else for (n in e) e[n] && (r && (r += " "), r += n);
   return r;
 }
-function Yr() {
-  for (var e, t, n = 0, r = "", s = arguments.length; n < s; n++) (e = arguments[n]) && (t = St(e)) && (r && (r += " "), r += t);
+function jr() {
+  for (var e, t, n = 0, r = "", s = arguments.length; n < s; n++) (e = arguments[n]) && (t = Ct(e)) && (r && (r += " "), r += t);
   return r;
 }
 function we(...e) {
-  return Yr(e);
+  return jr(e);
 }
-function Jr(e) {
+function Yr(e) {
   return /* @__PURE__ */ l(_e.Provider, { ...e });
 }
-function Kr({
+function Jr({
   className: e,
   ...t
 }) {
@@ -1630,7 +1630,7 @@ function Kr({
     }
   );
 }
-function Qr({
+function Kr({
   className: e,
   ...t
 }) {
@@ -1643,7 +1643,7 @@ function Qr({
     }
   );
 }
-function Xr({
+function Qr({
   className: e,
   ...t
 }) {
@@ -1671,7 +1671,7 @@ function nt({
     }
   );
 }
-function Zr({
+function Xr({
   direction: e = "end",
   className: t,
   children: n,
@@ -1686,7 +1686,7 @@ function Zr({
       ...r,
       children: n ?? /* @__PURE__ */ w(De, { children: [
         /* @__PURE__ */ l(
-          $t,
+          Ot,
           {
             size: 16,
             "aria-hidden": "true",
@@ -1698,18 +1698,18 @@ function Zr({
     }
   );
 }
-const en = () => /* @__PURE__ */ w("div", { className: "chat-empty-row", children: [
+const Zr = () => /* @__PURE__ */ w("div", { className: "chat-empty-row", children: [
   /* @__PURE__ */ l(
     "div",
     {
       className: "avatar-circle avatar-circle--mt",
       "aria-hidden": "true",
-      children: /* @__PURE__ */ l(ft, { size: 15 })
+      children: /* @__PURE__ */ l(pt, { size: 15 })
     }
   ),
   /* @__PURE__ */ l("div", { className: "chat-empty-bubble", children: /* @__PURE__ */ l("p", { children: "Hello — I am the VPS Veritas assistant. Ask about reports, sample status, registration, or support, or choose a question below the text box." }) })
 ] });
-function tn(e) {
+function en(e) {
   const t = e.trim();
   if (!/[\u0000-\u001f\u007f]/.test(t) && /^(https?:\/\/|mailto:|\/(?!\/)|#)/i.test(t))
     return t;
@@ -1721,7 +1721,7 @@ function te(e) {
     if (!r) return null;
     const o = r.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
     if (o) {
-      const a = o[1], i = o[2], u = tn(i);
+      const a = o[1], i = o[2], u = en(i);
       if (!u) return /* @__PURE__ */ l(oe.Fragment, { children: a }, s);
       const h = /^https?:\/\//i.test(i);
       return /* @__PURE__ */ l(
@@ -1749,7 +1749,7 @@ function te(e) {
     ) : /* @__PURE__ */ l(oe.Fragment, { children: r }, s);
   });
 }
-function rn(e) {
+function tn(e) {
   const t = e.replace(/\r\n/g, `
 `).split(`
 `), n = [];
@@ -1819,9 +1819,9 @@ function rn(e) {
   }
   return n;
 }
-const st = oe.memo(function({ text: t }) {
+const rn = oe.memo(function({ text: t }) {
   if (!t) return null;
-  const n = rn(t);
+  const n = tn(t);
   return /* @__PURE__ */ l("div", { className: "md-content", children: n.map((r, s) => {
     switch (r.type) {
       case "h":
@@ -1886,14 +1886,14 @@ const st = oe.memo(function({ text: t }) {
       "aria-live": "off",
       children: /* @__PURE__ */ w("div", { className: "agent-reasoning-header-left", children: [
         r ? /* @__PURE__ */ l(
-          Qt,
+          Kt,
           {
             size: 13,
             className: "agent-reasoning-spinner",
             "aria-hidden": "true"
           }
         ) : /* @__PURE__ */ l(
-          jt,
+          Ut,
           {
             size: 13,
             className: "agent-reasoning-done-icon",
@@ -1937,7 +1937,7 @@ function ln(e) {
       return s;
   return null;
 }
-function ot(e) {
+function st(e) {
   return e.title ? e.title : (e.source.split(/[/\\]/).pop() || e.source).replace(/\.md$/i, "").replace(/[-_]/g, " ").replace(/\b\w/g, (n) => n.toUpperCase());
 }
 const an = ({
@@ -1953,7 +1953,7 @@ const an = ({
   return /* @__PURE__ */ w("div", { className: "grounded-sources-card", children: [
     /* @__PURE__ */ w("div", { className: "grounded-sources-header", children: [
       /* @__PURE__ */ w("div", { className: "grounded-sources-badge", children: [
-        /* @__PURE__ */ l(tr, { size: 13, className: "grounded-shield-icon" }),
+        /* @__PURE__ */ l(er, { size: 13, className: "grounded-shield-icon" }),
         /* @__PURE__ */ w("span", { children: [
           g.length,
           " retrieved VPS sources"
@@ -1968,13 +1968,13 @@ const an = ({
           "aria-expanded": a,
           children: [
             /* @__PURE__ */ l("span", { children: a ? "Hide Details" : "Inspect Sources" }),
-            a ? /* @__PURE__ */ l(Ut, { size: 12 }) : /* @__PURE__ */ l(Gt, { size: 12 })
+            a ? /* @__PURE__ */ l(Gt, { size: 12 }) : /* @__PURE__ */ l(Vt, { size: 12 })
           ]
         }
       )
     ] }),
     /* @__PURE__ */ l("div", { className: "grounded-pills-row", children: g.map((f, c) => {
-      const p = ot(f), b = u === c;
+      const p = st(f), b = u === c;
       return /* @__PURE__ */ w(
         "button",
         {
@@ -1985,7 +1985,7 @@ const an = ({
           },
           title: f.source,
           children: [
-            /* @__PURE__ */ l(Wt, { size: 11, className: "grounded-book-icon" }),
+            /* @__PURE__ */ l(zt, { size: 11, className: "grounded-book-icon" }),
             /* @__PURE__ */ w("span", { className: "grounded-pill-title", children: [
               "[S",
               c + 1,
@@ -2002,7 +2002,7 @@ const an = ({
       );
     }) }),
     !o && a && /* @__PURE__ */ l("div", { className: "grounded-sources-details-list", children: g.map((f, c) => {
-      const p = ot(f), b = ln(f.source);
+      const p = st(f), b = ln(f.source);
       return /* @__PURE__ */ w(
         "div",
         {
@@ -2033,7 +2033,7 @@ const an = ({
                     title: `Navigate to ${b.label}`,
                     children: [
                       /* @__PURE__ */ l("span", { children: b.label }),
-                      /* @__PURE__ */ l(Jt, { size: 10 })
+                      /* @__PURE__ */ l(Yt, { size: 10 })
                     ]
                   }
                 )
@@ -2074,7 +2074,7 @@ const dn = ({ message: e }) => {
       {
         className: "avatar-circle avatar-circle--mt",
         "aria-hidden": "true",
-        children: /* @__PURE__ */ l(ft, { size: 15 })
+        children: /* @__PURE__ */ l(pt, { size: 15 })
       }
     ),
     /* @__PURE__ */ w("div", { className: `msg-col${s ? " msg-col--user" : ""}`, children: [
@@ -2091,26 +2091,26 @@ const dn = ({ message: e }) => {
                 durationMs: e.durationMs
               }
             ),
-            a ? e.content ? /* @__PURE__ */ l("div", { className: "msg-content-wrapper msg-content-wrapper--streaming", children: /* @__PURE__ */ l(st, { text: e.content }) }) : /* @__PURE__ */ l(nn, {}) : s ? /* @__PURE__ */ l("p", { className: "msg-user-pre", children: e.content }) : /* @__PURE__ */ l("div", { className: "msg-content-wrapper", children: /* @__PURE__ */ l(st, { text: e.content }) }),
+            a ? e.content ? /* @__PURE__ */ l("div", { className: "msg-content-wrapper msg-content-wrapper--streaming", children: /* @__PURE__ */ l("div", { className: "msg-streaming-text", children: e.content }) }) : /* @__PURE__ */ l(nn, {}) : s ? /* @__PURE__ */ l("p", { className: "msg-user-pre", children: e.content }) : /* @__PURE__ */ l("div", { className: "msg-content-wrapper", children: /* @__PURE__ */ l(rn, { text: e.content }) }),
             e.toolCalls ? /* @__PURE__ */ l(un, { toolCalls: e.toolCalls }) : null,
             !s && !a && !o && r && ((g = e.sources) != null && g.length) ? /* @__PURE__ */ l(an, { sources: e.sources, hideInspectSources: n }) : null
           ]
         }
       ),
-      s && e.status !== "error" && /* @__PURE__ */ l(Vt, { size: 13, className: "msg-tick", "aria-hidden": "true" })
+      s && e.status !== "error" && /* @__PURE__ */ l(Wt, { size: 13, className: "msg-tick", "aria-hidden": "true" })
     ] })
   ] });
 }, hn = () => {
   const { messages: e, status: t, showSuggestions: n } = Be();
   return /* @__PURE__ */ l(
-    Jr,
+    Yr,
     {
       autoScroll: !0,
       defaultScrollPosition: "last-anchor",
       scrollPreviousItemPeek: 64,
-      children: /* @__PURE__ */ w(Kr, { children: [
-        /* @__PURE__ */ l(Qr, { "aria-label": "Chat messages", children: /* @__PURE__ */ w(Xr, { "aria-busy": t === "awaiting" || t === "connecting", children: [
-          e.length === 0 && /* @__PURE__ */ l(nt, { messageId: "welcome", children: /* @__PURE__ */ l(en, {}) }),
+      children: /* @__PURE__ */ w(Jr, { children: [
+        /* @__PURE__ */ l(Kr, { "aria-label": "Chat messages", children: /* @__PURE__ */ w(Qr, { "aria-busy": t === "awaiting" || t === "connecting", children: [
+          e.length === 0 && /* @__PURE__ */ l(nt, { messageId: "welcome", children: /* @__PURE__ */ l(Zr, {}) }),
           e.map((s) => /* @__PURE__ */ l(
             nt,
             {
@@ -2121,7 +2121,7 @@ const dn = ({ message: e }) => {
             s.id
           ))
         ] }) }),
-        /* @__PURE__ */ l(Zr, {})
+        /* @__PURE__ */ l(Xr, {})
       ] })
     }
   );
@@ -2175,7 +2175,7 @@ const dn = ({ message: e }) => {
       ]
     }
   ) : null;
-}, Ft = ({
+}, St = ({
   className: e,
   onClose: t,
   showMinimize: n,
@@ -2192,7 +2192,7 @@ const dn = ({ message: e }) => {
       "aria-label": "VPS AI Assistant",
       children: [
         /* @__PURE__ */ l(
-          ar,
+          lr,
           {
             title: r,
             subtitle: s,
@@ -2204,10 +2204,10 @@ const dn = ({ message: e }) => {
           }
         ),
         /* @__PURE__ */ l("div", { className: "chat-panel-body", children: /* @__PURE__ */ l(hn, {}) }),
-        h && u === "error" && /* @__PURE__ */ l(xt, { message: h, onRetry: () => void f() }),
+        h && u === "error" && /* @__PURE__ */ l(Pt, { message: h, onRetry: () => void f() }),
         /* @__PURE__ */ l(pn, {}),
         /* @__PURE__ */ l(
-          dr,
+          ur,
           {
             onSend: (b) => void i(b),
             disabled: p
@@ -2227,7 +2227,7 @@ const dn = ({ message: e }) => {
     id: "vps-chatbot-widget-panel",
     className: "widget-panel",
     children: /* @__PURE__ */ l(
-      Ft,
+      St,
       {
         onClose: t,
         showMinimize: !0,
@@ -2249,9 +2249,9 @@ const dn = ({ message: e }) => {
     "aria-controls": "vps-chatbot-widget-panel",
     "aria-label": e ? "Close assistant" : "Open assistant",
     className: "widget-trigger-btn",
-    children: e ? /* @__PURE__ */ l(nr, { size: 22 }) : /* @__PURE__ */ l(mt, { size: 24 })
+    children: e ? /* @__PURE__ */ l(rr, { size: 22 }) : /* @__PURE__ */ l(ft, { size: 24 })
   }
-), lt = ({
+), ot = ({
   defaultOpen: e = !1,
   open: t,
   onOpenChange: n,
@@ -2291,8 +2291,8 @@ const dn = ({ message: e }) => {
   ...b
 }) => {
   const k = Ge(), v = e ?? t ?? n;
-  return !!k && (!v || ve(v) === ve(k == null ? void 0 : k.apiBaseUrl)) && !r && s === void 0 && o === void 0 && a === void 0 && i === void 0 && !u && h === void 0 && !g && f === void 0 && c === void 0 && p === void 0 ? /* @__PURE__ */ l(lt, { ...b }) : /* @__PURE__ */ l(
-    ht,
+  return !!k && (!v || ve(v) === ve(k == null ? void 0 : k.apiBaseUrl)) && !r && s === void 0 && o === void 0 && a === void 0 && i === void 0 && !u && h === void 0 && !g && f === void 0 && c === void 0 && p === void 0 ? /* @__PURE__ */ l(ot, { ...b }) : /* @__PURE__ */ l(
+    dt,
     {
       apiBaseUrl: v,
       userContext: r,
@@ -2306,7 +2306,7 @@ const dn = ({ message: e }) => {
       hideInspectSources: f,
       showGroundedSources: c,
       modelId: p,
-      children: /* @__PURE__ */ l(lt, { ...b })
+      children: /* @__PURE__ */ l(ot, { ...b })
     }
   );
 }, gn = ({
@@ -2333,7 +2333,7 @@ const dn = ({ message: e }) => {
       className: `embedded-panel ${e ? "embedded-panel--open" : "embedded-panel--closed"}`,
       "aria-hidden": !e,
       children: e && /* @__PURE__ */ l(
-        Ft,
+        St,
         {
           onClose: t,
           title: r || "VPS AI Assistant",
@@ -2344,11 +2344,11 @@ const dn = ({ message: e }) => {
       )
     }
   )
-] }), bn = 5, $e = 8, Tt = "vps-embedded-assistant-top";
+] }), bn = 5, $e = 8, Ft = "vps-embedded-assistant-top";
 function vn(e, t, n) {
   return Math.min(n, Math.max(t, e));
 }
-function at(e, t) {
+function lt(e, t) {
   const n = Math.max(
     $e,
     window.innerHeight - t - $e
@@ -2357,7 +2357,7 @@ function at(e, t) {
 }
 function _n() {
   try {
-    const e = window.localStorage.getItem(Tt);
+    const e = window.localStorage.getItem(Ft);
     if (!e) return null;
     const t = Number(e);
     return Number.isFinite(t) ? t : null;
@@ -2367,7 +2367,7 @@ function _n() {
 }
 function wn(e) {
   try {
-    window.localStorage.setItem(Tt, String(e));
+    window.localStorage.setItem(Ft, String(e));
   } catch {
   }
 }
@@ -2389,7 +2389,7 @@ const yn = ({
     if (!c) return;
     const p = () => {
       s((b) => {
-        const k = b ?? Math.round(window.innerHeight / 2 - c.offsetHeight / 2), v = at(k, c.offsetHeight);
+        const k = b ?? Math.round(window.innerHeight / 2 - c.offsetHeight / 2), v = lt(k, c.offsetHeight);
         return o.current = v, v;
       });
     };
@@ -2413,7 +2413,7 @@ const yn = ({
     const p = c.clientY - n.current.startY;
     if (!n.current.moved && Math.abs(p) < bn) return;
     n.current.moved = !0, u(!0);
-    const b = at(
+    const b = lt(
       n.current.startTop + p,
       c.currentTarget.offsetHeight
     );
@@ -2453,12 +2453,12 @@ const yn = ({
         transform: r == null ? "translateY(-50%)" : void 0
       },
       children: [
-        /* @__PURE__ */ l(mt, { size: 16 }),
+        /* @__PURE__ */ l(ft, { size: 16 }),
         "Assistant"
       ]
     }
   );
-}, it = ({
+}, at = ({
   defaultOpen: e = !1,
   open: t,
   onOpenChange: n,
@@ -2499,8 +2499,8 @@ const yn = ({
   ...b
 }) => {
   const k = Ge(), v = e ?? t ?? n;
-  return !!k && (!v || ve(v) === ve(k == null ? void 0 : k.apiBaseUrl)) && !r && s === void 0 && o === void 0 && a === void 0 && i === void 0 && !u && h === void 0 && !g && f === void 0 && c === void 0 && p === void 0 ? /* @__PURE__ */ l(it, { ...b }) : /* @__PURE__ */ l(
-    ht,
+  return !!k && (!v || ve(v) === ve(k == null ? void 0 : k.apiBaseUrl)) && !r && s === void 0 && o === void 0 && a === void 0 && i === void 0 && !u && h === void 0 && !g && f === void 0 && c === void 0 && p === void 0 ? /* @__PURE__ */ l(at, { ...b }) : /* @__PURE__ */ l(
+    dt,
     {
       apiBaseUrl: v,
       userContext: r,
@@ -2514,7 +2514,7 @@ const yn = ({
       hideInspectSources: f,
       showGroundedSources: c,
       modelId: p,
-      children: /* @__PURE__ */ l(it, { ...b })
+      children: /* @__PURE__ */ l(at, { ...b })
     }
   );
 }, En = {
@@ -2682,16 +2682,16 @@ const yn = ({
   }
 };
 export {
-  Ft as ChatPanel,
-  ht as ChatProvider,
+  St as ChatPanel,
+  dt as ChatProvider,
   Fn as ChatbotWidget,
   En as ColorPalette,
   Tn as EmbeddedChatbot,
   Pe as buildApiUrl,
   Sn as chatApi,
-  dt as createChatApi,
+  ut as createChatApi,
   ve as resolveApiBaseUrl,
-  Dt as useChatContext,
+  Mt as useChatContext,
   Be as useChatbot,
   Ge as useOptionalChatContext
 };
