@@ -9,6 +9,21 @@ import type {
 import { DEFAULT_SUGGESTIONS } from "../config/suggestions";
 import { ChatContext, type ChatUiStatus } from "./ChatContext";
 
+type RenderTiming = {
+  messageId: string;
+  startedAt: number;
+  firstTokenAt?: number;
+  firstCommitRecorded?: boolean;
+  completedAt?: number;
+};
+
+function measureChat(name: string, start: number, end: number, requestId?: string) {
+  if (typeof performance.measure !== "function") return;
+  const entry = `vps-chatbot:${name}`;
+  performance.clearMeasures(entry);
+  performance.measure(entry, { start, end, detail: requestId ? { requestId } : null });
+}
+
 export interface ChatProviderProps {
   children: React.ReactNode;
   userContext?: ChatUserContext;
@@ -117,6 +132,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const lastUserTextRef = useRef<string | null>(null);
   const initialSentRef = useRef(false);
   const activeRequest = useRef<AbortController | null>(null);
+  const renderTiming = useRef<RenderTiming | null>(null);
   const busyRef = useRef(false);
   const [models, setModels] = useState<ModelOption[]>([]);
   const [selectedModelId, setSelectedModelId] = useState(modelId);
@@ -138,6 +154,22 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   }, [models]);
 
   React.useEffect(() => () => activeRequest.current?.abort(), []);
+
+  React.useLayoutEffect(() => {
+    const timing = renderTiming.current;
+    if (!timing) return;
+    const assistant = messages.find((message) => message.id === timing.messageId);
+    const committedAt = performance.now();
+    if (assistant?.status === "complete" && timing.completedAt !== undefined) {
+      measureChat("completion-to-commit", timing.completedAt, committedAt);
+      measureChat("submit-to-complete-commit", timing.startedAt, committedAt);
+      renderTiming.current = null;
+    } else if (assistant?.status === "pending" && assistant.content
+               && timing.firstTokenAt !== undefined && !timing.firstCommitRecorded) {
+      measureChat("first-token-to-commit", timing.firstTokenAt, committedAt);
+      timing.firstCommitRecorded = true;
+    }
+  }, [messages]);
 
   const ensureSession = useCallback(async (signal: AbortSignal): Promise<string> => {
     if (sessionId) return sessionId;
@@ -178,6 +210,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         progressText: "Preparing your answer…",
       };
       const requestStartedAt = performance.now();
+      const timing: RenderTiming = { messageId: pendingId, startedAt: requestStartedAt };
+      renderTiming.current = timing;
 
       setMessages((prev) => [...prev, userMessage, pendingAssistant]);
       setStatus("awaiting");
@@ -196,6 +230,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
       try {
         const currentSession = await ensureSession(controller.signal);
+        const apiStartedAt = performance.now();
+        measureChat("request-preparation", requestStartedAt, apiStartedAt);
         const response = client.sendMessageStream
           ? await client.sendMessageStream(
             currentSession,
@@ -208,6 +244,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
             updateProgress,
             (token) => {
               if (controller.signal.aborted) return;
+              if (token && timing.firstTokenAt === undefined) {
+                timing.firstTokenAt = performance.now();
+                measureChat("first-token-received", apiStartedAt, timing.firstTokenAt);
+              }
               pendingText += token;
               if (frame === undefined) frame = requestAnimationFrame(() => {
                 frame = undefined;
@@ -226,6 +266,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         cancelFrame();
         if (controller.signal.aborted) return;
 
+        timing.messageId = response.requestId || pendingId;
+        timing.completedAt = performance.now();
+        measureChat("completion-received", apiStartedAt, timing.completedAt, response.requestId);
         setMessages((prev) =>
           prev.map((message) =>
             message.id === pendingId
@@ -249,6 +292,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         setStatus("idle");
       } catch (err) {
         cancelFrame();
+        if (renderTiming.current === timing) renderTiming.current = null;
         if (controller.signal.aborted) return;
         const message = friendlyError(err);
         setMessages((prev) =>
