@@ -403,8 +403,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       suggestions,
       showSuggestions:
         !disableSuggestions &&
+        status === "idle" &&
         (messages.length === 0 ||
-          (messages.length === 1 && messages[0].id === "welcome-default")),
+          (messages.length === 1 && messages[0].id === "welcome-default") ||
+          messages.some((m) => m.role === "assistant" && m.status === "complete" && !m.id.startsWith("welcome"))),
       suggestionBadgesEnabled: !disableSuggestions,
       userContext: effectiveUserContext,
       apiBaseUrl: client.apiBaseUrl,

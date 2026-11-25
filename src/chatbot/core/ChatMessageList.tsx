@@ -10,11 +10,17 @@ import {
 import { useChatbot } from "../hooks/useChatbot";
 import { ChatEmptyState } from "./ChatEmptyState";
 import { ChatMessageBubble } from "./ChatMessage";
+import { ChatSuggestions } from "./ChatSuggestions";
+import type { Suggestion } from "../api/chatbot-types";
 
 export const ChatMessageList: React.FC<{ onEdit?: (text: string) => void }> = ({ onEdit }) => {
-  const { messages, status } = useChatbot();
+  const { messages, status, suggestions, showSuggestions, sendMessage } = useChatbot();
   const isBusy = status === "awaiting" || status === "connecting";
   const visibleMessages = messages.filter((message) => message.status !== "error");
+
+  // const handleSuggestionSelect = (suggestion: Suggestion) => {
+  //   void sendMessage(suggestion.query);
+  // };
 
   return (
     <MessageScrollerProvider
