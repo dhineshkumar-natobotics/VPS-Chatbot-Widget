@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { MessageSquare } from "lucide-react";
+import vpsIconUrl from "../../vps-v.svg";
 
 const DRAG_THRESHOLD_PX = 5;
 const EDGE_PADDING_PX = 8;
 const POSITION_STORAGE_KEY = "vps-embedded-assistant-top";
+const DEFAULT_TOP_PX = 16;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -56,6 +57,7 @@ export const EmbeddedChatbotTrigger: React.FC<EmbeddedChatbotTriggerProps> = ({
   const topRef = useRef(top);
   const suppressClickRef = useRef(false);
   const [dragging, setDragging] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     topRef.current = top;
@@ -67,9 +69,7 @@ export const EmbeddedChatbotTrigger: React.FC<EmbeddedChatbotTriggerProps> = ({
 
     const applyBounds = () => {
       setTop((current) => {
-        const fallback =
-          current ??
-          Math.round(window.innerHeight / 2 - button.offsetHeight / 2);
+        const fallback = current ?? DEFAULT_TOP_PX;
         const next = clampToViewport(fallback, button.offsetHeight);
         topRef.current = next;
         return next;
@@ -142,6 +142,8 @@ export const EmbeddedChatbotTrigger: React.FC<EmbeddedChatbotTriggerProps> = ({
       onPointerMove={handlePointerMove}
       onPointerUp={finishPointer}
       onPointerCancel={finishPointer}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       onClick={() => {
         if (suppressClickRef.current) {
           suppressClickRef.current = false;
@@ -152,16 +154,15 @@ export const EmbeddedChatbotTrigger: React.FC<EmbeddedChatbotTriggerProps> = ({
       aria-expanded={false}
       aria-controls="vps-embedded-chat-panel"
       aria-label="Assistant"
-      className={`embedded-trigger-btn ${
-        dragging ? "embedded-trigger-btn--grabbing" : "embedded-trigger-btn--grab"
-      }`}
+      className={`embedded-trigger-btn ${dragging ? "embedded-trigger-btn--grabbing" : "embedded-trigger-btn--grab"
+        }${hovered ? " embedded-trigger-btn--expanded" : " embedded-trigger-btn--collapsed"}`}
       style={{
-        top: top ?? "50%",
-        transform: top == null ? "translateY(-50%)" : undefined,
+        top: top ?? DEFAULT_TOP_PX,
+        transform: undefined,
       }}
     >
-      <MessageSquare size={16} />
-      Assistant
+      <img src={vpsIconUrl} alt="" className="embedded-trigger-icon" aria-hidden="true" />
+      <span className="embedded-trigger-label">Assistant</span>
     </button>
   );
 };

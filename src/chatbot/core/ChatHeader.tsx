@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import { ArrowLeft, Minus, RefreshCw, Volume2, VolumeX } from "lucide-react";
 import { EnvBadge, type EnvStage } from "../../components/EnvBadge";
+import vpsIconUrl from '../../vps-v.svg';
+
 
 interface ChatHeaderProps {
   title?: string;
@@ -17,7 +19,7 @@ interface ChatHeaderProps {
   envPulse?: boolean;
 }
 
-const SVGComponent = (props: React.SVGProps<SVGSVGElement> & { width?: string; height?: string , Color?: string}) => (
+const SVGComponent = (props: React.SVGProps<SVGSVGElement> & { width?: string; height?: string, Color?: string }) => (
   <svg
     width={props.width || "24px"}
     height={props.height || "24px"}
@@ -61,7 +63,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           className="avatar-circle"
           aria-hidden="true"
         >
-          <SVGComponent width="16px" height="16px" color="white" />
+          {/* <SVGComponent width="16px" height="16px" color="white" /> */}
+          <img src={vpsIconUrl} alt="VPS Logo" style={{ width: '16px', height: '16px' }} />
         </div>
         <div>
           <div className="chat-header-title-row">

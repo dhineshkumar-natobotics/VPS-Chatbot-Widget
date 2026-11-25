@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { EmbeddedChatbotPanel } from "./EmbeddedChatbotPanel";
 import { EmbeddedChatbotTrigger } from "./EmbeddedChatbotTrigger";
 import { type EnvStage } from "../../components/EnvBadge";
@@ -64,6 +64,23 @@ const EmbeddedChatbotView: React.FC<Omit<
       setUncontrolledOpen(next);
     }
   };
+
+  // Push a history entry when the panel opens so the back button closes it.
+  useEffect(() => {
+    if (isOpen) {
+      window.history.pushState({ vpsChatOpen: true }, "");
+
+      const handlePopState = () => {
+        setOpen(false);
+      };
+
+      window.addEventListener("popstate", handlePopState);
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   return (
     <>

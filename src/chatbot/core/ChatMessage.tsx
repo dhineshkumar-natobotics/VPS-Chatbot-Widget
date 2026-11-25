@@ -15,6 +15,7 @@ import { AgentReasoning } from "./AgentReasoning";
 import { GroundedSources } from "./GroundedSources";
 
 import { useOptionalChatContext } from "./ChatContext";
+import VPSIcon from '../../vps-v.svg'
 
 interface ChatMessageProps {
   message: ChatMessage;
@@ -42,7 +43,8 @@ export const ChatMessageBubble: React.FC<ChatMessageProps> = ({ message, onEdit 
     <Message align={isUser ? "end" : "start"}>
       {message.role === "assistant" && (
         <MessageAvatar className="avatar-circle" aria-hidden="true">
-          <BotMessageSquare size={15} />
+          {/* <BotMessageSquare size={15} /> */}
+          <img src={VPSIcon} alt="VPS Logo" style={{ width: '16px', height: '16px' }} />
         </MessageAvatar>
       )}
       <MessageContent>

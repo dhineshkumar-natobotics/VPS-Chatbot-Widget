@@ -784,7 +784,7 @@ button {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background-color: var(--primary);
+  background-color: var(--action);
   color: var(--text-on-action);
   flex-shrink: 0;
 }
@@ -1959,9 +1959,10 @@ button {
   pointer-events: none;
 }
 
+/* On desktop: keep overlay for outside-click detection but hide the dim */
 @media (min-width: 640px) {
   .embedded-overlay {
-    display: none;
+    background-color: transparent;
   }
 }
 
@@ -2018,11 +2019,33 @@ button {
   color: var(--text-on-action);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   touch-action: none;
-  transition: background 0.15s;
+  transition: background 0.15s, max-width 0.22s ease, padding 0.22s ease;
+  overflow: hidden;
+  max-width: 44px; /* icon-only by default */
 }
 
+/* label text — hidden when collapsed */
+.embedded-trigger-label {
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 0;
+  max-width: 0;
+  transition: opacity 0.18s ease, max-width 0.22s ease;
+  pointer-events: none;
+}
+
+/* Hover: expand to show full label */
+.embedded-trigger-btn--expanded,
 .embedded-trigger-btn:hover {
+  max-width: 160px;
   background-color: var(--action-hover);
+}
+
+.embedded-trigger-btn--expanded .embedded-trigger-label,
+.embedded-trigger-btn:hover .embedded-trigger-label {
+  opacity: 1;
+  max-width: 120px;
+  pointer-events: auto;
 }
 
 .embedded-trigger-btn:focus-visible {
@@ -2036,6 +2059,12 @@ button {
 
 .embedded-trigger-btn--grabbing {
   cursor: grabbing;
+}
+
+.embedded-trigger-icon {
+  width: 22px;
+  height: 24px;
+  flex-shrink: 0;
 }
 
 /* ── MessageScroller ─────────────────────────────────────────── */
