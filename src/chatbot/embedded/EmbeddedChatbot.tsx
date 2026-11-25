@@ -37,7 +37,7 @@ export interface EmbeddedChatbotProps {
   disableSuggestions?: boolean;
   /** Initial welcome message to trigger on mount */
   initialMessage?: string;
-  /** If true, hides the "Inspect Sources" toggle button and drawer in grounded sources */
+  /** Hide inline previews and the source list's inspection controls. */
   hideInspectSources?: boolean;
   /** Whether to show grounded sources (default: false) */
   showGroundedSources?: boolean;

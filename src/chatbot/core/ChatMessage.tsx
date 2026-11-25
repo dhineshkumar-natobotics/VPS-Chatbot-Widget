@@ -69,7 +69,11 @@ export const ChatMessageBubble: React.FC<ChatMessageProps> = ({ message, onEdit 
           </Bubble>
         ) : message.content && (
           <div className="chat-message-body">
-            <ChatMarkdown text={message.content} streaming={isPending} />
+            <ChatMarkdown
+              text={message.content}
+              streaming={isPending}
+              sources={isAssistantReply && !isPending && !isStopped && !hideInspectSources ? message.sources : undefined}
+            />
             {isAssistantReply && !isPending && !isStopped && showGroundedSources && message.sources?.length ? (
               <GroundedSources sources={message.sources} hideInspectSources={hideInspectSources} />
             ) : null}

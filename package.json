@@ -50,11 +50,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@base-ui/react": "^1.9.0",
     "@shadcn/react": "^0.3.1",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "embla-carousel-react": "^8.6.0",
     "lucide-react": "^0.468.0",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "streamdown": "^2.8.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

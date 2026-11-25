@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import type { ChatMessage } from "../api/chatbot-types";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "../../components/ai-elements/reasoning";
 import { ChatMarkdown } from "./ChatMarkdown";
 import { ChatMessageBubble } from "./ChatMessage";
 import { ChatProvider } from "./ChatProvider";
@@ -37,6 +38,31 @@ describe("grounded answer rendering", () => {
     expect(screen.queryByRole("link", { name: "Fuel Reports" })).not.toBeInTheDocument();
   });
 
+  it("opens an inline citation from the keyboard and gives the source link a new-tab label", async () => {
+    const user = userEvent.setup();
+    render(<ChatMarkdown text="Fuel reports [S1] [S9]" sources={[{
+      chunkId: "public",
+      source: "knowledge/Web/Reports-Fuel.md",
+      title: "Fuel Reports",
+      url: "https://example.com/fuel",
+      score: 0.65,
+      snippet: "Open Reports from the portal.",
+    }]} />);
+
+    const citation = screen.getByRole("button", { name: "View sources [S1]" });
+    await user.tab();
+    expect(citation).toHaveFocus();
+    await user.keyboard("{Enter}");
+    const link = await screen.findByRole("link", { name: "example.com (opens in a new tab)" });
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    await user.tab();
+    expect(link).toHaveFocus();
+    expect(screen.getByText("Fuel Reports")).toBeVisible();
+    expect(screen.getByText("Open Reports from the portal.")).toBeVisible();
+    expect(screen.getByText("[S9]", { exact: false })).toBeVisible();
+  });
+
   it("updates the live trace and lets readers expand completed tool activity", async () => {
     const user = userEvent.setup();
     const message: ChatMessage = {
@@ -49,7 +75,7 @@ describe("grounded answer rendering", () => {
       progressSteps: ["Searching relevant knowledge…", "Writing your answer…"],
     };
     const { rerender } = render(<ChatMessageBubble message={message} />);
-    const running = screen.getByRole("button", { name: "Working…" });
+    const running = screen.getByRole("button", { name: "Thinking" });
     expect(running.querySelector('[data-slot="trace-line"]'))
       .toHaveAttribute("data-status", "running");
     expect(screen.getByText("Writing your answer…")).toBeVisible();
@@ -63,7 +89,7 @@ describe("grounded answer rendering", () => {
       durationMs: 1200,
       toolCalls: [{ toolName: "get_ticket", arguments: { id: "123" }, result: {} }],
     }} />);
-    const activity = screen.getByRole("button", { name: /response generated/i });
+    const activity = screen.getByRole("button", { name: "Thought for 1.2s" });
     expect(activity).toHaveTextContent("1.2s");
     expect(screen.getByText("Ticket status loaded")).toBeVisible();
     await user.click(activity);
@@ -80,5 +106,23 @@ describe("grounded answer rendering", () => {
     expect(screen.getByText("2", { selector: ".md-code-number" })).toHaveAttribute("aria-hidden", "true");
     await user.click(screen.getByRole("button", { name: "Copy code" }));
     expect(await navigator.clipboard.readText()).toBe(code);
+  });
+
+  it("renders reasoning text as Markdown and respects the controlling open prop", async () => {
+    const { rerender } = render(
+      <Reasoning open isStreaming>
+        <ReasoningTrigger />
+        <ReasoningContent>Checking **reports**.</ReasoningContent>
+      </Reasoning>
+    );
+    expect(screen.getByRole("button", { name: "Thinking" })).toHaveAttribute("aria-expanded", "true");
+    expect(await screen.findByText("reports", { selector: '[data-streamdown="strong"]' })).toBeVisible();
+    rerender(
+      <Reasoning open={false} duration={5}>
+        <ReasoningTrigger />
+        <ReasoningContent>Checking **reports**.</ReasoningContent>
+      </Reasoning>
+    );
+    expect(screen.getByRole("button", { name: "Thought for 5s" })).toHaveAttribute("aria-expanded", "false");
   });
 });

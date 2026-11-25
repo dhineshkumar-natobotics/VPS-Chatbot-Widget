@@ -1,10 +1,5 @@
-import {
-  createContext,
-  useContext,
-  useId,
-  useState,
-  type ComponentProps,
-} from "react";
+import type { ComponentProps } from "react";
+import { Collapsible } from "@base-ui/react/collapsible";
 import { ChevronRight } from "lucide-react";
 import { cn } from "../../lib/cn";
 
@@ -34,89 +29,40 @@ export function TraceDescription({ className, ...props }: ComponentProps<"span">
   return <span data-slot="trace-description" className={cn("trace-description", className)} {...props} />;
 }
 
-const TraceDisclosure = createContext<{
-  contentId: string;
-  open: boolean;
-  toggle: () => void;
-} | null>(null);
-
-function useTraceDisclosure() {
-  const disclosure = useContext(TraceDisclosure);
-  if (!disclosure) throw new Error("Trace disclosure parts require TraceCollapsible.");
-  return disclosure;
-}
-
-export function TraceCollapsible({
-  open,
-  defaultOpen = false,
-  onOpenChange,
-  children,
-  ...props
-}: ComponentProps<"div"> & {
-  open?: boolean;
-  defaultOpen?: boolean;
+export function TraceCollapsible(props: Omit<Collapsible.Root.Props, "className" | "onOpenChange"> & {
+  className?: string;
   onOpenChange?: (open: boolean) => void;
 }) {
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
-  const contentId = useId();
-  const expanded = open ?? uncontrolledOpen;
-
-  function toggle() {
-    if (open === undefined) setUncontrolledOpen(!expanded);
-    onOpenChange?.(!expanded);
-  }
-
-  return (
-    <TraceDisclosure.Provider value={{ contentId, open: expanded, toggle }}>
-      <div data-slot="trace-collapsible" {...props}>{children}</div>
-    </TraceDisclosure.Provider>
-  );
+  return <Collapsible.Root data-slot="trace-collapsible" {...props} />;
 }
 
 export function TraceCollapsibleTrigger({
   children,
   className,
-  onClick,
   ...props
-}: ComponentProps<"button">) {
-  const { contentId, open, toggle } = useTraceDisclosure();
-
+}: Omit<Collapsible.Trigger.Props, "className"> & { className?: string }) {
   return (
-    <button
-      {...props}
+    <Collapsible.Trigger
       type="button"
       data-slot="trace-collapsible-trigger"
       className={cn("trace-trigger", className)}
-      aria-expanded={open}
-      aria-controls={contentId}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) toggle();
-      }}
+      {...props}
     >
       {children}
       <TraceIcon className="trace-chevron"><ChevronRight size={13} /></TraceIcon>
-    </button>
+    </Collapsible.Trigger>
   );
 }
 
 export function TraceCollapsibleContent({
-  children,
   className,
-  keepMounted = false,
   ...props
-}: ComponentProps<"div"> & { keepMounted?: boolean }) {
-  const { contentId, open } = useTraceDisclosure();
-
+}: Omit<Collapsible.Panel.Props, "className"> & { className?: string }) {
   return (
-    <div
+    <Collapsible.Panel
       {...props}
-      id={contentId}
       data-slot="trace-collapsible-content"
       className={cn("trace-content", className)}
-      hidden={!open}
-    >
-      {(open || keepMounted) && children}
-    </div>
+    />
   );
 }

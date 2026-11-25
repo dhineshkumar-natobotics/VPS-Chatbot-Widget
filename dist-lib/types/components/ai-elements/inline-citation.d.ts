@@ -1,0 +1,52 @@
+import { type ComponentProps } from "react";
+import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
+import { type ButtonProps } from "../ui/button";
+import { HoverCard, HoverCardContent } from "../ui/hover-card";
+export type InlineCitationProps = ComponentProps<"span">;
+export declare function InlineCitation({ className, ...props }: InlineCitationProps): import("react").JSX.Element;
+export type InlineCitationTextProps = ComponentProps<"span">;
+export declare function InlineCitationText(props: InlineCitationTextProps): import("react").JSX.Element;
+export type InlineCitationCardProps = ComponentProps<typeof HoverCard> & {
+    openDelay?: number;
+    closeDelay?: number;
+};
+export declare function InlineCitationCard({ handle, onOpenChange, openDelay, closeDelay, ...props }: InlineCitationCardProps): import("react").JSX.Element;
+export type InlineCitationCardTriggerProps = Omit<ButtonProps, "render"> & {
+    sources: string[];
+    delay?: number;
+    closeDelay?: number;
+};
+export declare function InlineCitationCardTrigger({ sources, delay, closeDelay, id, children, onClick, ...props }: InlineCitationCardTriggerProps): import("react").JSX.Element;
+export type InlineCitationCardBodyProps = ComponentProps<typeof HoverCardContent>;
+export declare function InlineCitationCardBody({ ref, onBlur, ...props }: InlineCitationCardBodyProps): import("react").JSX.Element;
+type EmblaApi = NonNullable<UseEmblaCarouselType[1]>;
+type EmblaOptions = NonNullable<Parameters<typeof useEmblaCarousel>[0]>;
+type EmblaPlugins = NonNullable<Parameters<typeof useEmblaCarousel>[1]>;
+export type InlineCitationCarouselProps = ComponentProps<"div"> & {
+    opts?: EmblaOptions;
+    plugins?: EmblaPlugins;
+    orientation?: "horizontal" | "vertical";
+    setApi?: (api: EmblaApi) => void;
+};
+export declare function InlineCitationCarousel({ opts, plugins, orientation, setApi, className, ...props }: InlineCitationCarouselProps): import("react").JSX.Element;
+export type InlineCitationCarouselContentProps = ComponentProps<"div">;
+export declare function InlineCitationCarouselContent({ className, ...props }: InlineCitationCarouselContentProps): import("react").JSX.Element;
+export type InlineCitationCarouselItemProps = ComponentProps<"div">;
+export declare function InlineCitationCarouselItem({ className, ...props }: InlineCitationCarouselItemProps): import("react").JSX.Element;
+export type InlineCitationCarouselHeaderProps = ComponentProps<"div">;
+export declare function InlineCitationCarouselHeader({ className, ...props }: InlineCitationCarouselHeaderProps): import("react").JSX.Element;
+export type InlineCitationCarouselIndexProps = ComponentProps<"div">;
+export declare function InlineCitationCarouselIndex({ children, ...props }: InlineCitationCarouselIndexProps): import("react").JSX.Element;
+export type InlineCitationCarouselPrevProps = ButtonProps;
+export declare function InlineCitationCarouselPrev(props: InlineCitationCarouselPrevProps): import("react").JSX.Element;
+export type InlineCitationCarouselNextProps = ButtonProps;
+export declare function InlineCitationCarouselNext(props: InlineCitationCarouselNextProps): import("react").JSX.Element;
+export type InlineCitationSourceProps = ComponentProps<"div"> & {
+    title?: string;
+    url?: string;
+    description?: string;
+};
+export declare function InlineCitationSource({ title, url, description, className, children, ...props }: InlineCitationSourceProps): import("react").JSX.Element;
+export type InlineCitationQuoteProps = ComponentProps<"blockquote">;
+export declare function InlineCitationQuote({ className, ...props }: InlineCitationQuoteProps): import("react").JSX.Element;
+export {};

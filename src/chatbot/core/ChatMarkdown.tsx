@@ -1,13 +1,11 @@
 import React from "react";
 import { Check, Copy } from "lucide-react";
 import { useCopyText } from "../hooks/useCopyText";
+import { safeHref } from "../../lib/safeHref";
+import type { Source } from "../api/chatbot-types";
+import { ChatInlineCitation } from "./ChatInlineCitation";
 
-export function safeHref(value: string): string | undefined {
-  const url = value.trim();
-  if (/[\u0000-\u001f\u007f]/.test(url)) return undefined;
-  if (/^(https?:\/\/|mailto:|\/(?!\/)|#)/i.test(url)) return url;
-  return undefined;
-}
+export { safeHref } from "../../lib/safeHref";
 
 /**
  * Robust inline Markdown renderer supporting:
@@ -17,17 +15,24 @@ export function safeHref(value: string): string | undefined {
  * - Italic *text* and _text_
  * - Inline code `text`
  */
-function renderInline(text: string): React.ReactNode[] {
+function renderInline(text: string, sources?: Source[]): React.ReactNode[] {
   if (!text) return [];
 
   // Match: [text](url) | **bold** | *italic* | `code` | https?://...
   const tokenRegex =
-    /(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|https?:\/\/[^\s]+)/g;
+    /(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|https?:\/\/[^\s]+|\[S\d+(?:\s*,\s*S\d+)*\])/g;
 
   const parts = text.split(tokenRegex);
 
   return parts.map((part, index) => {
     if (!part) return null;
+
+    if (sources?.length && /^\[S\d+(?:\s*,\s*S\d+)*\]$/.test(part)) {
+      const cited = [...new Set(part.match(/\d+/g))].map((number) => sources[Number(number) - 1]);
+      if (cited.every((source) => source !== undefined)) {
+        return <ChatInlineCitation key={index} label={part} sources={cited} />;
+      }
+    }
 
     // Markdown link: [text](url)
     const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
@@ -271,27 +276,29 @@ function MarkdownCode({ code, lang, streaming }: { code: string; lang: string; s
 export const ChatMarkdown = React.memo(function ChatMarkdown({
   text,
   streaming = false,
-}: { text: string; streaming?: boolean }) {
+  sources,
+}: { text: string; streaming?: boolean; sources?: Source[] }) {
   if (!text) return null;
 
   const blocks = parseBlocks(text);
+  const inline = (value: string) => renderInline(value, sources);
 
   return (
     <div className="md-content">
       {blocks.map((block, idx) => {
         switch (block.type) {
           case "h": {
-            if (block.level === 1) return <h2 key={idx} className="md-h1">{renderInline(block.content)}</h2>;
-            if (block.level === 2) return <h3 key={idx} className="md-h2">{renderInline(block.content)}</h3>;
-            if (block.level === 3) return <h4 key={idx} className="md-h3">{renderInline(block.content)}</h4>;
-            return <h5 key={idx} className="md-h4">{renderInline(block.content)}</h5>;
+            if (block.level === 1) return <h2 key={idx} className="md-h1">{inline(block.content)}</h2>;
+            if (block.level === 2) return <h3 key={idx} className="md-h2">{inline(block.content)}</h3>;
+            if (block.level === 3) return <h4 key={idx} className="md-h3">{inline(block.content)}</h4>;
+            return <h5 key={idx} className="md-h4">{inline(block.content)}</h5>;
           }
           case "ul":
             return (
               <ul key={idx} className="md-ul">
                 {block.items.map((item, itemIdx) => (
                   <li key={itemIdx} className="md-li">
-                    {renderInline(item)}
+                    {inline(item)}
                   </li>
                 ))}
               </ul>
@@ -301,7 +308,7 @@ export const ChatMarkdown = React.memo(function ChatMarkdown({
               <ol key={idx} className="md-ol">
                 {block.items.map((item, itemIdx) => (
                   <li key={itemIdx} className="md-li">
-                    {renderInline(item)}
+                    {inline(item)}
                   </li>
                 ))}
               </ol>
@@ -312,7 +319,7 @@ export const ChatMarkdown = React.memo(function ChatMarkdown({
             return (
               <blockquote key={idx} className="md-quote">
                 {block.lines.map((line, qIdx) => (
-                  <p key={qIdx}>{renderInline(line)}</p>
+                  <p key={qIdx}>{inline(line)}</p>
                 ))}
               </blockquote>
             );
@@ -325,7 +332,7 @@ export const ChatMarkdown = React.memo(function ChatMarkdown({
                   <thead>
                     <tr>
                       {block.headers.map((h, hIdx) => (
-                        <th key={hIdx}>{renderInline(h)}</th>
+                        <th key={hIdx}>{inline(h)}</th>
                       ))}
                     </tr>
                   </thead>
@@ -333,7 +340,7 @@ export const ChatMarkdown = React.memo(function ChatMarkdown({
                     {block.rows.map((row, rIdx) => (
                       <tr key={rIdx}>
                         {row.map((cell, cIdx) => (
-                          <td key={cIdx}>{renderInline(cell)}</td>
+                          <td key={cIdx}>{inline(cell)}</td>
                         ))}
                       </tr>
                     ))}
@@ -347,7 +354,7 @@ export const ChatMarkdown = React.memo(function ChatMarkdown({
               <p key={idx} className="md-p">
                 {block.lines.map((line, lineIdx) => (
                   <React.Fragment key={lineIdx}>
-                    {renderInline(line)}
+                    {inline(line)}
                     {lineIdx < block.lines.length - 1 && <br />}
                   </React.Fragment>
                 ))}

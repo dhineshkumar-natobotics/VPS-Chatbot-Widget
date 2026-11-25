@@ -40,7 +40,7 @@ const ROUTE_HINTS: Record<string, { label: string; path: string }> = {
   },
 };
 
-function getRouteHint(sourcePath: string): { label: string; path: string } | null {
+export function getRouteHint(sourcePath: string): { label: string; path: string } | null {
   const filename = sourcePath.split(/[/\\]/).pop() || "";
   const stem = filename.replace(/\.md$/i, "").toLowerCase();
   for (const [key, value] of Object.entries(ROUTE_HINTS)) {
@@ -51,7 +51,7 @@ function getRouteHint(sourcePath: string): { label: string; path: string } | nul
   return null;
 }
 
-function formatDocTitle(source: Source): string {
+export function formatDocTitle(source: Source): string {
   if (source.title) return source.title;
   const filename = source.source.split(/[/\\]/).pop() || source.source;
   return filename

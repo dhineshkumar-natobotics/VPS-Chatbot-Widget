@@ -15,7 +15,7 @@ export default defineConfig({
       fileName: (format) => `vps-chatbot.${format === "es" ? "js" : "cjs"}`,
     },
     rollupOptions: {
-      external: ["react", "react-dom", "react/jsx-runtime"],
+      external: ["react", "react-dom", "react/jsx-runtime", "streamdown"],
       output: {
         globals: {
           react: "React",

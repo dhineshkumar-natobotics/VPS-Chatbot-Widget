@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { CheckCircle2, LoaderCircle, Square, Wrench } from "lucide-react";
 import { Marker, MarkerContent, MarkerIcon } from "../../components/ui/marker";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "../../components/ai-elements/reasoning";
 import {
   Trace,
-  TraceCollapsible,
-  TraceCollapsibleContent,
-  TraceCollapsibleTrigger,
   TraceDescription,
   TraceIcon,
   TraceLine,
@@ -38,7 +36,6 @@ export const AgentReasoning: React.FC<AgentReasoningProps> = ({
   const isPending = status === "pending";
   const isStopped = status === "stopped";
   const [seconds, setSeconds] = useState(0);
-  const [open, setOpen] = useState<boolean>();
 
   useEffect(() => {
     if (!isPending) return;
@@ -49,59 +46,52 @@ export const AgentReasoning: React.FC<AgentReasoningProps> = ({
     return () => clearInterval(interval);
   }, [isPending]);
 
-  const durationDisplay = isStopped
-    ? undefined
-    : isPending
-    ? `${seconds.toFixed(1)}s`
-    : durationMs === undefined
-      ? undefined
-      : `${(durationMs / 1000).toFixed(1)}s`;
-
   const hasActivity = progressSteps.length > 0 || toolCalls.length > 0;
-  const title = isPending
-    ? hasActivity ? "Working…" : progressText || "Preparing your answer…"
-    : isStopped ? "Response stopped" : "Response generated";
-  const summary = (
-    <TraceLine status={isPending ? "running" : undefined}>
-      <TraceIcon>
-        {isPending ? (
-          <LoaderCircle size={14} className="trace-spinner" />
-        ) : isStopped ? (
-          <Square size={12} />
-        ) : (
-          <CheckCircle2 size={14} />
-        )}
-      </TraceIcon>
-      <TraceTitle>{title}</TraceTitle>
-      {durationDisplay && <TraceDescription aria-hidden={isPending || undefined}>{durationDisplay}</TraceDescription>}
-    </TraceLine>
-  );
+  const duration = durationMs === undefined ? undefined : Number((durationMs / 1000).toFixed(1));
+
+  if (!hasActivity) {
+    return (
+      <Trace className="chat-response-trace">
+        <TraceLine status={isPending ? "running" : undefined}>
+          <TraceIcon>
+            {isPending ? <LoaderCircle size={14} className="trace-spinner" /> : <CheckCircle2 size={14} />}
+          </TraceIcon>
+          <TraceTitle>{isPending ? progressText || "Thinking" : isStopped ? "Response stopped" : "Thought"}</TraceTitle>
+          {isPending ? (
+            <TraceDescription aria-hidden="true">{seconds.toFixed(1)}s</TraceDescription>
+          ) : !isStopped && duration !== undefined && (
+            <TraceDescription>{duration}s</TraceDescription>
+          )}
+        </TraceLine>
+      </Trace>
+    );
+  }
 
   return (
-    <Trace className="chat-response-trace">
-      {hasActivity ? (
-        <TraceCollapsible open={open ?? isPending} onOpenChange={setOpen}>
-          <TraceCollapsibleTrigger>{summary}</TraceCollapsibleTrigger>
-          <TraceCollapsibleContent>
-            <Trace>
-              {progressSteps.map((step, index) => (
-                <Marker key={`${step}-${index}`}>
-                  <MarkerIcon>
-                    <span className="chat-progress-dot" />
-                  </MarkerIcon>
-                  <MarkerContent>{step}</MarkerContent>
-                </Marker>
-              ))}
-              {toolCalls.map((call, index) => (
-                <TraceLine key={`${call.toolName}-${index}`}>
-                  <TraceIcon><Wrench size={13} /></TraceIcon>
-                  <TraceTitle>{toolLabel(call.toolName)}</TraceTitle>
-                </TraceLine>
-              ))}
-            </Trace>
-          </TraceCollapsibleContent>
-        </TraceCollapsible>
-      ) : summary}
-    </Trace>
+    <Reasoning className="chat-response-trace" isStreaming={isPending} duration={duration}>
+      <ReasoningTrigger
+        getThinkingMessage={isStopped ? () => "Response stopped" : undefined}
+        icon={isStopped ? <Square size={12} /> : undefined}
+        description={isPending ? `${seconds.toFixed(1)}s` : undefined}
+      />
+      <ReasoningContent>
+        <Trace>
+          {progressSteps.map((step, index) => (
+            <Marker key={`${step}-${index}`}>
+              <MarkerIcon>
+                <span className="chat-progress-dot" />
+              </MarkerIcon>
+              <MarkerContent>{step}</MarkerContent>
+            </Marker>
+          ))}
+          {toolCalls.map((call, index) => (
+            <TraceLine key={`${call.toolName}-${index}`}>
+              <TraceIcon><Wrench size={13} /></TraceIcon>
+              <TraceTitle>{toolLabel(call.toolName)}</TraceTitle>
+            </TraceLine>
+          ))}
+        </Trace>
+      </ReasoningContent>
+    </Reasoning>
   );
 };

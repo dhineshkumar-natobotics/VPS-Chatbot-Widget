@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatProvider } from "../chatbot/core/ChatProvider";
 import { ChatbotWidget } from "../chatbot/widget/ChatbotWidget";
 import { EmbeddedChatbot } from "../chatbot/embedded/EmbeddedChatbot";
@@ -31,6 +31,7 @@ const usage = {
 describe("chatbot UI", () => {
   beforeEach(() => {
     window.localStorage.removeItem("vps-embedded-assistant-top");
+    window.localStorage.removeItem("vps-chatbot-response-sound");
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -57,6 +58,7 @@ describe("chatbot UI", () => {
       })
     );
   });
+  afterEach(() => vi.unstubAllGlobals());
 
   it("opens and closes the widget", async () => {
     const user = userEvent.setup();
@@ -201,7 +203,7 @@ describe("chatbot UI", () => {
     await user.type(input, "Where are reports?{Enter}");
     await waitFor(() => expect(streamController).toBeDefined());
     const thread = within(screen.getByLabelText("Chat messages"));
-    const activity = thread.getByRole("button", { name: "Working…" });
+    const activity = thread.getByRole("button", { name: "Thinking" });
     expect(activity).toHaveAttribute("aria-expanded", "true");
 
     await act(async () => {
@@ -219,6 +221,41 @@ describe("chatbot UI", () => {
     expect(thread.getByRole("button", { name: "Response stopped" })).toHaveAttribute("aria-expanded", "false");
     expect(thread.getByText("Reports", { selector: "strong" })).toBeVisible();
     expect(input).toBeEnabled();
+  });
+
+  it("plays one completion sound per shared reply and lets the user mute it", async () => {
+    const user = userEvent.setup();
+    const start = vi.fn();
+    class TestAudioContext {
+      state = "running";
+      currentTime = 0;
+      destination = {};
+      createOscillator() {
+        return { frequency: { value: 0 }, connect: vi.fn(), start, stop: vi.fn(), disconnect: vi.fn() };
+      }
+      createGain() {
+        return {
+          gain: { setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
+          connect: vi.fn(),
+          disconnect: vi.fn(),
+        };
+      }
+      async close() {}
+    }
+    vi.stubGlobal("AudioContext", TestAudioContext);
+    render(<ChatProvider><ChatbotWidget defaultOpen /><EmbeddedChatbot defaultOpen showTrigger={false} /></ChatProvider>);
+
+    const [input] = screen.getAllByLabelText("Chat message");
+    const [mute, otherMute] = screen.getAllByRole("button", { name: "Response sound" });
+    expect(mute).toHaveAttribute("aria-pressed", "true");
+    await user.type(input!, "Where are reports?{Enter}");
+    await waitFor(() => expect(start).toHaveBeenCalledTimes(2));
+
+    await user.click(mute!);
+    expect(otherMute).toHaveAttribute("aria-pressed", "false");
+    await user.type(input!, "Where are samples?{Enter}");
+    await waitFor(() => expect(screen.getAllByText("Transformer oil reports are available in the Reports page.")).toHaveLength(4));
+    expect(start).toHaveBeenCalledTimes(2);
   });
 
   it("selects a configured AI model for the next turn", async () => {
@@ -362,7 +399,7 @@ describe("chatbot UI", () => {
       ).toBeGreaterThan(1);
     });
     expect(within(screen.getByTestId("second-surface")).getByText("shared question")).toBeTruthy();
-    expect(screen.getAllByText("Response generated")).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: /thought for/i })).toHaveLength(2);
     expect(screen.queryByText(/retrieved VPS sources?/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /inspect sources/i })).not.toBeInTheDocument();
     expect(screen.queryByText("Score 0.98")).not.toBeInTheDocument();

@@ -95,6 +95,7 @@ export function normalizeSource(dto: SourceDto): Source {
     source: dto.source,
     score: dto.score,
     title: dto.title,
+    ...(dto.url ? { url: dto.url } : {}),
     snippet: dto.snippet,
   };
 }

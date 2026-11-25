@@ -1,5 +1,10 @@
 import React from "react";
 import type { Source } from "../api/chatbot-types";
+export declare function getRouteHint(sourcePath: string): {
+    label: string;
+    path: string;
+} | null;
+export declare function formatDocTitle(source: Source): string;
 export interface GroundedSourcesProps {
     sources: Source[];
     /** If true, hides the "Inspect Sources" toggle button and details list */

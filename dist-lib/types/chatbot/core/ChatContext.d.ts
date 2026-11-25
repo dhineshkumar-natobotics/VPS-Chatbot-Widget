@@ -19,6 +19,8 @@ export interface ChatContextValue {
     apiBaseUrl?: string;
     hideInspectSources?: boolean;
     showGroundedSources?: boolean;
+    soundEnabled: boolean;
+    toggleSound: () => void;
     sendMessage: (text: string) => Promise<void>;
     stopResponse: () => void;
     toggleMessageFeedback: (messageId: string, feedback: MessageFeedback) => void;

@@ -1,4 +1,5 @@
 import React from "react";
+import { Suggestion as SuggestionButton, Suggestions } from "../../components/ai-elements/suggestion";
 import type { Suggestion } from "../api/chatbot-types";
 
 export function filterSuggestions(suggestions: Suggestion[], text: string): Suggestion[] {
@@ -25,42 +26,21 @@ export const ChatSuggestions: React.FC<ChatSuggestionsProps> = ({
 }) => {
   if (!suggestions.length) return null;
 
-  if (variant === "badge") {
-    return (
-      <ul
-        className="suggestions-badge-list"
-        aria-label="Suggested questions"
-      >
-        {suggestions.map((item) => (
-          <li key={item.query} className="suggestion-badge-item">
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => onSelect(item)}
-              title={item.query}
-              className="suggestion-badge-btn"
-            >
-              {item.label}
-            </button>
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
   return (
-    <div className="suggestions-list">
+    <Suggestions className={variant === "badge" ? "chat-suggestion-strip" : "suggestions-list"}
+      role="list" aria-label="Suggested questions">
       {suggestions.map((item) => (
-        <button
-          key={item.query}
-          type="button"
-          disabled={disabled}
-          onClick={() => onSelect(item)}
-          className="suggestion-list-btn"
-        >
-          {item.label}
-        </button>
+        <div key={item.query} role="listitem">
+          <SuggestionButton
+            suggestion={item.query}
+            disabled={disabled}
+            onClick={() => onSelect(item)}
+            title={item.query}
+          >
+            {item.label}
+          </SuggestionButton>
+        </div>
       ))}
-    </div>
+    </Suggestions>
   );
 };

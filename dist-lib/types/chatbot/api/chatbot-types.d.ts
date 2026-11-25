@@ -6,6 +6,7 @@ export interface Source {
     source: string;
     score: number;
     title?: string;
+    url?: string;
     snippet?: string;
 }
 export interface ToolCall {
@@ -98,6 +99,7 @@ export interface SourceDto {
     source: string;
     score: number;
     title?: string;
+    url?: string;
     snippet?: string;
 }
 export interface ToolCallDto {

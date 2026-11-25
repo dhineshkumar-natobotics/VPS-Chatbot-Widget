@@ -23,7 +23,7 @@ export interface ChatProviderProps {
     proxyUrl?: string;
     /** Optional custom chat API client */
     api?: ChatApiClient;
-    /** If true, hides the "Inspect Sources" toggle and details drawer */
+    /** Hide inline previews and the source list's inspection controls. */
     hideInspectSources?: boolean;
     /** Whether to render grounded sources (default: false) */
     showGroundedSources?: boolean;

@@ -6,6 +6,8 @@ interface ChatHeaderProps {
     onClose?: () => void;
     onReset?: () => void;
     onBack?: () => void;
+    soundEnabled?: boolean;
+    onToggleSound?: () => void;
     showMinimize?: boolean;
     /** Environment badge stage shown in the header. Omit for production. */
     envStage?: EnvStage;

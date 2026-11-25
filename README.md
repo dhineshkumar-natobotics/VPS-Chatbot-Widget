@@ -2,9 +2,7 @@
 
 [![VpsChatbot-widget](https://github.com/dhineshkumar-natobotics/VPS-Chatbot-Widget/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/dhineshkumar-natobotics/VPS-Chatbot-Widget/actions/workflows/npm-publish.yml)
 
-A modular, highly customizable React + TypeScript assistant widget and slide-out panel for customer portals. Built with Tailwind CSS, Lucide icons, and full TypeScript typings.
-
-Supports both **standalone mode** (drop-in with zero setup) and **shared conversation mode** (floating widget + slide-out panel syncing the same session).
+A React 19 and TypeScript chat widget for the VPS Customer Portal. Use the floating widget or slide-out panel on its own, or wrap both in a shared `ChatProvider` to keep one conversation.
 
 ---
 
@@ -15,6 +13,7 @@ Supports both **standalone mode** (drop-in with zero setup) and **shared convers
   - [1. Standalone Widget](#1-standalone-widget-no-provider-required)
   - [2. Standalone Slide-out Panel](#2-standalone-slide-out-panel)
   - [3. Shared Conversation Mode](#3-shared-conversation-mode-multiple-views)
+- [Conversation UI](#conversation-ui)
 - [API & Proxy URL Configuration](#api--proxy-url-configuration)
   - [URL Normalization Behavior](#url-normalization-behavior)
 - [Component Props Reference](#component-props-reference)
@@ -36,14 +35,19 @@ Supports both **standalone mode** (drop-in with zero setup) and **shared convers
 
 ## Installation
 
-### From GitHub Repository
+### From a Local Checkout
+
+Run these commands from the root of the chatbot repository.
 
 ```bash
-# Using npm
-npm install git+https://github.com/dhineshkumar-natobotics/VPS-Chatbot-Widget.git
+npm --prefix frontend ci
+npm --prefix frontend run build:lib
+```
 
-# Or if importing from a monorepo branch subdirectory
-npm install github:dhineshkumar-natobotics/VPS-AI-Chatbot#main:frontend
+From the host application, install the built package.
+
+```bash
+npm install /path/to/VPS-AI-Chatbot/frontend
 ```
 
 ### From npm Registry
@@ -108,7 +112,7 @@ export function App() {
 
 ### 3. Shared Conversation Mode (Multiple Views)
 
-Wrap both components in `<ChatProvider>` so messages, session state, and ticket flows stay synchronized between views:
+Pass shared settings to `<ChatProvider>` so both views use the same session, messages, and feedback. Pass view settings such as `open` or `envStage` to each widget.
 
 ```tsx
 import { useState } from "react";
@@ -140,9 +144,19 @@ export function App() {
 
 ---
 
+## Conversation UI
+
+- The suggestion strip scrolls horizontally. Clicking a suggestion fills the composer. Enter sends the message, and Shift+Enter adds a line.
+- During a reply, **Thinking** expands to show API progress. After completion, **Thought** shows elapsed time. Activity collapses automatically unless the reader changed its open state.
+- **Stop response** preserves the text already displayed. Completed replies offer Copy, Like, and Dislike. Ratings belong to the current conversation. **Edit message** loads a previous prompt into the composer.
+- Inline references such as `[S1]` open a source preview when the reply includes matching metadata. A source link opens in a new tab when a URL is available. Set `showGroundedSources` to show the separate source list or `hideInspectSources` to suppress previews.
+- A short chime plays when a reply completes. The **Response sound** button mutes it, and the browser remembers the preference when local storage is available. Playback depends on the browser allowing audio after interaction.
+
+---
+
 ## API & Proxy URL Configuration
 
-You can configure the backend target using any of the following 4 methods:
+Pass the API URL as a prop, use a same-origin proxy, or configure it when building the frontend with Vite.
 
 ### 1. Component Prop
 
@@ -198,7 +212,7 @@ VITE_API_BASE_URL=https://yourapiurl.com
 VITE_API_URL=https://yourapiurl.com
 ```
 
-When no prop is provided, the components automatically read `VITE_API_BASE`.
+Vite reads these variables at build time. If you consume the prebuilt npm package, pass `apiBaseUrl` for a custom URL or use a same-origin proxy.
 
 ### URL Normalization Behavior
 
@@ -234,6 +248,8 @@ Floating round launcher button in the bottom-right corner with an animated pop-u
 | `suggestions` | [`Suggestion[]`](#suggestion) | `DEFAULT_SUGGESTIONS` | Custom quick prompt suggestions rendered above the input. |
 | `disableSuggestions` | `boolean` | `false` | When `true`, hides the suggestion badges entirely. |
 | `initialMessage` | `string` | `undefined` | Starter message sent automatically to the assistant upon session creation. |
+| `showGroundedSources` | `boolean` | `false` | Show the source list below replies. |
+| `hideInspectSources` | `boolean` | `false` | Hide inline previews and the source list’s inspection control. |
 
 ---
 
@@ -256,6 +272,8 @@ A draggable side tab on the right edge of the screen that slides out into a full
 | `suggestions` | [`Suggestion[]`](#suggestion) | `DEFAULT_SUGGESTIONS` | Quick prompt suggestions. |
 | `disableSuggestions` | `boolean` | `false` | Hide suggestion pills. |
 | `initialMessage` | `string` | `undefined` | Starter message automatically sent on mount. |
+| `showGroundedSources` | `boolean` | `false` | Show the source list below replies. |
+| `hideInspectSources` | `boolean` | `false` | Hide inline previews and the source list’s inspection control. |
 
 ---
 
@@ -274,6 +292,9 @@ React context provider that coordinates conversation state, API communication, m
 | `disableSuggestions` | `boolean` | `false` | Disable suggestion badges across all views. |
 | `initialMessage` | `string` | `undefined` | Message triggered upon provider initialization. |
 | `api` | `ChatApiClient` | `undefined` | Optional pre-configured API client instance from `createChatApi(baseUrl)`. |
+| `showGroundedSources` | `boolean` | `false` | Show the source list across shared views. |
+| `hideInspectSources` | `boolean` | `false` | Hide inline previews and the source list’s inspection control across shared views. |
+| `modelId` | `string` | `"auto"` | Select a configured model alias. |
 
 ---
 
@@ -309,6 +330,8 @@ export interface ChatUserContext {
   name?: string;
   /** User role (e.g. "admin", "customer", "operator") */
   role?: string;
+  roleId?: number;
+  client?: "mobile" | "web" | "admin";
   /** Current page/route context (e.g. "reports", "sample-status") */
   page?: string;
 }
@@ -345,10 +368,15 @@ export interface ChatMessage {
   role: "user" | "assistant" | "system";
   content: string;
   createdAt: string;
-  status?: "pending" | "complete" | "error";
+  status?: "pending" | "complete" | "error" | "stopped";
+  streamId?: string;
+  durationMs?: number;
+  progressText?: string;
+  progressSteps?: string[];
   sources?: Source[];
   toolCalls?: ToolCall[];
   usage?: TokenUsage;
+  feedback?: "like" | "dislike";
 }
 ```
 
@@ -371,6 +399,9 @@ function CustomStatus() {
     sessionId,          // string | null
     apiBaseUrl,         // string
     sendMessage,        // (text: string) => Promise<void>
+    stopResponse,       // () => void
+    soundEnabled,       // boolean
+    toggleSound,        // () => void
     retryLast,          // () => Promise<void>
     resetConversation,  // () => Promise<void>
   } = useChatbot();
@@ -395,6 +426,15 @@ const reply = await client.sendMessage(session.sessionId, "Hello");
 
 ## Building & Distributing
 
+Run the frontend checks from this directory.
+
+```bash
+npm ci
+npm run typecheck
+npm test
+npm run build
+```
+
 ### Build Standalone Library
 
 Compiles the package into `dist-lib/` with ES Modules, CommonJS, and TypeScript types:
@@ -417,8 +457,8 @@ npm run typecheck
 
 ### Package Exports Overview
 
-When imported as a library, `package.json` maps:
+`package.json` exposes the widget through the following paths.
 
-- `.` &rarr; TypeScript source / `dist-lib/vps-chatbot.js` / CommonJS
-- `./css` &rarr; `dist-lib/style.css` (or `src/index.css`)
-- Types &rarr; `dist-lib/types/chatbot/index.d.ts`
+- `vpschatbotwidget` and `vpschatbotwidget/chatbot` resolve to ESM or CommonJS builds in `dist-lib/`.
+- `vpschatbotwidget/css` loads `src/index.css`.
+- TypeScript resolves both entry points to `dist-lib/types/chatbot/index.d.ts`.
