@@ -7,7 +7,8 @@ import type {
   ModelOption,
 } from "../api/chatbot-types";
 import { DEFAULT_SUGGESTIONS } from "../config/suggestions";
-import { ChatContext, type ChatUiStatus } from "./ChatContext";
+import { useResponseSound } from "../hooks/useResponseSound";
+import { ChatContext, type ChatContextValue, type ChatUiStatus } from "./ChatContext";
 
 type RenderTiming = {
   messageId: string;
@@ -48,7 +49,7 @@ export interface ChatProviderProps {
   api?: ChatApiClient;
   /** If true, hides the "Inspect Sources" toggle and details drawer */
   hideInspectSources?: boolean;
-  /** Whether to render grounded sources (default: true) */
+  /** Whether to render grounded sources (default: false) */
   showGroundedSources?: boolean;
   /** Configured model alias, or auto for server-side routing. */
   modelId?: string;
@@ -94,7 +95,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   proxyUrl,
   api,
   hideInspectSources = false,
-  showGroundedSources = true,
+  showGroundedSources = false,
   modelId = "auto",
 }) => {
   const resolvedBaseUrl = apiBaseUrl ?? apiUrl ?? proxyUrl;
@@ -136,6 +137,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const busyRef = useRef(false);
   const [models, setModels] = useState<ModelOption[]>([]);
   const [selectedModelId, setSelectedModelId] = useState(modelId);
+  const { soundEnabled, toggleSound, prepareSound, playSound } = useResponseSound();
 
   React.useEffect(() => setSelectedModelId(modelId), [modelId]);
   React.useEffect(() => {
@@ -183,6 +185,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const sendToBackend = useCallback(
     async (text: string) => {
       if (busyRef.current) return;
+      prepareSound();
       busyRef.current = true;
       const controller = new AbortController();
       activeRequest.current = controller;
@@ -201,13 +204,16 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         status: "complete",
       };
       const pendingId = newId("asst");
+      const initialProgress = "Preparing your answer…";
       const pendingAssistant: ChatMessage = {
         id: pendingId,
+        streamId: pendingId,
         role: "assistant",
         content: "",
         createdAt: new Date().toISOString(),
         status: "pending",
-        progressText: "Preparing your answer…",
+        progressText: initialProgress,
+        progressSteps: [initialProgress],
       };
       const requestStartedAt = performance.now();
       const timing: RenderTiming = { messageId: pendingId, startedAt: requestStartedAt };
@@ -218,11 +224,16 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       setError(null);
 
       const updateProgress = (stageText: string) => {
-        if (controller.signal.aborted) return;
+        const stage = stageText.trim();
+        if (!stage || controller.signal.aborted) return;
         setMessages((prev) =>
           prev.map((message) =>
-            message.id === pendingId
-              ? { ...message, progressText: stageText }
+            message.id === pendingId && message.progressText !== stage
+              ? {
+                  ...message,
+                  progressText: stage,
+                  progressSteps: [...(message.progressSteps ?? []), stage],
+                }
               : message
           )
         );
@@ -290,6 +301,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
           )
         );
         setStatus("idle");
+        playSound();
       } catch (err) {
         cancelFrame();
         if (renderTiming.current === timing) renderTiming.current = null;
@@ -312,7 +324,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         }
       }
     },
-    [ensureSession, client, effectiveUserContext.client, effectiveUserContext.roleId, selectedModelId]
+    [ensureSession, client, effectiveUserContext.client, effectiveUserContext.roleId, selectedModelId, prepareSound, playSound]
   );
 
   const sendMessage = useCallback(
@@ -331,6 +343,32 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     setMessages((prev) => prev.filter((message) => message.status !== "error"));
     await sendToBackend(last);
   }, [sendToBackend]);
+
+  const stopResponse = useCallback(() => {
+    const controller = activeRequest.current;
+    if (!controller) return;
+    controller.abort();
+    activeRequest.current = null;
+    busyRef.current = false;
+    renderTiming.current = null;
+    setMessages((current) => current.map((message) =>
+      message.status === "pending"
+        ? { ...message, status: "stopped", progressText: undefined }
+        : message
+    ));
+    setStatus("idle");
+  }, []);
+
+  const toggleMessageFeedback = useCallback<ChatContextValue["toggleMessageFeedback"]>(
+    (messageId, feedback) => {
+      setMessages((previous) => previous.map((message) =>
+        message.id === messageId
+          ? { ...message, feedback: message.feedback === feedback ? undefined : feedback }
+          : message
+      ));
+    },
+    []
+  );
 
   const confirmTicket = useCallback(async () => { }, []);
   const cancelTicket = useCallback(() => { }, []);
@@ -372,7 +410,11 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       apiBaseUrl: client.apiBaseUrl,
       hideInspectSources,
       showGroundedSources,
+      soundEnabled,
+      toggleSound,
       sendMessage,
+      stopResponse,
+      toggleMessageFeedback,
       retryLast,
       confirmTicket,
       cancelTicket,
@@ -392,7 +434,11 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       client.apiBaseUrl,
       hideInspectSources,
       showGroundedSources,
+      soundEnabled,
+      toggleSound,
       sendMessage,
+      stopResponse,
+      toggleMessageFeedback,
       retryLast,
       confirmTicket,
       cancelTicket,

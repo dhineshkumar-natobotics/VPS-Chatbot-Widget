@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { BookOpen, ChevronDown, ChevronUp, ExternalLink, ShieldCheck } from "lucide-react";
+import { BookOpen, ExternalLink, Library } from "lucide-react";
+import {
+  Trace,
+  TraceCollapsible,
+  TraceCollapsibleContent,
+  TraceCollapsibleTrigger,
+  TraceDescription,
+  TraceIcon,
+  TraceLine,
+  TraceTitle,
+} from "../../components/ui/trace";
 import type { Source } from "../api/chatbot-types";
 
 // Map document basenames to corresponding portal routes
@@ -75,105 +85,118 @@ export const GroundedSources: React.FC<GroundedSourcesProps> = ({
 
   if (!sources || !sources.length) return null;
 
-  // Display top 5 grounded sources as requested
   const topSources = sources.slice(0, maxSources);
+  const sourceLabel = topSources.length === 1 ? "source" : "sources";
+  const summary = (
+    <TraceLine>
+      <TraceIcon><Library size={14} /></TraceIcon>
+      <TraceTitle>{`${topSources.length} retrieved VPS ${sourceLabel}`}</TraceTitle>
+      {!shouldHideInspect && (
+        <TraceDescription>{expanded ? "Hide Details" : "Inspect Sources"}</TraceDescription>
+      )}
+    </TraceLine>
+  );
+
+  const sourceRows = (
+    <Trace className="grounded-source-rows">
+      {topSources.map((source, idx) => {
+        const isSelected = activeSnippetIdx === idx;
+        const line = (
+          <TraceLine>
+            <TraceIcon><BookOpen size={13} /></TraceIcon>
+            <TraceTitle>[S{idx + 1}] {formatDocTitle(source)}</TraceTitle>
+            <TraceDescription title="Ranking score, not a probability of correctness">
+              Score {source.score.toFixed(2)}
+            </TraceDescription>
+          </TraceLine>
+        );
+
+        return shouldHideInspect ? (
+          <div key={`${source.chunkId}-${idx}`}>{line}</div>
+        ) : (
+          <button
+            key={`${source.chunkId}-${idx}`}
+            type="button"
+            className={`trace-trigger${expanded && isSelected ? " grounded-source-selected" : ""}`}
+            aria-pressed={expanded && isSelected}
+            onClick={() => {
+              setExpanded(true);
+              setActiveSnippetIdx(isSelected ? null : idx);
+            }}
+            title={source.source}
+          >
+            {line}
+          </button>
+        );
+      })}
+    </Trace>
+  );
+
+  if (shouldHideInspect) {
+    return (
+      <Trace className="grounded-sources-card">
+        {summary}
+        {sourceRows}
+      </Trace>
+    );
+  }
 
   return (
-    <div className="grounded-sources-card">
-      <div className="grounded-sources-header">
-        <div className="grounded-sources-badge">
-          <ShieldCheck size={13} className="grounded-shield-icon" />
-          <span>{topSources.length} retrieved VPS sources</span>
-        </div>
-        {!shouldHideInspect && (
-          <button
-            type="button"
-            className="grounded-toggle-btn"
-            onClick={() => setExpanded((prev) => !prev)}
-            aria-expanded={expanded}
-          >
-            <span>{expanded ? "Hide Details" : "Inspect Sources"}</span>
-            {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          </button>
-        )}
-      </div>
+    <Trace className="grounded-sources-card">
+      <TraceCollapsible open={expanded} onOpenChange={setExpanded}>
+        <TraceCollapsibleTrigger>{summary}</TraceCollapsibleTrigger>
+        {sourceRows}
+        <TraceCollapsibleContent>
+          <div className="grounded-sources-details-list">
+            {topSources.map((source, idx) => {
+              const title = formatDocTitle(source);
+              const routeHint = getRouteHint(source.source);
+              const isHighlighted = activeSnippetIdx === idx;
 
-      <div className="grounded-pills-row">
-        {topSources.map((source, idx) => {
-          const title = formatDocTitle(source);
-          const isSelected = activeSnippetIdx === idx;
-
-          return (
-            <button
-              key={`${source.chunkId}-${idx}`}
-              type="button"
-              className={`grounded-source-pill${isSelected ? " grounded-source-pill--selected" : ""}`}
-              onClick={() => {
-                if (!shouldHideInspect) {
-                  setExpanded(true);
-                  setActiveSnippetIdx(isSelected ? null : idx);
-                }
-              }}
-              title={source.source}
-            >
-              <BookOpen size={11} className="grounded-book-icon" />
-              <span className="grounded-pill-title">[S{idx + 1}] {title}</span>
-              <span className="grounded-pill-score" title="Ranking score, not a probability of correctness">Score {source.score.toFixed(2)}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {!shouldHideInspect && expanded && (
-        <div className="grounded-sources-details-list">
-          {topSources.map((source, idx) => {
-            const title = formatDocTitle(source);
-            const routeHint = getRouteHint(source.source);
-            const isHighlighted = activeSnippetIdx === idx;
-
-            return (
-              <div
-                key={`detail-${source.chunkId}-${idx}`}
-                className={`grounded-detail-item${isHighlighted ? " grounded-detail-item--highlighted" : ""}`}
-              >
-                <div className="grounded-detail-top">
-                  <div className="grounded-detail-title-group">
-                    <span className="grounded-detail-index">[{idx + 1}]</span>
-                    <span className="grounded-detail-title">{title}</span>
+              return (
+                <div
+                  key={`detail-${source.chunkId}-${idx}`}
+                  className={`grounded-detail-item${isHighlighted ? " grounded-detail-item--highlighted" : ""}`}
+                >
+                  <div className="grounded-detail-top">
+                    <div className="grounded-detail-title-group">
+                      <span className="grounded-detail-index">[{idx + 1}]</span>
+                      <span className="grounded-detail-title">{title}</span>
+                    </div>
+                    <div className="grounded-detail-meta">
+                      <span className="grounded-detail-score">Rank score {source.score.toFixed(2)}</span>
+                      {routeHint && (
+                        <a
+                          href={routeHint.path}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            window.location.href = routeHint.path;
+                          }}
+                          className="grounded-route-link"
+                          title={`Navigate to ${routeHint.label}`}
+                        >
+                          <span>{routeHint.label}</span>
+                          <ExternalLink size={10} aria-hidden="true" />
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <div className="grounded-detail-meta">
-                    <span className="grounded-detail-score">Rank score {source.score.toFixed(2)}</span>
-                    {routeHint && (
-                      <a
-                        href={routeHint.path}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          window.location.href = routeHint.path;
-                        }}
-                        className="grounded-route-link"
-                        title={`Navigate to ${routeHint.label}`}
-                      >
-                        <span>{routeHint.label}</span>
-                        <ExternalLink size={10} />
-                      </a>
-                    )}
+
+                  <div className="grounded-detail-path">
+                    <code>{source.source}</code>
                   </div>
-                </div>
 
-                <div className="grounded-detail-path">
-                  <code>{source.source}</code>
+                  {source.snippet && (
+                    <p className="grounded-detail-snippet">
+                      "{source.snippet}"
+                    </p>
+                  )}
                 </div>
-
-                {source.snippet && (
-                  <p className="grounded-detail-snippet">
-                    "{source.snippet}"
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
+              );
+            })}
+          </div>
+        </TraceCollapsibleContent>
+      </TraceCollapsible>
+    </Trace>
   );
 };

@@ -23,6 +23,7 @@ export type {
   TokenUsage,
   ChatRole,
   MessageStatus,
+  MessageFeedback,
   ModelOption,
   ModelCatalog,
 } from "./api/chatbot-types";

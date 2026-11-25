@@ -1,4 +1,4 @@
-import type { ChatMessage, ChatUserContext, Suggestion, Ticket, ModelOption } from "../api/chatbot-types";
+import type { ChatMessage, ChatUserContext, MessageFeedback, Suggestion, Ticket, ModelOption } from "../api/chatbot-types";
 export type ChatUiStatus = "idle" | "connecting" | "awaiting" | "error";
 export interface PendingTicket {
     subject: string;
@@ -20,6 +20,8 @@ export interface ChatContextValue {
     hideInspectSources?: boolean;
     showGroundedSources?: boolean;
     sendMessage: (text: string) => Promise<void>;
+    stopResponse: () => void;
+    toggleMessageFeedback: (messageId: string, feedback: MessageFeedback) => void;
     retryLast: () => Promise<void>;
     confirmTicket: (customerIdOrEmail?: string) => Promise<void>;
     cancelTicket: () => void;

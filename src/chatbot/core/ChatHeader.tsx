@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { ArrowLeft, Minus, RefreshCw } from "lucide-react";
+import { ArrowLeft, Minus, RefreshCw, Volume2, VolumeX } from "lucide-react";
 import { EnvBadge, type EnvStage } from "../../components/EnvBadge";
 
 interface ChatHeaderProps {
@@ -8,6 +8,8 @@ interface ChatHeaderProps {
   onClose?: () => void;
   onReset?: () => void;
   onBack?: () => void;
+  soundEnabled?: boolean;
+  onToggleSound?: () => void;
   showMinimize?: boolean;
   /** Environment badge stage shown in the header. Omit for production. */
   envStage?: EnvStage;
@@ -36,6 +38,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onClose,
   onReset,
   onBack,
+  soundEnabled,
+  onToggleSound,
   showMinimize = false,
   envStage,
   envPulse = true,
@@ -71,6 +75,18 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         </div>
       </div>
       <div className="chat-header-actions">
+        {onToggleSound && (
+          <button
+            type="button"
+            className="icon-btn-action chat-sound-btn"
+            aria-label="Response sound"
+            aria-pressed={Boolean(soundEnabled)}
+            title={soundEnabled ? "Mute response sound" : "Enable response sound"}
+            onClick={onToggleSound}
+          >
+            {soundEnabled ? <Volume2 size={16} aria-hidden="true" /> : <VolumeX size={16} aria-hidden="true" />}
+          </button>
+        )}
         {onReset && (
           <button
             type="button"

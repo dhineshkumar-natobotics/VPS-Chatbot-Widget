@@ -39,7 +39,7 @@ export interface EmbeddedChatbotProps {
   initialMessage?: string;
   /** If true, hides the "Inspect Sources" toggle button and drawer in grounded sources */
   hideInspectSources?: boolean;
-  /** Whether to show grounded sources (default: true) */
+  /** Whether to show grounded sources (default: false) */
   showGroundedSources?: boolean;
   modelId?: string;
 }

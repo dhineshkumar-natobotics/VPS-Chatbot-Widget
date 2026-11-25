@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatProvider } from "../chatbot/core/ChatProvider";
@@ -48,7 +48,7 @@ describe("chatbot UI", () => {
             request_id: "req-1",
             session_id: "session-1",
             answer: "Transformer oil reports are available in the Reports page.",
-            sources: [],
+            sources: [{ chunk_id: "source-1", source: "knowledge/Reports-Fuel.md", score: 0.98 }],
             tool_calls: [],
             usage,
           });
@@ -69,6 +69,7 @@ describe("chatbot UI", () => {
     expect(screen.queryByLabelText("VPS AI Assistant")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Open assistant" }));
     expect(screen.getByLabelText("VPS AI Assistant")).toBeInTheDocument();
+    expect(screen.getByText("AI can make mistakes.")).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Close assistant" }));
     expect(screen.queryByLabelText("VPS AI Assistant")).not.toBeInTheDocument();
   });
@@ -86,6 +87,7 @@ describe("chatbot UI", () => {
       "aria-hidden",
       "false"
     );
+    expect(screen.getByText("AI can make mistakes.")).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Close chat" }));
     expect(document.getElementById("vps-embedded-chat-panel")).toHaveAttribute(
       "aria-hidden",
@@ -151,6 +153,72 @@ describe("chatbot UI", () => {
       "/api/v1/sessions/session-1/messages/stream",
       expect.objectContaining({ method: "POST" })
     );
+  });
+
+  it("copies only the completed assistant reply and reports clipboard failures", async () => {
+    const user = userEvent.setup();
+    render(<ChatbotWidget defaultOpen />);
+
+    expect(screen.queryByRole("group", { name: "Response actions" })).not.toBeInTheDocument();
+    await user.type(screen.getByLabelText("Chat message"), "Where can I find reports?{Enter}");
+
+    const actions = await screen.findByRole("group", { name: "Response actions" });
+    const copy = within(actions).getByRole("button", { name: "Copy response" });
+    await user.click(copy);
+    expect(await navigator.clipboard.readText()).toBe(
+      "Transformer oil reports are available in the Reports page."
+    );
+    expect(within(actions).getByRole("status")).toHaveTextContent("Copied");
+
+    vi.spyOn(navigator.clipboard, "writeText").mockRejectedValueOnce(new Error("Access denied"));
+    await user.click(copy);
+    expect(within(actions).getByRole("status")).toHaveTextContent("Couldn’t copy");
+
+    await user.click(screen.getByRole("button", { name: "Edit message" }));
+    expect(screen.getByLabelText("Chat message")).toHaveValue("Where can I find reports?");
+    expect(screen.getByLabelText("Chat message")).toHaveFocus();
+  });
+
+  it("shows live progress and Markdown, then keeps the displayed reply when stopped", async () => {
+    const user = userEvent.setup();
+    const original = vi.mocked(fetch).getMockImplementation()!;
+    const encoder = new TextEncoder();
+    let streamController: ReadableStreamDefaultController<Uint8Array> | undefined;
+    let signal: AbortSignal | null | undefined;
+    vi.mocked(fetch).mockImplementation(async (input, init) => {
+      if (!String(input).endsWith("/messages/stream")) return original(input, init);
+      signal = init?.signal;
+      return new Response(new ReadableStream<Uint8Array>({
+        start(controller) {
+          streamController = controller;
+          signal?.addEventListener("abort", () => controller.error(new DOMException("Aborted", "AbortError")));
+        },
+      }), { headers: { "Content-Type": "text/event-stream" } });
+    });
+
+    render(<ChatbotWidget defaultOpen />);
+    const input = screen.getByLabelText("Chat message");
+    await user.type(input, "Where are reports?{Enter}");
+    await waitFor(() => expect(streamController).toBeDefined());
+    const thread = within(screen.getByLabelText("Chat messages"));
+    const activity = thread.getByRole("button", { name: "Working…" });
+    expect(activity).toHaveAttribute("aria-expanded", "true");
+
+    await act(async () => {
+      streamController!.enqueue(encoder.encode(
+        'data: {"type":"progress","stage":"Searching relevant knowledge…"}\n\n' +
+        'data: {"type":"token","text":"Open **Reports**."}\n\n'
+      ));
+    });
+    expect(await thread.findByText("Reports", { selector: "strong" })).toBeVisible();
+    expect(thread.getByText("Searching relevant knowledge…")).toBeVisible();
+    expect(thread.queryByRole("group", { name: "Response actions" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Stop response" }));
+    expect(signal?.aborted).toBe(true);
+    expect(thread.getByRole("button", { name: "Response stopped" })).toHaveAttribute("aria-expanded", "false");
+    expect(thread.getByText("Reports", { selector: "strong" })).toBeVisible();
+    expect(input).toBeEnabled();
   });
 
   it("selects a configured AI model for the next turn", async () => {
@@ -244,10 +312,9 @@ describe("chatbot UI", () => {
     await user.keyboard("{Enter}");
 
     await waitFor(() => {
-      expect(
-        screen.getAllByText(/unable to process the chat request right now/i).length
-      ).toBeGreaterThan(0);
+      expect(screen.getAllByText(/unable to process the chat request right now/i)).toHaveLength(1);
     });
+    expect(screen.queryByRole("group", { name: "Response actions" })).not.toBeInTheDocument();
 
     fetchMock.mockImplementation(async (input, init) => {
       const url = String(input);
@@ -280,7 +347,7 @@ describe("chatbot UI", () => {
       <ChatProvider>
         <ChatbotWidget defaultOpen />
         <div data-testid="second-surface">
-          <ChatPanel />
+          <EmbeddedChatbot defaultOpen showTrigger={false} />
         </div>
       </ChatProvider>
     );
@@ -295,6 +362,20 @@ describe("chatbot UI", () => {
       ).toBeGreaterThan(1);
     });
     expect(within(screen.getByTestId("second-surface")).getByText("shared question")).toBeTruthy();
+    expect(screen.getAllByText("Response generated")).toHaveLength(2);
+    expect(screen.queryByText(/retrieved VPS sources?/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /inspect sources/i })).not.toBeInTheDocument();
+    expect(screen.queryByText("Score 0.98")).not.toBeInTheDocument();
+
+    const [widgetLike, embeddedLike] = screen.getAllByRole("button", { name: "Like response" });
+    const [widgetDislike, embeddedDislike] = screen.getAllByRole("button", { name: "Dislike response" });
+    await user.click(widgetLike!);
+    expect(embeddedLike).toHaveAttribute("aria-pressed", "true");
+    await user.click(embeddedDislike!);
+    expect(widgetLike).toHaveAttribute("aria-pressed", "false");
+    expect(widgetDislike).toHaveAttribute("aria-pressed", "true");
+    await user.click(widgetDislike!);
+    expect(embeddedDislike).toHaveAttribute("aria-pressed", "false");
   });
 
   it("resolves apiBaseUrl correctly with various proxy and endpoint patterns", () => {

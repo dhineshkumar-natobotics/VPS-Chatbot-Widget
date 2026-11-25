@@ -25,7 +25,7 @@ export interface ChatProviderProps {
     api?: ChatApiClient;
     /** If true, hides the "Inspect Sources" toggle and details drawer */
     hideInspectSources?: boolean;
-    /** Whether to render grounded sources (default: true) */
+    /** Whether to render grounded sources (default: false) */
     showGroundedSources?: boolean;
     /** Configured model alias, or auto for server-side routing. */
     modelId?: string;

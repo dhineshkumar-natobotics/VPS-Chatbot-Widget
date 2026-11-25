@@ -1,4 +1,6 @@
 import React from "react";
+import { Check, Copy } from "lucide-react";
+import { useCopyText } from "../hooks/useCopyText";
 
 export function safeHref(value: string): string | undefined {
   const url = value.trim();
@@ -228,7 +230,48 @@ function parseBlocks(markdown: string): Block[] {
   return blocks;
 }
 
-export const ChatMarkdown = React.memo(function ChatMarkdown({ text }: { text: string }) {
+function MarkdownCode({ code, lang, streaming }: { code: string; lang: string; streaming: boolean }) {
+  const { status, copy } = useCopyText();
+
+  return (
+    <div className="md-code-block">
+      <div className="md-code-header">
+        <span>{lang || "Code"}</span>
+        {!streaming && (
+          <>
+            <span className="md-code-status" role="status">
+              {status === "copied" && "Copied"}
+              {status === "failed" && "Couldn’t copy"}
+            </span>
+            <button
+              type="button"
+              className="chat-message-action"
+              aria-label="Copy code"
+              title="Copy code"
+              disabled={status === "copying"}
+              onClick={() => void copy(code)}
+            >
+              {status === "copied" ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
+            </button>
+          </>
+        )}
+      </div>
+      <pre className="md-pre"><code>
+        {code.split("\n").map((line, index) => (
+          <span className="md-code-line" key={index}>
+            <span className="md-code-number" aria-hidden="true">{index + 1}</span>
+            <span>{line || " "}</span>
+          </span>
+        ))}
+      </code></pre>
+    </div>
+  );
+}
+
+export const ChatMarkdown = React.memo(function ChatMarkdown({
+  text,
+  streaming = false,
+}: { text: string; streaming?: boolean }) {
   if (!text) return null;
 
   const blocks = parseBlocks(text);
@@ -264,11 +307,7 @@ export const ChatMarkdown = React.memo(function ChatMarkdown({ text }: { text: s
               </ol>
             );
           case "code":
-            return (
-              <pre key={idx} className="md-pre">
-                <code>{block.code}</code>
-              </pre>
-            );
+            return <MarkdownCode key={idx} code={block.code} lang={block.lang} streaming={streaming} />;
           case "quote":
             return (
               <blockquote key={idx} className="md-quote">

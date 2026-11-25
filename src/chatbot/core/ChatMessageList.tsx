@@ -11,9 +11,10 @@ import { useChatbot } from "../hooks/useChatbot";
 import { ChatEmptyState } from "./ChatEmptyState";
 import { ChatMessageBubble } from "./ChatMessage";
 
-export const ChatMessageList: React.FC = () => {
-  const { messages, status, showSuggestions } = useChatbot();
+export const ChatMessageList: React.FC<{ onEdit?: (text: string) => void }> = ({ onEdit }) => {
+  const { messages, status } = useChatbot();
   const isBusy = status === "awaiting" || status === "connecting";
+  const visibleMessages = messages.filter((message) => message.status !== "error");
 
   return (
     <MessageScrollerProvider
@@ -24,18 +25,19 @@ export const ChatMessageList: React.FC = () => {
       <MessageScroller>
         <MessageScrollerViewport aria-label="Chat messages">
           <MessageScrollerContent aria-busy={isBusy}>
-            {messages.length === 0 && (
+            {visibleMessages.length === 0 && (
               <MessageScrollerItem messageId="welcome">
                 <ChatEmptyState />
               </MessageScrollerItem>
             )}
-            {messages.map((message) => (
+            {visibleMessages.map((message) => (
               <MessageScrollerItem
-                key={message.id}
-                messageId={message.id}
+                key={message.streamId ?? message.id}
+                messageId={message.streamId ?? message.id}
+                data-role={message.role}
                 scrollAnchor={message.role === "user"}
               >
-                <ChatMessageBubble message={message} />
+                <ChatMessageBubble message={message} onEdit={onEdit} />
               </MessageScrollerItem>
             ))}
           </MessageScrollerContent>

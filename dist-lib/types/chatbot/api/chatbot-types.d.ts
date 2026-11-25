@@ -1,5 +1,6 @@
 export type ChatRole = "user" | "assistant" | "system";
-export type MessageStatus = "pending" | "complete" | "error";
+export type MessageStatus = "pending" | "complete" | "error" | "stopped";
+export type MessageFeedback = "like" | "dislike";
 export interface Source {
     chunkId: string;
     source: string;
@@ -20,15 +21,19 @@ export interface TokenUsage {
 }
 export interface ChatMessage {
     id: string;
+    /** Stable view identity while a streamed reply receives its server request ID. */
+    streamId?: string;
     role: ChatRole;
     content: string;
     createdAt: string;
     status?: MessageStatus;
     progressText?: string;
+    progressSteps?: string[];
     durationMs?: number;
     sources?: Source[];
     toolCalls?: ToolCall[];
     usage?: TokenUsage;
+    feedback?: MessageFeedback;
 }
 export interface ChatUserContext {
     customerId?: string;

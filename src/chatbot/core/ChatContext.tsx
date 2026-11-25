@@ -2,6 +2,7 @@ import { createContext, useContext } from "react";
 import type {
   ChatMessage,
   ChatUserContext,
+  MessageFeedback,
   Suggestion,
   Ticket,
   ModelOption,
@@ -29,7 +30,11 @@ export interface ChatContextValue {
   apiBaseUrl?: string;
   hideInspectSources?: boolean;
   showGroundedSources?: boolean;
+  soundEnabled: boolean;
+  toggleSound: () => void;
   sendMessage: (text: string) => Promise<void>;
+  stopResponse: () => void;
+  toggleMessageFeedback: (messageId: string, feedback: MessageFeedback) => void;
   retryLast: () => Promise<void>;
   confirmTicket: (customerIdOrEmail?: string) => Promise<void>;
   cancelTicket: () => void;

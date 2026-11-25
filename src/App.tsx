@@ -7,8 +7,6 @@ import {
   ArrowRight,
   UserCheck,
   Compass,
-  Eye,
-  EyeOff,
   ShieldCheck,
   Brain,
   Zap,
@@ -118,8 +116,6 @@ const AppShowcase: React.FC<{
   setEmbeddedOpen: (o: boolean) => void;
   selectedRole: RoleOption;
   onSelectRole: (role: RoleOption) => void;
-  hideInspectSources: boolean;
-  onToggleInspectSources: () => void;
 }> = ({
   mode,
   setMode,
@@ -129,8 +125,6 @@ const AppShowcase: React.FC<{
   setEmbeddedOpen,
   selectedRole,
   onSelectRole,
-  hideInspectSources,
-  onToggleInspectSources,
 }) => {
     const { sendMessage } = useChatContext();
 
@@ -156,17 +150,6 @@ const AppShowcase: React.FC<{
           </div>
 
           <div className="app-header-controls">
-            {/* Toggle Inspect Sources Prop */}
-            <button
-              type="button"
-              className="mode-btn mode-btn--inactive"
-              onClick={onToggleInspectSources}
-              title={hideInspectSources ? "Inspect Sources is Hidden" : "Inspect Sources is Visible"}
-            >
-              {hideInspectSources ? <EyeOff size={14} /> : <Eye size={14} />}
-              <span>Inspect Sources: {hideInspectSources ? "Hidden" : "Visible"}</span>
-            </button>
-
             <button
               type="button"
               className={`mode-btn ${mode === "widget" ? "mode-btn--active" : "mode-btn--inactive"}`}
@@ -199,9 +182,6 @@ const AppShowcase: React.FC<{
             onOpenChange={setWidgetOpen}
             envStage="alpha"
             envPulse
-            apiBaseUrl="http://127.0.0.1:8000"
-            hideInspectSources={hideInspectSources}
-            showGroundedSources={false}
           />
         )}
         {mode === "embedded" && (
@@ -209,9 +189,6 @@ const AppShowcase: React.FC<{
             open={embeddedOpen}
             onOpenChange={setEmbeddedOpen}
             envStage="alpha"
-            apiBaseUrl="http://127.0.0.1:8000"
-              hideInspectSources={hideInspectSources}
-              showGroundedSources={false}
           />
         )}
       </div>
@@ -223,7 +200,6 @@ export const App: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<RoleOption>(ROLE_OPTIONS[0]);
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [embeddedOpen, setEmbeddedOpen] = useState(false);
-  const [hideInspectSources, setHideInspectSources] = useState(false);
 
   const userContext: ChatUserContext = {
     page: "portal-demo",
@@ -234,12 +210,11 @@ export const App: React.FC = () => {
 
   return (
     <ChatProvider
-      key={`${selectedRole.id}-${hideInspectSources}`}
+      key={selectedRole.id}
       userContext={userContext}
       role={selectedRole.role}
       roleId={selectedRole.roleId}
       client={selectedRole.client}
-      hideInspectSources={hideInspectSources}
       apiBaseUrl="http://127.0.0.1:8000"
     >
       <AppShowcase
@@ -251,8 +226,6 @@ export const App: React.FC = () => {
         setEmbeddedOpen={setEmbeddedOpen}
         selectedRole={selectedRole}
         onSelectRole={setSelectedRole}
-        hideInspectSources={hideInspectSources}
-        onToggleInspectSources={() => setHideInspectSources((prev) => !prev)}
       />
     </ChatProvider>
   );
