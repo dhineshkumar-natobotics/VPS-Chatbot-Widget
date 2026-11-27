@@ -17,6 +17,7 @@ export interface ChatApiClient {
         toolCalls: ToolCall[];
         usage: TokenUsage;
         durationMs?: number;
+        suggestions?: string[];
     }>;
     sendMessageStream?(sessionId: string, message: string, access?: ChatAccessContext, onProgress?: (stage: string) => void, onToken?: (token: string) => void, signal?: AbortSignal): Promise<{
         requestId: string;
@@ -26,6 +27,7 @@ export interface ChatApiClient {
         toolCalls: ToolCall[];
         usage: TokenUsage;
         durationMs?: number;
+        suggestions?: string[];
     }>;
     getHistory(sessionId: string): Promise<ChatMessage[]>;
     closeSession(sessionId: string): Promise<void>;

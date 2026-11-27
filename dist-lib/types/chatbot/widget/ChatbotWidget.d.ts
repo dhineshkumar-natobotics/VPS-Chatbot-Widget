@@ -1,6 +1,6 @@
 import React from "react";
 import { type EnvStage } from "../../components/EnvBadge";
-import type { ChatUserContext, Suggestion } from "../api/chatbot-types";
+import type { ChatServiceArea, ChatUserContext, Suggestion } from "../api/chatbot-types";
 export interface ChatbotWidgetProps {
     defaultOpen?: boolean;
     open?: boolean;
@@ -10,10 +10,11 @@ export interface ChatbotWidgetProps {
     envPulse?: boolean;
     /** Direct role name (e.g. "VPS Admin", "Client User", "Captain") */
     role?: string;
-    /** Direct role ID for server-side RAG access control */
+    /** Customer Portal role ID used to tailor questions and route knowledge */
     roleId?: number;
     /** Direct client experience ("web" | "mobile" | "admin") */
     client?: "mobile" | "web" | "admin";
+    service?: ChatServiceArea;
     /** Optional custom initial welcome message */
     welcomeMessage?: string;
     /** Backend or proxy API base URL */

@@ -1,15 +1,17 @@
 import React from "react";
 import { type ChatApiClient } from "../api/chatbot-api";
-import type { ChatUserContext, Suggestion } from "../api/chatbot-types";
+import type { ChatServiceArea, ChatUserContext, Suggestion } from "../api/chatbot-types";
 export interface ChatProviderProps {
     children: React.ReactNode;
     userContext?: ChatUserContext;
     /** Direct role name prop (e.g. "VPS Admin", "Client User", "Captain") */
     role?: string;
-    /** Direct role ID prop for server-side RAG access control */
+    /** Customer Portal role ID used to tailor questions and route knowledge */
     roleId?: number;
     /** Direct client experience prop ("web" | "mobile" | "admin") */
     client?: "mobile" | "web" | "admin";
+    /** Active VPS service, when the portal already knows it. */
+    service?: ChatServiceArea;
     /** Optional custom welcome message to display as initial assistant response */
     welcomeMessage?: string;
     suggestions?: Suggestion[];

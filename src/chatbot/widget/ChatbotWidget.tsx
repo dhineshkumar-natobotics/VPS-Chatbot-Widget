@@ -4,7 +4,7 @@ import { ChatbotWidgetTrigger } from "./ChatbotWidgetTrigger";
 import { type EnvStage } from "../../components/EnvBadge";
 import { useOptionalChatContext } from "../core/ChatContext";
 import { ChatProvider } from "../core/ChatProvider";
-import type { ChatUserContext, Suggestion } from "../api/chatbot-types";
+import type { ChatServiceArea, ChatUserContext, Suggestion } from "../api/chatbot-types";
 import { resolveApiBaseUrl } from "../api/chatbot-api";
 
 
@@ -17,10 +17,11 @@ export interface ChatbotWidgetProps {
   envPulse?: boolean;
   /** Direct role name (e.g. "VPS Admin", "Client User", "Captain") */
   role?: string;
-  /** Direct role ID for server-side RAG access control */
+  /** Customer Portal role ID used to tailor questions and route knowledge */
   roleId?: number;
   /** Direct client experience ("web" | "mobile" | "admin") */
   client?: "mobile" | "web" | "admin";
+  service?: ChatServiceArea;
   /** Optional custom initial welcome message */
   welcomeMessage?: string;
   /** Backend or proxy API base URL */
@@ -85,6 +86,7 @@ export const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
   role,
   roleId,
   client,
+  service,
   welcomeMessage,
   suggestions,
   disableSuggestions,
@@ -104,6 +106,7 @@ export const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
     role === undefined &&
     roleId === undefined &&
     client === undefined &&
+    service === undefined &&
     welcomeMessage === undefined &&
     !suggestions &&
     disableSuggestions === undefined &&
@@ -122,6 +125,7 @@ export const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
       role={role}
       roleId={roleId}
       client={client}
+      service={service}
       welcomeMessage={welcomeMessage}
       suggestions={suggestions}
       disableSuggestions={disableSuggestions}

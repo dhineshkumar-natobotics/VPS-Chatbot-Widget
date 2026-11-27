@@ -12,9 +12,11 @@ export {
   type ChatApiClient,
 } from "./api/chatbot-api";
 export { ColorPalette } from "./config/colors";
+export { CUSTOMER_PORTAL_ROLES, type CustomerPortalRoleId } from "./config/roles";
 export type {
   ChatUserContext,
   ChatAccessContext,
+  ChatServiceArea,
   ChatMessage,
   Suggestion,
   Ticket,

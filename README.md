@@ -14,6 +14,7 @@ A React 19 and TypeScript chat widget for the VPS Customer Portal. Use the float
   - [2. Standalone Slide-out Panel](#2-standalone-slide-out-panel)
   - [3. Shared Conversation Mode](#3-shared-conversation-mode-multiple-views)
 - [Conversation UI](#conversation-ui)
+- [Role-aware chat](#role-aware-chat)
 - [API & Proxy URL Configuration](#api--proxy-url-configuration)
   - [URL Normalization Behavior](#url-normalization-behavior)
 - [Component Props Reference](#component-props-reference)
@@ -153,6 +154,18 @@ export function App() {
 - A short chime plays when a reply completes. The **Response sound** button mutes it, and the browser remembers the preference when local storage is available. Playback depends on the browser allowing audio after interaction.
 
 ---
+
+## Role-aware chat
+
+Pass the active Customer Portal role ID to `ChatbotWidget`, `EmbeddedChatbot`, or a shared `ChatProvider`. You can also set `userContext.roleId`.
+
+```tsx
+<ChatbotWidget roleId={currentUser.roleId} service="tot" apiBaseUrl="/api" />
+```
+
+Use `service="vessel"` or `service="tot"` when the current portal screen already identifies the service. Leave it unset for automatic routing and service clarification. `userContext.service` works as well. The widget uses the role and service for starter questions and displays the chatbot's clarification choices in the composer. The conversation continues when the service changes. Switching accounts, roles, or clients starts a fresh conversation. Use `client="web"` to select browser guidance for a role that also has a mobile or admin experience.
+
+Private VPS Admin guidance requires a trusted portal proxy. The proxy verifies the active user and session ownership, derives the role from the authenticated portal session, and attaches the API credential server-side.
 
 ## API & Proxy URL Configuration
 

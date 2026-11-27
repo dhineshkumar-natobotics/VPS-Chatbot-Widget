@@ -157,6 +157,58 @@ describe("chatbot UI", () => {
     );
   });
 
+  it("uses the role ID to send role context and starts a fresh chat when it changes", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<ChatbotWidget open roleId={9} />);
+    const question = "How do I pre-register a vessel sample in the mobile app?";
+
+    await user.click(screen.getByRole("button", { name: question }));
+    await user.keyboard("{Enter}");
+    expect(await screen.findByText("Transformer oil reports are available in the Reports page.")).toBeVisible();
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/v1/sessions/session-1/messages/stream",
+      expect.objectContaining({
+        body: JSON.stringify({ message: question, role_id: 9, client: "mobile", model_id: "auto" }),
+      })
+    );
+
+    rerender(<ChatbotWidget open roleId={11} />);
+    expect(screen.queryByText("Transformer oil reports are available in the Reports page.")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Where can I download a transformer oil report?" })).toBeVisible();
+  });
+
+  it("shows a service clarification and reuses the session when the service changes", async () => {
+    const user = userEvent.setup();
+    const question = "Where do I download my reports?";
+    const answer = "Which service are you using?";
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockImplementation(async (input, init) => {
+      const url = String(input);
+      if (url.endsWith("/api/v1/sessions")) return jsonResponse({ session_id: "session-1" });
+      if (url.includes("/messages")) {
+        const body = JSON.parse(String(init?.body));
+        return jsonResponse({ session_id: "session-1", request_id: body.message, usage,
+          answer: body.message === question ? answer : "Open Reports and choose VPS Power.",
+          suggestions: body.message === question ? ["Vessel", "Transformer Oil Testing (TOT)"] : [] });
+      }
+      return jsonResponse({}, 404);
+    });
+
+    const { rerender } = render(<ChatbotWidget open roleId={10} />);
+    const input = screen.getByLabelText("Chat message");
+    await user.type(input, question);
+    await user.keyboard("{Enter}");
+    expect(await screen.findByText(answer)).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Transformer Oil Testing (TOT)" }));
+    rerender(<ChatbotWidget open roleId={10} service="tot" />);
+    await user.keyboard("{Enter}");
+    expect(await screen.findByText("Open Reports and choose VPS Power.")).toBeVisible();
+    expect(fetchMock).toHaveBeenLastCalledWith("/api/v1/sessions/session-1/messages/stream", expect.objectContaining({
+      body: JSON.stringify({ message: "Transformer Oil Testing (TOT)", role_id: 10, client: "admin", service: "tot", model_id: "auto" }),
+    }));
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/api/v1/sessions"))).toHaveLength(1);
+  });
+
   it("copies only the completed assistant reply and reports clipboard failures", async () => {
     const user = userEvent.setup();
     render(<ChatbotWidget defaultOpen />);

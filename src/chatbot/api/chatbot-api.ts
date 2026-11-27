@@ -158,6 +158,7 @@ export interface ChatApiClient {
     toolCalls: ToolCall[];
     usage: TokenUsage;
     durationMs?: number;
+    suggestions?: string[];
   }>;
   sendMessageStream?(
     sessionId: string,
@@ -174,6 +175,7 @@ export interface ChatApiClient {
     toolCalls: ToolCall[];
     usage: TokenUsage;
     durationMs?: number;
+    suggestions?: string[];
   }>;
   getHistory(sessionId: string): Promise<ChatMessage[]>;
   closeSession(sessionId: string): Promise<void>;
@@ -243,6 +245,7 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
             message,
             ...(access?.roleId !== undefined ? { role_id: access.roleId } : {}),
             ...(access?.client ? { client: access.client } : {}),
+            ...(access?.service ? { service: access.service } : {}),
             ...(access?.modelId ? { model_id: access.modelId } : {}),
           }),
         }
@@ -255,6 +258,7 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
         toolCalls: (dto.tool_calls || []).map(normalizeToolCall),
         usage: normalizeUsage(dto.usage),
         durationMs: dto.duration_ms,
+        suggestions: dto.suggestions,
       };
     },
 
@@ -278,6 +282,7 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
             message,
             ...(access?.roleId !== undefined ? { role_id: access.roleId } : {}),
             ...(access?.client ? { client: access.client } : {}),
+            ...(access?.service ? { service: access.service } : {}),
             ...(access?.modelId ? { model_id: access.modelId } : {}),
           }),
         });
@@ -304,7 +309,7 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
             requestId: dto.request_id, sessionId: dto.session_id, answer: dto.answer,
             sources: (dto.sources || []).map(normalizeSource),
             toolCalls: (dto.tool_calls || []).map(normalizeToolCall),
-            usage: normalizeUsage(dto.usage), durationMs: dto.duration_ms,
+            usage: normalizeUsage(dto.usage), durationMs: dto.duration_ms, suggestions: dto.suggestions,
           };
         }
 
@@ -319,6 +324,7 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
           toolCalls: ToolCall[];
           usage: TokenUsage;
           durationMs?: number;
+          suggestions?: string[];
         };
         const finalResult: { value: StreamResult | null } = { value: null };
 
@@ -340,6 +346,7 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
             tool_calls?: ToolCallDto[];
             usage?: TokenUsageDto;
             duration_ms?: number;
+            suggestions?: string[];
             message?: string;
           } = {};
           try {
@@ -365,6 +372,7 @@ export function createChatApi(initialBaseUrl?: string): ChatApiClient {
                 ? normalizeUsage(data.usage)
                 : { model: "", promptTokens: 0, completionTokens: 0, totalTokens: 0 },
               durationMs: data.duration_ms,
+              suggestions: data.suggestions,
             };
           } else if (data.type === "error") {
             throw {

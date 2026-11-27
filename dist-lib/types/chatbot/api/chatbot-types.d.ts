@@ -35,22 +35,26 @@ export interface ChatMessage {
     toolCalls?: ToolCall[];
     usage?: TokenUsage;
     feedback?: MessageFeedback;
+    suggestions?: string[];
 }
+export type ChatServiceArea = "vessel" | "tot";
 export interface ChatUserContext {
     customerId?: string;
     email?: string;
     name?: string;
     /** Display name of the role, if the host application has one. */
     role?: string;
-    /** Authenticated Customer Portal role ID used for server-side RAG routing. */
+    /** Customer Portal role ID used to personalize help and route knowledge. */
     roleId?: number;
-    /** Client experience that owns this authenticated session. */
+    /** Client experience. The widget infers it from a known role ID when omitted. */
     client?: "mobile" | "web" | "admin";
+    service?: ChatServiceArea;
     page?: string;
 }
 export interface ChatAccessContext {
     roleId?: number;
     client?: "mobile" | "web" | "admin";
+    service?: ChatServiceArea;
     modelId?: string;
 }
 export interface ModelOption {
@@ -139,12 +143,15 @@ export interface ChatResponseDto {
     usage: TokenUsageDto;
     duration_ms?: number;
     role?: RoleDto | null;
+    suggestions?: string[];
 }
 export interface RoleDto {
     id: number;
     usertype: string;
     channel: "mobile" | "web" | "admin";
     knowledge_scopes: string[];
+    services?: ChatServiceArea[];
+    menu_items?: string[];
 }
 export interface TicketDto {
     ticket_id: string;

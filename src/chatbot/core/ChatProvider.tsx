@@ -2,11 +2,13 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { createChatApi, type ChatApiClient } from "../api/chatbot-api";
 import type {
   ChatMessage,
+  ChatServiceArea,
   ChatUserContext,
   Suggestion,
   ModelOption,
 } from "../api/chatbot-types";
 import { DEFAULT_SUGGESTIONS } from "../config/suggestions";
+import { findPortalRole } from "../config/roles";
 import { useResponseSound } from "../hooks/useResponseSound";
 import { ChatContext, type ChatContextValue, type ChatUiStatus } from "./ChatContext";
 
@@ -30,10 +32,12 @@ export interface ChatProviderProps {
   userContext?: ChatUserContext;
   /** Direct role name prop (e.g. "VPS Admin", "Client User", "Captain") */
   role?: string;
-  /** Direct role ID prop for server-side RAG access control */
+  /** Customer Portal role ID used to tailor questions and route knowledge */
   roleId?: number;
   /** Direct client experience prop ("web" | "mobile" | "admin") */
   client?: "mobile" | "web" | "admin";
+  /** Active VPS service, when the portal already knows it. */
+  service?: ChatServiceArea;
   /** Optional custom welcome message to display as initial assistant response */
   welcomeMessage?: string;
   suggestions?: Suggestion[];
@@ -80,14 +84,22 @@ function friendlyError(err: unknown): string {
   return "I couldn't process that request right now.";
 }
 
-export const ChatProvider: React.FC<ChatProviderProps> = ({
+export const ChatProvider: React.FC<ChatProviderProps> = (props) => {
+  const roleId = props.roleId ?? props.userContext?.roleId;
+  const clientChannel = props.client ?? props.userContext?.client ?? findPortalRole(roleId)?.client;
+  const scopeKey = JSON.stringify([roleId, clientChannel, props.userContext?.customerId, props.userContext?.email]);
+  return <ChatSessionProvider key={scopeKey} {...props} roleId={roleId} client={clientChannel} />;
+};
+
+const ChatSessionProvider: React.FC<ChatProviderProps> = ({
   children,
   userContext = {},
   role,
   roleId,
   client: clientChannel,
+  service,
   welcomeMessage,
-  suggestions = DEFAULT_SUGGESTIONS,
+  suggestions,
   disableSuggestions = false,
   initialMessage,
   apiBaseUrl,
@@ -103,26 +115,39 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     () => api ?? createChatApi(resolvedBaseUrl),
     [api, resolvedBaseUrl]
   );
+  const portalRole = findPortalRole(roleId);
+  const activeService = service ?? userContext.service;
+  const effectiveSuggestions = useMemo(() => {
+    if (suggestions) return suggestions;
+    if (!portalRole) return DEFAULT_SUGGESTIONS;
+    const webExperience = clientChannel === "web" && portalRole.webQuestions;
+    const groupedQuestions = webExperience ? portalRole.webServiceQuestions : portalRole.serviceQuestions;
+    const questions = (activeService && groupedQuestions?.[activeService]) || webExperience || portalRole.questions;
+    return questions.map((query) => ({ label: query, query }));
+  }, [activeService, clientChannel, portalRole, suggestions]);
 
   const effectiveUserContext = useMemo<ChatUserContext>(() => {
     return {
       ...userContext,
-      ...(role !== undefined ? { role } : {}),
+      role: role ?? userContext.role ?? portalRole?.name,
       ...(roleId !== undefined ? { roleId } : {}),
       ...(clientChannel !== undefined ? { client: clientChannel } : {}),
+      ...(service !== undefined ? { service } : {}),
     };
-  }, [userContext, role, roleId, clientChannel]);
+  }, [userContext, role, roleId, clientChannel, portalRole, service]);
 
   const defaultWelcomeMsg = useMemo<ChatMessage | null>(() => {
     if (welcomeMessage === "") return null;
     return {
       id: "welcome-default",
       role: "assistant",
-      content: welcomeMessage || DEFAULT_WELCOME_TEXT,
+      content: welcomeMessage ?? (portalRole
+        ? `Hello! I’m your **VPS Veritas assistant**. I can help with ${portalRole.topics}. What would you like to do?`
+        : DEFAULT_WELCOME_TEXT),
       createdAt: new Date().toISOString(),
       status: "complete",
     };
-  }, [welcomeMessage]);
+  }, [portalRole, welcomeMessage]);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -250,6 +275,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
             {
               roleId: effectiveUserContext.roleId,
               client: effectiveUserContext.client,
+              service: effectiveUserContext.service,
               modelId: selectedModelId,
             },
             updateProgress,
@@ -271,6 +297,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
           : await client.sendMessage(currentSession, text, {
             roleId: effectiveUserContext.roleId,
             client: effectiveUserContext.client,
+            service: effectiveUserContext.service,
             modelId: selectedModelId,
           }, controller.signal);
 
@@ -290,6 +317,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
                 status: "complete",
                 progressText: undefined,
                 sources: response.sources,
+                suggestions: response.suggestions,
                 toolCalls: response.toolCalls,
                 usage: response.usage,
                 durationMs: Math.max(
@@ -324,7 +352,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         }
       }
     },
-    [ensureSession, client, effectiveUserContext.client, effectiveUserContext.roleId, selectedModelId, prepareSound, playSound]
+    [ensureSession, client, effectiveUserContext.client, effectiveUserContext.roleId, effectiveUserContext.service, selectedModelId, prepareSound, playSound]
   );
 
   const sendMessage = useCallback(
@@ -391,6 +419,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     void sendMessage(initialMessage);
   }, [initialMessage, sendMessage]);
 
+  const followUpChoices = messages[messages.length - 1]?.suggestions;
   const value = useMemo(
     () => ({
       messages,
@@ -400,7 +429,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       pendingTicket: null,
       ticketBusy: false,
       lastTicket: null,
-      suggestions,
+      suggestions: followUpChoices?.length
+        ? followUpChoices.map((query) => ({ label: query, query }))
+        : effectiveSuggestions,
       showSuggestions:
         !disableSuggestions &&
         status === "idle" &&
@@ -430,7 +461,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       status,
       error,
       sessionId,
-      suggestions,
+      effectiveSuggestions,
+      followUpChoices,
       disableSuggestions,
       effectiveUserContext,
       client.apiBaseUrl,

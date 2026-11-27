@@ -690,6 +690,14 @@ button {
   gap: 6px;
 }
 
+.app-role-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 /* Mode toggle buttons (Widget / Slide-out) */
 .mode-btn {
   display: inline-flex;
